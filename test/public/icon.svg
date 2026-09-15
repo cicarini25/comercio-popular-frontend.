@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#138a6c" />
+      <stop offset="100%" stop-color="#0F6E56" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffb703" />
+      <stop offset="100%" stop-color="#fb8500" />
+    </linearGradient>
+  </defs>
+  <!-- Background with subtle corner radius -->
+  <rect width="512" height="512" rx="108" fill="url(#brandGrad)" />
+  
+  <!-- Outer Ring / Circle motif -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#2dd4bf" stroke-width="6" stroke-dasharray="16 12" opacity="0.35" />
+
+  <!-- Shopping Bag / Marketplace Silhouette -->
+  <g transform="translate(106, 100)">
+    <!-- Bag Handle -->
+    <path d="M 85 130 C 85 50, 215 50, 215 130" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" />
+    <!-- Bag Body -->
+    <rect x="35" y="120" width="230" height="210" rx="34" fill="#ffffff" />
+    <!-- Warm Accent Tag / Badge -->
+    <path d="M 125 180 L 175 180 C 185 180, 192 187, 192 197 L 192 235 L 150 215 L 108 235 L 108 197 C 108 187, 115 180, 125 180 Z" fill="url(#accentGrad)" />
+    <!-- CP Text / Initials Monogram -->
+    <text x="150" y="295" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="46" font-weight="900" fill="#0F6E56" text-anchor="middle" letter-spacing="2">CP</text>
+  </g>
+</svg>

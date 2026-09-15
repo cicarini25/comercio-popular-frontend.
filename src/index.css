@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+
+  --color-teal-950: #042119;
+  --color-teal-900: #083c2e;
+  --color-teal-800: #0b5341;
+  --color-teal-700: #0F6E56;
+  --color-teal-600: #168a6b;
+  --color-teal-500: #1D9E75;
+  --color-teal-400: #34b38a;
+  --color-teal-300: #5DCAA5;
+  --color-teal-200: #9de3cb;
+  --color-teal-100: #C2EEDB;
+  --color-teal-50: #E1F5EE;
+
+  --color-coral-950: #421406;
+  --color-coral-900: #6e2711;
+  --color-coral-800: #993C1D;
+  --color-coral-700: #b84a24;
+  --color-coral-600: #D85A30;
+  --color-coral-500: #e4724d;
+  --color-coral-400: #F0997B;
+  --color-coral-300: #f7b49e;
+  --color-coral-200: #fbd6c9;
+  --color-coral-100: #fde8e1;
+  --color-coral-50: #FAECE7;
+}
+
+@layer base {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  body {
+    background-color: #f8faf9;
+    color: #1a202c;
+  }
+}
+
+/* Custom smooth pulse and scan animations for biometric KYC and deals */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
+}
+
+.animate-scanline {
+  animation: scanline 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.92; transform: scale(1.02); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}

@@ -1,0 +1,35 @@
+import React from 'react';
+import { test, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { AuthProvider } from '../src/context/AuthContext';
+import { AuthModal } from '../src/components/auth/AuthModal';
+vi.mock('../src/components/auth/GoogleSignInButton',()=>({GoogleSignInButton:()=>null}));
+vi.mock('../src/components/auth/FacebookSignInButton',()=>({FacebookSignInButton:({onToken}:any)=><button onClick={()=>onToken('test-facebook-token')}>Entrar com Facebook</button>}));
+const user={id:'user-1',name:'Teste',email:'test@example.test'};
+test('Facebook completa CPF, telefone e senha antes de guardar sessão',async()=>{
+ const fetchMock=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({status:'registration_required',profile:user})}).mockResolvedValueOnce({ok:true,json:async()=>({status:'authenticated',user,token:'facebook-session'})});
+ vi.stubGlobal('fetch',fetchMock);
+ const success=vi.fn();
+ render(<AuthProvider><AuthModal isOpen onClose={()=>{}} onSuccess={success}/></AuthProvider>);
+ fireEvent.click(screen.getByText('Entrar com Facebook'));
+ await screen.findByText('E-mail do Facebook');
+ expect(localStorage.getItem('cp_token')).toBeNull();
+ fireEvent.change(screen.getByLabelText('CPF'),{target:{value:'52998224725'}});
+ fireEvent.change(screen.getByLabelText('Telefone com DDD'),{target:{value:'41999999999'}});
+ fireEvent.change(screen.getByLabelText('Senha'),{target:{value:'test-password'}});
+ fireEvent.submit(screen.getByLabelText('CPF').closest('form')!);
+ await waitFor(()=>expect(localStorage.getItem('cp_token')).toBe('facebook-session'));
+ expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toMatchObject({accessToken:'test-facebook-token',action:'register',cpf:'52998224725',phone:'41999999999',password:'test-password'});
+ expect(success).toHaveBeenCalledTimes(1);
+});
+test('Facebook pede senha da conta existente e mantém erro sem sessão',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({status:'link_required',profile:user})}).mockResolvedValueOnce({ok:false,json:async()=>({error:'Senha da loja incorreta.'})}));
+ render(<AuthProvider><AuthModal isOpen onClose={()=>{}} onSuccess={()=>{}}/></AuthProvider>);
+ fireEvent.click(screen.getByText('Entrar com Facebook'));
+ await screen.findByText('E-mail do Facebook');
+ expect(screen.queryByLabelText('CPF')).toBeNull();
+ fireEvent.change(screen.getByLabelText('Senha'),{target:{value:'wrong-password'}});
+ fireEvent.click(screen.getByText('Vincular e entrar'));
+ expect(await screen.findByRole('alert')).toHaveProperty('textContent','Senha da loja incorreta.');
+ expect(localStorage.getItem('cp_token')).toBeNull();
+});
