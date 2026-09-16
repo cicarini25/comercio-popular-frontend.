@@ -18,7 +18,7 @@ interface AuthModalProps {
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initialMode = 'signup' }) => {
   const { login, signup, googleLogin, facebookLogin } = useAuth();
-  const [socialPending, setSocialPending] = useState<{ provider: 'Google' | 'Facebook'; credential?: string; nonce?: string; accessToken?: string; action: 'register' | 'link' } | null>(null);
+  const [socialPending, setSocialPending] = useState<{ provider: 'Google' | 'Facebook'; credential?: string; nonce?: string; accessToken?: string; emailRequired?: boolean; action: 'register' | 'link' } | null>(null);
   const pendingRequest = useRef(false);
   const [stage, setStage] = useState(1);
   const [providerNotice, setProviderNotice] = useState('');
@@ -59,7 +59,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       const response = await facebookLogin({ accessToken });
       if (response.status === 'authenticated') { complete(response.user); return; }
       const action = response.status === 'link_required' ? 'link' : 'register';
-      setSocialPending({ provider: 'Facebook', accessToken, action });
+      setSocialPending({ provider: 'Facebook', accessToken, action, emailRequired: response.emailRequired === true });
       setMode(action === 'link' ? 'login' : 'signup');
       setName(response.profile.name); setEmail(response.profile.email); setPassword('');
       setCpf(''); setPhone(''); setStage(2);
@@ -78,7 +78,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     setBusy(true);
     try {
       if (socialPending) {
-        const response = await (socialPending.provider === 'Facebook' ? facebookLogin : googleLogin)({ ...socialPending, name: name.trim(), password,
+        const response = await (socialPending.provider === 'Facebook' ? facebookLogin : googleLogin)({ ...socialPending, email: email.trim(), name: name.trim(), password,
           cpf: cpf.replace(/\D/g, ''), phone: phone.replace(/\D/g, '') });
         if (response.status !== 'authenticated') throw new Error('Volte e escolha sua conta novamente.');
         complete(response.user);
@@ -116,10 +116,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
           <fieldset disabled={busy} className="space-y-3">
             {socialPending && <>
-              <p className="rounded-xl bg-teal-50 p-3 text-sm text-teal-900">{socialPending.action === 'link'
+              <p className="rounded-xl bg-teal-50 p-3 text-sm text-teal-900">{socialPending.emailRequired ? 'O Facebook não enviou seu e-mail. Informe o e-mail e a senha da sua conta do Comércio Popular para vincular o Facebook.' : socialPending.action === 'link'
                 ? `Este e-mail já tem cadastro. Confirme sua senha do Comércio Popular para vincular o ${socialPending.provider}.`
                 : socialPending.provider === 'Google' ? 'Complete seu CPF e telefone para entrar com Google.' : 'Complete seu cadastro e crie uma senha da loja para também entrar com e-mail.'}</p>
-              <label className="block text-sm">E-mail do {socialPending.provider}<input readOnly type="email" className={fieldClass} value={email} /></label>
+              <label className="block text-sm">{socialPending.emailRequired ? 'E-mail da sua conta na loja' : `E-mail do ${socialPending.provider}`}<input required maxLength={150} readOnly={!socialPending.emailRequired} type="email" autoComplete="email" className={fieldClass} value={email} onChange={e => setEmail(e.target.value)} /></label>
               {socialPending.action === 'register' && <label className="block text-sm">Nome completo<input required maxLength={150} autoComplete="name" className={fieldClass} value={name} onChange={e => setName(e.target.value)} /></label>}
             </>}
             {stage === 1 && mode === 'signup' && <label className="block text-sm">Nome completo<input required maxLength={150} autoComplete="name" className={fieldClass} value={name} onChange={e => setName(e.target.value)} /></label>}
