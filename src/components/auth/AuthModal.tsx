@@ -45,6 +45,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  const complete = (user: any) => {
+    onSuccess(mapApiUser(user));
+    setSocialPending(null);
+    setPassword('');
+  };
+
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode);
@@ -56,14 +62,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       didProcessTikTok.current = false;
     }
   }, [isOpen, initialMode]);
-
-  if (!isOpen) return null;
-
-  const complete = (user: any) => {
-    onSuccess(mapApiUser(user));
-    setSocialPending(null);
-    setPassword('');
-  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -119,6 +117,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       })
       .finally(() => setBusy(false));
   }, [location.search, location.pathname, isOpen]);
+
+  if (!isOpen) return null;
 
   const googleCredential = async (credential: string, nonce: string) => {
     if (pendingRequest.current) return;
