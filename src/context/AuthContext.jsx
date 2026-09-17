@@ -7,6 +7,16 @@ function validUser(user) {
   return user && typeof user.id === 'string' && typeof user.name === 'string';
 }
 
+function normalizeUser(user) {
+  if (!validUser(user)) return null;
+  return {
+    ...user,
+    email: typeof user.email === 'string' ? user.email : '',
+    cpf: user.cpf || '',
+    phone: user.phone || '',
+  };
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,8 +31,9 @@ export function AuthProvider({ children }) {
     }
 
     api.me().then((response) => {
-      if (!validUser(response.user)) throw new Error('Resposta de sessão inválida.');
-      if (active && generation.current === version) setUser(response.user);
+      const normalized = normalizeUser(response.user);
+      if (!normalized) throw new Error('Resposta de sessão inválida.');
+      if (active && generation.current === version) setUser(normalized);
     }).catch(() => {
       if (active && generation.current === version) {
         localStorage.removeItem('cp_token');
@@ -41,14 +52,15 @@ export function AuthProvider({ children }) {
     if (['googleLogin', 'facebookLogin'].includes(method) && ['registration_required', 'link_required'].includes(data.status)) {
       return data;
     }
-    if (!validUser(data.user) || typeof data.token !== 'string' || !data.token) {
+    const normalized = normalizeUser(data.user);
+    if (!normalized || typeof data.token !== 'string' || !data.token) {
       throw new Error('O servidor não confirmou a sessão.');
     }
     if (version !== generation.current) throw new Error('Operação de login cancelada.');
     localStorage.setItem('cp_token', data.token);
-    setUser(data.user);
+    setUser(normalized);
     setLoading(false);
-    return data;
+    return { ...data, user: normalized };
   }
 
   const login = payload => authenticate('login', payload);
@@ -58,21 +70,22 @@ export function AuthProvider({ children }) {
 
   async function completeTikTokSignup(payload) {
     const data = await api.tiktokComplete(payload);
-    if (!validUser(data.user) || typeof data.token !== 'string' || !data.token) {
+    const normalized = normalizeUser(data.user);
+    if (!normalized || typeof data.token !== 'string' || !data.token) {
       throw new Error('O servidor não confirmou o cadastro com TikTok.');
     }
     generation.current += 1;
     localStorage.setItem('cp_token', data.token);
-    setUser(data.user);
+    setUser(normalized);
     setLoading(false);
-    return data;
+    return { ...data, user: normalized };
   }
 
   function loginWithToken(token, userData) {
     if (typeof token !== 'string' || !token) throw new Error('Token de sessão inválido.');
     generation.current += 1;
     localStorage.setItem('cp_token', token);
-    setUser(validUser(userData) ? userData : null);
+    setUser(normalizeUser(userData));
     setLoading(false);
   }
 
