@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
   async function authenticate(method, payload) {
     const version = ++generation.current;
     const data = await api[method](payload);
-    if (['googleLogin', 'facebookLogin'].includes(method) && ['registration_required', 'link_required'].includes(data.status)) {
+    if (['googleLogin', 'facebookLogin'].includes(method) && ['registration_required', 'link_required', 'legal_required'].includes(data.status)) {
       return data;
     }
     const normalized = normalizeUser(data.user);
@@ -73,6 +73,19 @@ export function AuthProvider({ children }) {
     const normalized = normalizeUser(data.user);
     if (!normalized || typeof data.token !== 'string' || !data.token) {
       throw new Error('O servidor não confirmou o cadastro com TikTok.');
+    }
+    generation.current += 1;
+    localStorage.setItem('cp_token', data.token);
+    setUser(normalized);
+    setLoading(false);
+    return { ...data, user: normalized };
+  }
+
+  async function acceptSocialLegal(legalToken) {
+    const data = await api.acceptLegal(legalToken);
+    const normalized = normalizeUser(data.user);
+    if (!normalized || typeof data.token !== 'string' || !data.token) {
+      throw new Error('O servidor não confirmou a aceitação das regras.');
     }
     generation.current += 1;
     localStorage.setItem('cp_token', data.token);
@@ -105,6 +118,7 @@ export function AuthProvider({ children }) {
       googleLogin,
       facebookLogin,
       completeTikTokSignup,
+      acceptSocialLegal,
       loginWithToken,
       logout,
     }}>
