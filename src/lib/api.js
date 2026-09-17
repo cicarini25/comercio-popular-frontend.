@@ -19,5 +19,8 @@ export const api = {
   },
   facebookConfig: () => request('/auth/facebook/config'),
   facebookLogin: payload => request('/auth/facebook', { method: 'POST', body: JSON.stringify(payload) }),
+  tiktokStartUrl: () => `${API_URL}/auth/tiktok`,
+  tiktokExchange: code => request('/auth/tiktok/exchange', { method: 'POST', body: JSON.stringify({ code }) }),
+  tiktokComplete: payload => request('/auth/tiktok/complete', { method: 'POST', body: JSON.stringify(payload) }),
   me: () => request('/auth/me')
 };
