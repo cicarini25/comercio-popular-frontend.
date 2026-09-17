@@ -15,12 +15,13 @@ export const api = {
   googleConfig: () => request('/auth/google/config'),
   googleLogin: async payload => {
     const data = await request('/auth/google', { method: 'POST', body: JSON.stringify({ idToken: payload.credential, ...(payload.cpf ? { cpf: payload.cpf, phone: payload.phone } : {}) }) });
-    return data.needsSignupInfo ? { status: 'registration_required', profile: { email: data.email, name: data.name } } : { ...data, status: 'authenticated' };
+    return data.needsSignupInfo ? { status: 'registration_required', profile: { email: data.email, name: data.name } } : { ...data, status: data.status || 'authenticated' };
   },
   facebookConfig: () => request('/auth/facebook/config'),
   facebookLogin: payload => request('/auth/facebook', { method: 'POST', body: JSON.stringify(payload) }),
   tiktokStartUrl: () => `${API_URL}/auth/tiktok`,
   tiktokExchange: code => request('/auth/tiktok/exchange', { method: 'POST', body: JSON.stringify({ code }) }),
   tiktokComplete: payload => request('/auth/tiktok/complete', { method: 'POST', body: JSON.stringify(payload) }),
+  acceptLegal: legalToken => request('/auth/legal/accept', { method: 'POST', body: JSON.stringify({ legalToken, accepted: true }) }),
   me: () => request('/auth/me')
 };
