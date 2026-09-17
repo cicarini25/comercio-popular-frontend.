@@ -32,7 +32,7 @@ type LegalPending = {
 };
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initialMode = 'signup' }) => {
-  const { login, signup, googleLogin, facebookLogin, acceptSocialLegal } = useAuth();
+  const { login, signup, googleLogin, facebookLogin, loginWithToken, acceptSocialLegal } = useAuth();
   const location = useLocation();
   const [socialPending, setSocialPending] = useState<SocialPending | null>(null);
   const [legalPending, setLegalPending] = useState<LegalPending | null>(null);
@@ -102,6 +102,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         }
 
         if (response.status === 'authenticated' && response.token && response.user) {
+          loginWithToken(response.token, response.user);
           complete(response.user);
           window.history.replaceState({}, '', location.pathname);
           return;
