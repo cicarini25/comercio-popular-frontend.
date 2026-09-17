@@ -4,7 +4,7 @@ import { api } from '../lib/api';
 const AuthContext = createContext(null);
 
 function validUser(user) {
-  return user && typeof user.id === 'string' && typeof user.name === 'string' && typeof user.email === 'string';
+  return user && typeof user.id === 'string' && typeof user.name === 'string';
 }
 
 export function AuthProvider({ children }) {
