@@ -50,9 +50,6 @@ export interface CreateOrderResponse {
   checkoutUrl?: string;
 }
 
-/**
- * Helper to make API requests with Authorization header and friendly error messages
- */
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
   const headers: Record<string, string> = {
@@ -74,7 +71,6 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       signal: AbortSignal.timeout(20000)
     });
   } catch (err: any) {
-    // Network or connection refused error
     console.error('Falha de conexão com a API:', err);
     throw new Error(
       `Não foi possível conectar ao servidor (${API_BASE_URL}). Verifique sua conexão ou se o back-end está ativo.`
@@ -98,9 +94,6 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
-  /**
-   * POST /api/auth/signup
-   */
   async signup(payload: SignupData): Promise<{ user: any; token: string }> {
     const res = await request<{ user: any; token: string }>('/api/auth/signup', {
       method: 'POST',
@@ -108,15 +101,10 @@ export const api = {
     });
     mapApiUser(res.user);
     if (!res.token || typeof res.token !== 'string') throw new Error('O servidor não confirmou a sessão.');
-    if (res.token) {
-      setAuthToken(res.token);
-    }
+    if (res.token) setAuthToken(res.token);
     return res;
   },
 
-  /**
-   * POST /api/auth/login
-   */
   async login(payload: LoginData): Promise<{ user: any; token: string }> {
     const res = await request<{ user: any; token: string }>('/api/auth/login', {
       method: 'POST',
@@ -124,43 +112,36 @@ export const api = {
     });
     mapApiUser(res.user);
     if (!res.token || typeof res.token !== 'string') throw new Error('O servidor não confirmou a sessão.');
-    if (res.token) {
-      setAuthToken(res.token);
-    }
+    if (res.token) setAuthToken(res.token);
     return res;
   },
 
-  /**
-   * GET /api/auth/me
-   */
   async getMe(): Promise<{ user: any }> {
-    return request<{ user: any }>('/api/auth/me', {
-      method: 'GET'
-    });
+    return request<{ user: any }>('/api/auth/me', { method: 'GET' });
   },
 
-  /**
-   * POST /api/orders
-   */
-  async createOrder(payload: CreateOrderPayload): Promise<CreateOrderResponse> {
+  async createOrder(_payload: CreateOrderPayload): Promise<CreateOrderResponse> {
     throw new Error('Pagamentos temporariamente indisponíveis. Nenhuma cobrança foi realizada.');
   },
 
-  /**
-   * GET /api/orders
-   */
   async getOrders(): Promise<{ orders: any[] }> {
-    return request<{ orders: any[] }>('/api/orders', {
-      method: 'GET'
-    });
+    return request<{ orders: any[] }>('/api/orders', { method: 'GET' });
   }
 };
 
 export function mapApiUser(user: any): User {
-  if (!user || typeof user.id !== 'string' || typeof user.email !== 'string' || typeof user.name !== 'string') {
+  if (!user || typeof user.id !== 'string' || typeof user.name !== 'string') {
     throw new Error('O servidor não confirmou os dados da conta.');
   }
-  return { id: user.id, name: user.name, email: user.email, cpf: user.cpf || '', phone: user.phone || '',
-    isVerifiedFace: user.is_verified_face === true, isVerifiedSMS: user.is_verified_sms === true,
-    isSeller: user.is_seller === true, avatar: user.avatar || '' };
+  return {
+    id: user.id,
+    name: user.name,
+    email: typeof user.email === 'string' ? user.email : '',
+    cpf: user.cpf || '',
+    phone: user.phone || '',
+    isVerifiedFace: user.is_verified_face === true,
+    isVerifiedSMS: user.is_verified_sms === true,
+    isSeller: user.is_seller === true,
+    avatar: user.avatar || ''
+  };
 }
