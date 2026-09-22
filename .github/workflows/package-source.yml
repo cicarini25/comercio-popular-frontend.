@@ -1,0 +1,17 @@
+name: package-source
+on:
+  push:
+    branches: [main]
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package source
+        run: |
+          rm -rf .git
+          zip -qr comercio-popular-frontend.zip . -x "node_modules/*" "dist/*" "build/*" "test/public/*" "public/videos/*"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: comercio-popular-frontend-source
+          path: comercio-popular-frontend.zip
