@@ -5,11 +5,12 @@ import { AuthProvider } from './context/AuthContext';
 import App from './App.tsx';
 import './index.css';
 import { setupServiceWorker } from './registerSW';
+import ShopeeImportAdmin from './components/ShopeeImportAdmin';
 
 setupServiceWorker();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter><AuthProvider><App /></AuthProvider></BrowserRouter>
+    <BrowserRouter><AuthProvider>{window.location.pathname.replace(/\/+$/, '') === '/admin/importar-shopee' ? <ShopeeImportAdmin /> : <App />}</AuthProvider></BrowserRouter>
   </StrictMode>,
 );
