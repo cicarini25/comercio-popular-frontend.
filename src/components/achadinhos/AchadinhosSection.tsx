@@ -80,36 +80,14 @@ export const AchadinhosSection: React.FC<AchadinhosSectionProps> = ({
                 <span>Achadinhos do Dia • Curadoria de Redes Sociais</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-display">
-                Ofertas Virais de Afiliados com até 65% OFF
+                Achadinhos da Shopee
               </h2>
               <p className="text-sm text-coral-200 mt-1 max-w-xl">
-                Produtos de impulso (menos de R$ 50 e R$ 100) das maiores plataformas: Shopee, Mercado Livre, Amazon e AliExpress com links diretos verificados.
+                Produtos selecionados com links de afiliado. Escolha uma oferta e finalize sua compra na Shopee.
               </p>
             </div>
 
-            {/* Countdown Clock Box */}
-            <div className="bg-coral-950/80 backdrop-blur-xs border border-coral-700/60 rounded-2xl p-4 shrink-0 text-center sm:text-right">
-              <span className="text-[11px] font-bold text-coral-300 uppercase tracking-wider flex items-center gap-1.5 justify-center sm:justify-end mb-2">
-                <Clock size={13} className="text-coral-400 animate-pulse" />
-                Tempo restante da rodada:
-              </span>
-              <div className="flex items-center justify-center sm:justify-end gap-2 font-display text-white font-black text-2xl">
-                <div className="bg-coral-900/90 px-3 py-1.5 rounded-xl min-w-12 text-center border border-coral-700">
-                  {String(timeLeft.hours).padStart(2, '0')}
-                  <span className="block text-[9px] font-sans font-medium text-coral-300">HORAS</span>
-                </div>
-                <span>:</span>
-                <div className="bg-coral-900/90 px-3 py-1.5 rounded-xl min-w-12 text-center border border-coral-700">
-                  {String(timeLeft.minutes).padStart(2, '0')}
-                  <span className="block text-[9px] font-sans font-medium text-coral-300">MIN</span>
-                </div>
-                <span>:</span>
-                <div className="bg-coral-900/90 px-3 py-1.5 rounded-xl min-w-12 text-center border border-coral-700 text-coral-300">
-                  {String(timeLeft.seconds).padStart(2, '0')}
-                  <span className="block text-[9px] font-sans font-medium text-coral-300">SEG</span>
-                </div>
-              </div>
-            </div>
+            <p className="max-w-xs text-sm text-coral-100">Preços, frete e disponibilidade sujeitos à confirmação na Shopee.</p>
           </div>
         </div>
 

@@ -1,3 +1,5 @@
+import { fetchShopeeCatalog } from './services/catalog';
+import { CatalogProductDetail } from './components/products/CatalogProductDetail';
 import { mapApiUser } from './services/api';
 import { useAuth } from './context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -22,7 +24,7 @@ import { BarcodeScannerModal } from './components/scanner/BarcodeScannerModal';
 import { PriceRangeSlider } from './components/products/PriceRangeSlider';
 
 import { Product, CartItem, User, Order, SellerPlan, PriceAlert, ProductReview } from './types';
-import { INITIAL_PRODUCTS, CATEGORIES } from './data/mockProducts';
+import { CATEGORIES } from './data/mockProducts';
 import { getOrGenerateReviews } from './data/mockReviews';
 import { formatCurrency } from './utils/formatters';
 import { Flame, Store, Sparkles, Filter, CheckCircle2, SlidersHorizontal, RotateCcw } from 'lucide-react';
@@ -31,24 +33,28 @@ import { notifyWishlistPriceDrop } from './services/notificationService';
 
 export default function App() {
   // Products catalog
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('cp_products');
-    if (saved) {
-      try {
-        const parsed: Product[] = JSON.parse(saved);
-        return parsed.map((p) => {
-          const init = INITIAL_PRODUCTS.find((item) => item.id === p.id);
-          if (init) {
-            return { ...p, images: init.images, ean: p.ean || init.ean };
-          }
-          return p;
-        });
-      } catch {
-        return INITIAL_PRODUCTS;
-      }
-    }
-    return INITIAL_PRODUCTS;
-  });
+  const [products, setProducts] = useState<Product[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState('');
+  const [catalogOffset, setCatalogOffset] = useState(0);
+  const [catalogHasMore, setCatalogHasMore] = useState(false);
+  const [catalogRetry, setCatalogRetry] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setCatalogLoading(true);
+    setCatalogError('');
+    fetchShopeeCatalog(catalogOffset, controller.signal).then(({ products: incoming, hasMore }) => {
+      setProducts(previous => catalogOffset === 0 ? incoming :
+        [...new Map([...previous, ...incoming].map(product => [product.id, product])).values()]);
+      setCatalogHasMore(hasMore);
+    }).catch(error => {
+      if (!controller.signal.aborted) setCatalogError(error.message);
+    }).finally(() => {
+      if (!controller.signal.aborted) setCatalogLoading(false);
+    });
+    return () => controller.abort();
+  }, [catalogOffset, catalogRetry]);
 
   const { user: sessionUser, loading, logout } = useAuth();
   const user: User | null = sessionUser ? mapApiUser(sessionUser) : null;
@@ -114,16 +120,8 @@ export default function App() {
 
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 300]);
 
-  // Synchronize initial price range when catalog boundaries are ready
   useEffect(() => {
-    if (catalogMinPrice !== undefined && catalogMaxPrice !== undefined) {
-      setPriceRange((prev) => {
-        if (prev[0] === 0 && prev[1] === 300) {
-          return [catalogMinPrice, catalogMaxPrice];
-        }
-        return prev;
-      });
-    }
+    setPriceRange([catalogMinPrice, catalogMaxPrice]);
   }, [catalogMinPrice, catalogMaxPrice]);
 
   // Modals
@@ -161,7 +159,7 @@ export default function App() {
       if (selectedProduct) {
         url.searchParams.set('produto', selectedProduct.id);
         window.history.replaceState(window.history.state, '', url.toString());
-      } else if (url.searchParams.has('produto')) {
+      } else if (!catalogLoading && products.length > 0 && url.searchParams.has('produto')) {
         url.searchParams.delete('produto');
         window.history.replaceState(window.history.state, '', url.toString());
       }
@@ -169,13 +167,6 @@ export default function App() {
       // safe fallback if in restricted iframe
     }
   }, [selectedProduct]);
-
-  // Sync to local storage
-  useEffect(() => {
-    localStorage.setItem('cp_products', JSON.stringify(products));
-  }, [products]);
-
-
 
   useEffect(() => {
     localStorage.setItem('cp_cart', JSON.stringify(cartItems));
@@ -265,6 +256,7 @@ export default function App() {
   };
 
   const handleSimulatePriceDrop = (productId: string) => {
+    if (products.find(p => p.id === productId)?.catalogSource === "api") return;
     const alert = priceAlerts.find((a) => a.productId === productId);
     const target = alert ? alert.targetPrice : 0;
     const targetProd = products.find((p) => p.id === productId);
@@ -385,6 +377,7 @@ export default function App() {
 
   // Cart actions
   const handleAddToCart = (product: Product, quantity = 1) => {
+    if (product.platform !== "parceiro") { setAffiliateProduct(product); return; }
     setCartItems((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
@@ -412,6 +405,7 @@ export default function App() {
   };
 
   const handleBuyNow = (product: Product) => {
+    if (product.platform !== "parceiro") { setAffiliateProduct(product); return; }
     handleAddToCart(product, 1);
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
@@ -585,6 +579,11 @@ export default function App() {
                 matchingCount={filteredProducts.length}
               />
 
+              {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da Shopee…</p>}
+              {catalogError && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
+                <p>{catalogError}</p><button className="underline font-bold" onClick={() => setCatalogRetry(n => n + 1)}>Tentar novamente</button>
+              </div>}
+              {!catalogLoading && !catalogError && catalogHasMore && <button className="p-3 rounded-xl bg-teal-700 text-white" onClick={() => setCatalogOffset(n => n + 100)}>Carregar mais produtos</button>}
               {/* Grid or Empty State */}
               {filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -600,7 +599,7 @@ export default function App() {
                     />
                   ))}
                 </div>
-              ) : (
+              ) : !catalogLoading && !catalogError ? (
                 <div className="py-12 px-4 text-center bg-white rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                   <div className="w-14 h-14 mx-auto rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
                     <SlidersHorizontal size={28} />
@@ -622,7 +621,7 @@ export default function App() {
                     <span>Resetar faixa de preço ({formatCurrency(catalogMinPrice)} a {formatCurrency(catalogMaxPrice)})</span>
                   </button>
                 </div>
-              )}
+              ) : null}
             </section>
           </div>
         )}
@@ -709,7 +708,10 @@ export default function App() {
       />
 
       {/* Product Detail Modal */}
-      {selectedProduct && (
+      {selectedProduct?.catalogSource === 'api' && (
+        <CatalogProductDetail product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+      )}
+      {selectedProduct && selectedProduct.catalogSource !== 'api' && (
         <ProductDetailModal
           product={
             products.find((p) => p.id === selectedProduct.id) || selectedProduct

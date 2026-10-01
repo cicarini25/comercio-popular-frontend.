@@ -142,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="inline-flex items-center gap-1 bg-coral-600 text-white text-[10px] uppercase font-bold px-1.5 py-0.5 rounded">
               <Flame size={12} /> Achadinhos
             </span>
-            <span>Ofertas de afiliados com até 65% OFF atualizadas a cada hora!</span>
+            <span>Ofertas de afiliados: confira as condições e o preço final na loja.</span>
           </div>
           <div className="hidden md:flex items-center gap-4 text-neutral-300 text-[11px]">
             <span className="flex items-center gap-1">

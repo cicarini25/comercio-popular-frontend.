@@ -104,7 +104,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
 
     const title = `${product.title} — Comércio Popular`;
-    const message = `🔥 Olha esse achadinho no Comércio Popular!\n\n🛍️ *${product.title}*\n💰 Por apenas *${formatCurrency(product.price)}*!${savingsText ? `\n📉 ${savingsText}` : ''}\n⭐ Avaliação: ${product.rating.toFixed(1)}/5.0\n\n👉 Confira a oferta no link direto: ${directUrl}`;
+    const message = `🔥 Olha esse achadinho no Comércio Popular!\n\n🛍️ *${product.title}*\n💰 Por apenas *${formatCurrency(product.price)}*!${savingsText ? `\n📉 ${savingsText}` : ''}${product.catalogSource === "api" ? "" : `\n⭐ Avaliação: ${product.rating.toFixed(1)}/5.0`}\n\n👉 Confira a oferta no link direto: ${directUrl}`;
 
     const shareData = {
       title,
@@ -260,7 +260,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         )}
 
         {/* Urgency Trigger: Low Stock */}
-        {!isOutOfStock && product.stockUnits <= 5 && (
+        {!isOutOfStock && product.stockUnits != null && product.stockUnits <= 5 && (
           <div className="absolute bottom-2.5 right-2.5 bg-amber-500/95 text-amber-950 font-bold text-[10px] px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1">
             <Clock size={10} /> Restam {product.stockUnits} unid.
           </div>
@@ -273,7 +273,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {/* Category & Rating */}
           <div className="flex items-center justify-between text-xs text-neutral-500 mb-1.5 gap-2">
             <span className="font-medium text-neutral-600 truncate">{product.category}</span>
-            <div
+            {product.catalogSource !== "api" && <div
               className="shrink-0 flex items-center hover:opacity-85 transition-opacity"
               title={`Avaliação média: ${product.rating.toFixed(1)} de 5 estrelas (${product.reviewCount} avaliações)`}
             >
@@ -284,7 +284,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 showScore={true}
                 showCount={true}
               />
-            </div>
+            </div>}
           </div>
 
           {/* Title */}
@@ -371,14 +371,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
           <div className="text-[11px] text-teal-700 font-medium mt-0.5">
             {isAffiliate ? (
-              <span>Direto da loja parceira oficial</span>
+              <span>Preço e disponibilidade confirmados na loja</span>
             ) : (
               <span>Até 12x no cartão ou à vista no Pix</span>
             )}
           </div>
 
           {/* Comparador de Preços (Mercado Livre, Shopee, Amazon) */}
-          <div
+          {product.catalogSource !== "api" && <div
             id={`price-comparator-${product.id}`}
             className="mt-2.5 bg-emerald-50/70 border border-emerald-200/90 rounded-xl p-2.5 transition-all"
           >
@@ -513,7 +513,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </div>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Action Buttons Row */}
           <div className="mt-3 flex items-center gap-2">
@@ -545,7 +545,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   }}
                   className="w-full py-2 px-2.5 rounded-xl bg-coral-600 hover:bg-coral-700 active:bg-coral-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
                 >
-                  <span className="truncate">Comprar no {platform.name}</span>
+                  <span className="truncate">{product.platform === "shopee" ? "Comprar na Shopee" : `Comprar no ${platform.name}`}</span>
                   <ExternalLink size={13} className="shrink-0" />
                 </button>
               ) : (

@@ -41,7 +41,7 @@ export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose
 
   const handleOpenStore = () => {
     if (product.affiliateUrl) {
-      window.open(product.affiliateUrl, '_blank');
+      window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer');
     }
     onClose();
   };
@@ -66,14 +66,14 @@ export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose
         <div>
           <div className="inline-flex items-center gap-1.5 bg-neutral-100 text-neutral-700 text-xs font-bold px-3 py-1 rounded-full mb-2">
             <ShieldCheck size={13} className="text-teal-700" />
-            <span>Link de Afiliado Verificado</span>
+            <span>Link de afiliado</span>
           </div>
 
           <h3 className="text-xl font-bold text-neutral-900 font-display">
-            Indo para a loja oficial do {platform.name}
+            Comprar na plataforma {platform.name}
           </h3>
           <p className="text-xs text-neutral-500 mt-1 max-w-xs mx-auto">
-            Você está sendo encaminhado com o melhor preço garantido e cupom ativo.
+            Confira preço final, frete, cupons e disponibilidade na plataforma.
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose
               )}
             </div>
             <p className="text-[10px] text-teal-700 font-medium">
-              Vendido e entregue por {platform.name}
+              Compra finalizada na plataforma {platform.name}
             </p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose
             <span>Transparência Comércio Popular</span>
           </div>
           <p className="text-neutral-600">
-            Ao comprar por este link, o Comércio Popular recebe uma pequena comissão da plataforma, sem nenhum custo adicional para você. Isso mantém nossa curadoria de achadinhos gratuita!
+            Ao comprar por este link, o Comércio Popular pode receber uma comissão da plataforma, sem nenhum custo adicional para você. Isso mantém nossa curadoria de achadinhos gratuita!
           </p>
         </div>
 

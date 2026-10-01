@@ -41,6 +41,10 @@ export const MARKETPLACE_BRANDS: Record<string, MarketplaceBrand> = {
  * (Mercado Livre, Shopee, Amazon).
  */
 export function getProductPriceComparison(product: Product): PriceComparison {
+  if (product.catalogSource === 'api') return {
+    competitors: [], averageMarketPrice: product.price, savingsAmount: 0,
+    savingsPercentage: 0, isLowestPriceHere: false
+  };
   if (product.priceComparison) {
     return product.priceComparison;
   }

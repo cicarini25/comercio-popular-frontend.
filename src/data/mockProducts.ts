@@ -479,6 +479,7 @@ export const CATEGORIES = [
   'Brinquedos',
   'TVs',
   'Calçados',
+  'Esportes & Lazer',
   'Cuidado & Beleza',
   'Alimentos & Bebidas'
 ];

@@ -28,6 +28,7 @@ export interface PriceComparison {
 }
 
 export interface Product {
+  catalogSource?: "api";
   id: string;
   title: string;
   description: string;
@@ -42,7 +43,7 @@ export interface Product {
   images: string[];
   category: string;
   isAchadinho: boolean;
-  stockUnits: number;
+  stockUnits: number | null;
   flashDealExpiresAt?: string;
   badge?: string;
   competitorPrices?: CompetitorPrice[];
