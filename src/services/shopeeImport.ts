@@ -233,3 +233,16 @@ export async function refreshShopeeImages(items: FeedItem[], token: string) {
     failures: { itemId: string; message: string }[];
   };
 }
+
+
+export async function repairShopeeCatalogState(token: string) {
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/repair-catalog-state', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token.trim() }
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao reparar catálogo Shopee.');
+  }
+  return result as { ok: true; repaired: number };
+}
