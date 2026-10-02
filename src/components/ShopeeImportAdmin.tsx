@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, enqueueShopeeBulk, getShopeeJob, refreshShopeeImages, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, enqueueShopeeBulk, getShopeeJob, refreshShopeeImages, repairShopeeCatalogState, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 
 type Preview = { id: string; title: string; price: number; image: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
@@ -42,7 +42,7 @@ export default function ShopeeImportAdmin() {
   async function refreshImages() {
     setError('');
     setSuccess('');
-    setBusy('Buscando as imagens reais nas páginas da Shopee…');
+    setBusy('Tentando recuperar as imagens reais nas páginas da Shopee…');
     try {
       const result = await refreshShopeeImages(items, token);
       if (result.failed) {
@@ -53,6 +53,20 @@ export default function ShopeeImportAdmin() {
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Falha ao atualizar imagens.');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function repairCatalog() {
+    setError('');
+    setSuccess('');
+    setBusy('Restaurando o estado do catálogo Shopee sem alterar preços ou imagens…');
+    try {
+      const result = await repairShopeeCatalogState(token);
+      setSuccess(result.repaired + ' produtos Shopee reativados no catálogo.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Falha ao reparar o catálogo Shopee.');
     } finally {
       setBusy('');
     }
@@ -180,8 +194,11 @@ export default function ShopeeImportAdmin() {
           <button disabled={!!busy} onClick={() => void publish()} className="rounded-xl bg-orange-600 text-white px-5 py-3 font-semibold disabled:opacity-50">
             Enviar {total} produtos para importação em massa
           </button>
+          <button disabled={!!busy} onClick={() => void repairCatalog()} className="rounded-xl border border-teal-700 text-teal-800 px-5 py-3 font-semibold disabled:opacity-50">
+            Restaurar catálogo Shopee
+          </button>
           <button disabled={!!busy} onClick={() => void refreshImages()} className="rounded-xl border border-emerald-700 text-emerald-800 px-5 py-3 font-semibold disabled:opacity-50">
-            Atualizar imagens reais da Shopee
+            Tentar recuperar imagens reais
           </button>
         </div>
       </section>}
