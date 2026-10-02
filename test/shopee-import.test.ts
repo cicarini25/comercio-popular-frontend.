@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Blob, File } from 'node:buffer';
 import { csvRows, prepareFeed, toBulkPayload, validAffiliate } from '../src/services/shopeeImport';
 
