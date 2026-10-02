@@ -176,6 +176,11 @@ export default function ShopeeImportAdmin() {
             <div className="text-sm text-slate-600 mt-2">
               {job.imported_count} importados · {job.updated_count} atualizados · {job.error_count} erros de {job.requested_count}
             </div>
+            {job.metadata?.lastError && (
+              <pre className="mt-3 whitespace-pre-wrap break-words rounded-lg bg-red-50 p-3 text-xs text-red-800">
+                {job.metadata.lastError}
+              </pre>
+            )}
           </div>)}
         </div>
       </section>}
