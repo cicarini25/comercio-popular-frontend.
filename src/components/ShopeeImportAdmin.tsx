@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, enqueueShopeeBulk, getShopeeJob, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, enqueueShopeeBulk, getShopeeJob, refreshShopeeImages, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 
 type Preview = { id: string; title: string; price: number; image: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
@@ -37,6 +37,25 @@ export default function ShopeeImportAdmin() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Não foi possível preparar o lote.');
     } finally { setBusy(''); }
+  }
+
+  async function refreshImages() {
+    setError('');
+    setSuccess('');
+    setBusy('Buscando as imagens reais nas páginas da Shopee…');
+    try {
+      const result = await refreshShopeeImages(items, token);
+      if (result.failed) {
+        const details = result.failures.slice(0, 10).map((f) => f.itemId + ': ' + f.message).join(' | ');
+        setSuccess(result.processed + ' imagens atualizadas. ' + result.failed + ' falharam.' + (details ? ' ' + details : ''));
+      } else {
+        setSuccess(result.processed + ' imagens reais atualizadas com sucesso.');
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Falha ao atualizar imagens.');
+    } finally {
+      setBusy('');
+    }
   }
 
   async function publish() {
@@ -157,9 +176,14 @@ export default function ShopeeImportAdmin() {
             </tbody>
           </table>
         </div>
-        <button disabled={!!busy} onClick={() => void publish()} className="mt-5 rounded-xl bg-orange-600 text-white px-5 py-3 font-semibold disabled:opacity-50">
-          Enviar {total} produtos para importação em massa
-        </button>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button disabled={!!busy} onClick={() => void publish()} className="rounded-xl bg-orange-600 text-white px-5 py-3 font-semibold disabled:opacity-50">
+            Enviar {total} produtos para importação em massa
+          </button>
+          <button disabled={!!busy} onClick={() => void refreshImages()} className="rounded-xl border border-emerald-700 text-emerald-800 px-5 py-3 font-semibold disabled:opacity-50">
+            Atualizar imagens reais da Shopee
+          </button>
+        </div>
       </section>}
 
       {!!jobs.length && <section className="mt-6 bg-white border rounded-2xl p-5">
