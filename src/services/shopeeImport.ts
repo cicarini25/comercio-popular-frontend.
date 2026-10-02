@@ -20,6 +20,7 @@ export type ShopeeJobStatus = {
   error_count: number;
   started_at?: string | null;
   finished_at?: string | null;
+  metadata?: { lastError?: string; attempts?: number } | null;
 };
 
 export async function* csvRows(file: Blob): AsyncGenerator<string[]> {
