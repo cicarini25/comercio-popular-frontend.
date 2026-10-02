@@ -202,3 +202,34 @@ export async function getShopeeJob(token: string, jobId: string): Promise<Shopee
   }
   return result.job as ShopeeJobStatus;
 }
+
+
+export async function refreshShopeeImages(items: FeedItem[], token: string) {
+  if (!items.length) throw new Error('Nenhum produto para atualizar.');
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/refresh-images', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token.trim()
+    },
+    body: JSON.stringify({
+      items: items.map((item) => ({
+        itemid: item.itemid,
+        product_link: item.product_link
+      })),
+      concurrency: 5
+    })
+  });
+
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao atualizar imagens.');
+  }
+  return result as {
+    ok: boolean;
+    processed: number;
+    failed: number;
+    results: { itemId: string; imageUrl: string }[];
+    failures: { itemId: string; message: string }[];
+  };
+}
