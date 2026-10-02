@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { API_BASE_URL } from '../services/api';
-import { prepareFeed, type FeedItem } from '../services/shopeeImport';
+import { prepareFeed, enqueueShopeeBulk, getShopeeJob, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 
 type Preview = { id: string; title: string; price: number; image: string };
+type JobView = ShopeeJobStatus & { displayStatus?: string };
+
+const API_NOTE = 'Os links devem vir do CSV "BatchProductLinks" / "Offer Link" gerado pela Shopee.';
+
 export default function ShopeeImportAdmin() {
   const [feed, setFeed] = useState<File | null>(null);
   const [links, setLinks] = useState<File | null>(null);
@@ -10,80 +13,171 @@ export default function ShopeeImportAdmin() {
   const [token, setToken] = useState('');
   const [items, setItems] = useState<FeedItem[]>([]);
   const [preview, setPreview] = useState<Preview[]>([]);
+  const [total, setTotal] = useState(0);
+  const [jobs, setJobs] = useState<JobView[]>([]);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const reset = () => { setItems([]); setPreview([]); setError(''); setSuccess(''); };
-  async function request(rows: FeedItem[], dryRun: boolean) {
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 90000);
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/integrations/shopee/import-feed`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token.trim()}` },
-        body: JSON.stringify({ items: rows, dryRun }), signal: controller.signal,
-      });
-      const result = await response.json();
-      if (!response.ok || !result.ok) throw new Error(result.error || `Falha HTTP ${response.status}.`);
-      return result;
-    } finally { window.clearTimeout(timer); }
-  }
+  const reset = () => { setItems([]); setPreview([]); setTotal(0); setJobs([]); setError(''); setSuccess(''); };
+
   async function check() {
-    reset(); setBusy('Lendo os arquivos e validando os produtos…');
+    reset();
+    setBusy('Lendo o Feed Shopee e cruzando os Item Ids com os Offer Links…');
     try {
       if (!feed || !token.trim()) throw new Error('Selecione o feed e informe o token administrativo.');
       const rows = await prepareFeed(feed, links, manual);
-      const result = await request(rows, true);
-      if (!Array.isArray(result.products) || result.products.length !== rows.length) throw new Error('Prévia incompleta. Nenhum produto foi publicado.');
-      setItems(rows); setPreview(result.products);
-    } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível validar o lote.'); }
-    finally { setBusy(''); }
-  }
-  async function publish() {
-    setError(''); setSuccess(''); setBusy('Publicando o lote…');
-    try {
-      const result = await request(items, false);
-      setSuccess(`${result.count} produtos processados com sucesso. A vitrine já pode ser atualizada.`);
-      setItems([]); setPreview([]); setToken('');
+      setItems(rows);
+      setTotal(rows.length);
+      setPreview(rows.slice(0, 50).map((row) => ({
+        id: row.itemid,
+        title: row.title,
+        price: Number(row.sale_price || row.price),
+        image: row.image_link
+      })));
     } catch (e) {
-      setError(`${e instanceof Error ? e.message : 'Falha na comunicação.'} Se a conexão caiu, confira a vitrine antes de tentar novamente.`);
+      setError(e instanceof Error ? e.message : 'Não foi possível preparar o lote.');
     } finally { setBusy(''); }
   }
+
+  async function publish() {
+    setError('');
+    setSuccess('');
+    setJobs([]);
+    setBusy('Enviando os produtos para a fila de importação em massa…');
+
+    try {
+      const created = await enqueueShopeeBulk(items, token);
+      const initial = created.map((job) => ({
+        id: job.id,
+        status: job.status,
+        requested_count: job.requested,
+        discovered_count: 0,
+        imported_count: 0,
+        updated_count: 0,
+        error_count: 0
+      }));
+      setJobs(initial);
+      setBusy('Acompanhando o processamento dos lotes…');
+
+      const poll = async () => {
+        let latest = initial;
+        for (let round = 0; round < 120; round += 1) {
+          latest = await Promise.all(initial.map(async (job) => {
+            const current = await getShopeeJob(token, job.id);
+            return {
+              ...current,
+              displayStatus:
+                current.status === 'concluido' ? 'Concluído' :
+                current.status === 'concluido_com_erros' ? 'Concluído com erros' :
+                current.status === 'falhou' ? 'Falhou' :
+                current.status === 'processando' ? 'Processando' :
+                'Na fila'
+            };
+          }));
+          setJobs(latest);
+
+          const finished = latest.every((job) =>
+            ['concluido', 'concluido_com_erros', 'falhou'].includes(job.status)
+          );
+          if (finished) return latest;
+          await new Promise((resolve) => window.setTimeout(resolve, 3000));
+        }
+        throw new Error('O acompanhamento excedeu o tempo de espera. Os jobs continuam no Railway; consulte os logs e o worker.');
+      };
+
+      const finished = await poll();
+      const imported = finished.reduce((sum, job) => sum + job.imported_count, 0);
+      const updated = finished.reduce((sum, job) => sum + job.updated_count, 0);
+      const errors = finished.reduce((sum, job) => sum + job.error_count, 0);
+      setSuccess(imported + updated + ' produtos processados. ' + errors + ' com erro.');
+      setBusy('');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Falha na importação em massa.');
+      setBusy('');
+    }
+  }
+
   const input = 'block w-full rounded-xl border border-slate-300 bg-white p-3 mt-2 text-sm';
+  const completedCount = jobs.reduce((sum, job) => sum + job.imported_count + job.updated_count, 0);
+  const errorCount = jobs.reduce((sum, job) => sum + job.error_count, 0);
   return <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-8">
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <a href="/" className="text-emerald-700 underline">Voltar à vitrine</a>
-      <h1 className="text-3xl font-bold mt-6">Importar produtos Shopee</h1>
-      <p className="mt-2 text-slate-600">Associe os dados do feed aos seus links de afiliado. Confira a prévia e publique até 100 produtos por lote.</p>
-      <form onSubmit={e => { e.preventDefault(); void check(); }} className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mt-6">
+      <h1 className="text-3xl font-bold mt-6">Importação Shopee em massa</h1>
+      <p className="mt-2 text-slate-600">
+        Use o Feed de Produto da Shopee junto do CSV de links em massa. O sistema cruza pelo Item Id e envia os produtos para processamento em fila.
+      </p>
+      <p className="mt-1 text-sm text-slate-500">{API_NOTE}</p>
+
+      <form onSubmit={(e) => { e.preventDefault(); void check(); }} className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mt-6">
         <fieldset disabled={!!busy} className="space-y-5 disabled:opacity-60">
           <label className="block font-semibold">1. Feed de produto da Shopee (CSV)
-            <input className={input} type="file" accept=".csv,text/csv" required onChange={e => { reset(); setFeed(e.target.files?.[0] || null); }} />
+            <input className={input} type="file" accept=".csv,text/csv" required onChange={(e) => { reset(); setFeed(e.target.files?.[0] || null); }} />
+            <span className="text-sm font-normal text-slate-500">Esse arquivo fornece imagem, descrição, categoria, preço e demais dados do produto.</span>
           </label>
-          <label className="block font-semibold">2. Planilha de links de afiliado (CSV)
-            <input className={input} type="file" accept=".csv,text/csv" onChange={e => { reset(); setLinks(e.target.files?.[0] || null); }} />
-            <span className="text-sm font-normal text-slate-500">Arquivo exportado com as colunas Item Id e Offer Link.</span>
+
+          <label className="block font-semibold">2. CSV de links em massa da Shopee (CSV)
+            <input className={input} type="file" accept=".csv,text/csv" required={!manual.trim()} onChange={(e) => { reset(); setLinks(e.target.files?.[0] || null); }} />
+            <span className="text-sm font-normal text-slate-500">Use o arquivo baixado em “Oferta de Produto → Obter Link”. Ele deve ter “Item Id” e “Offer Link”.</span>
           </label>
-          <label className="block font-semibold">Ou informe os IDs e links
-            <textarea className={input} rows={4} value={manual} onChange={e => { reset(); setManual(e.target.value); }} placeholder="58217601055 https://s.shopee.com.br/seulink" spellCheck={false} />
-            <span className="text-sm font-normal text-slate-500">Um ID numérico e seu link por linha, separados por espaço. Links sozinhos não identificam o produto.</span>
+
+          <label className="block font-semibold">Ou informe os IDs e links manualmente <span className="text-sm font-normal text-slate-500">(opcional)</span>
+            <textarea className={input} rows={4} value={manual} onChange={(e) => { reset(); setManual(e.target.value); }} placeholder="58217601055 https://s.shopee.com.br/seulink" spellCheck={false} />
           </label>
+
           <label className="block font-semibold">3. Token administrativo
-            <input className={input} type="password" autoComplete="off" required value={token} onChange={e => { reset(); setToken(e.target.value); }} />
-            <span className="text-sm font-normal text-slate-500">Use o INTEGRATION_ADMIN_TOKEN do backend. Não é a senha da Shopee. Não será salvo no navegador.</span>
+            <input className={input} type="password" autoComplete="off" required value={token} onChange={(e) => { reset(); setToken(e.target.value); }} />
+            <span className="text-sm font-normal text-slate-500">Use o INTEGRATION_ADMIN_TOKEN do backend. Não é a senha da Shopee.</span>
           </label>
-          <button className="rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold" type="submit">Preparar e validar prévia</button>
+
+          <button className="rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold" type="submit">
+            Preparar carga
+          </button>
         </fieldset>
       </form>
+
       {busy && <p role="status" className="p-4 mt-4 bg-blue-50 rounded-xl">{busy}</p>}
       {error && <p role="alert" className="p-4 mt-4 bg-red-50 text-red-800 rounded-xl break-words">{error}</p>}
       {success && <p role="status" className="p-4 mt-4 bg-emerald-50 text-emerald-800 rounded-xl">{success} <a className="underline" href="/">Abrir vitrine</a></p>}
-      {!!preview.length && <section className="mt-6 bg-white border rounded-2xl p-5">
-        <h2 className="text-xl font-bold">Prévia: {preview.length} produtos</h2>
-        <p className="text-sm text-slate-600 mt-2">Os preços são os do arquivo enviado. Produtos já cadastrados com o mesmo ID serão atualizados. Nenhuma atualização periódica é ativada por esta importação.</p>
-        <div className="overflow-x-auto mt-4"><table className="w-full text-left text-sm"><thead><tr><th className="p-2">Produto</th><th className="p-2">ID</th><th className="p-2">Preço</th></tr></thead><tbody>
-          {preview.map(p => <tr key={p.id} className="border-t"><td className="p-2"><div className="flex items-center gap-3"><img className="w-14 h-14 object-contain" src={p.image} alt="" referrerPolicy="no-referrer" /><span>{p.title}</span></div></td><td className="p-2">{p.id}</td><td className="p-2 whitespace-nowrap">{p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td></tr>)}
-        </tbody></table></div>
-        <button disabled={!!busy} onClick={() => void publish()} className="mt-5 rounded-xl bg-orange-600 text-white px-5 py-3 font-semibold disabled:opacity-50">Publicar {preview.length} produtos</button>
+
+      {!!items.length && !jobs.length && <section className="mt-6 bg-white border rounded-2xl p-5">
+        <h2 className="text-xl font-bold">Prévia: {total} produtos</h2>
+        <p className="text-sm text-slate-600 mt-2">
+          O cruzamento foi feito pelo Item Id. Abaixo são mostrados até 50 produtos para conferência. Nada foi enviado ao backend ainda.
+        </p>
+        <div className="overflow-x-auto mt-4">
+          <table className="w-full text-left text-sm">
+            <thead><tr><th className="p-2">Produto</th><th className="p-2">ID</th><th className="p-2">Preço</th></tr></thead>
+            <tbody>
+              {preview.map((p) => <tr key={p.id} className="border-t">
+                <td className="p-2"><div className="flex items-center gap-3"><img className="w-14 h-14 object-contain" src={p.image} alt="" referrerPolicy="no-referrer" /><span>{p.title}</span></div></td>
+                <td className="p-2">{p.id}</td>
+                <td className="p-2 whitespace-nowrap">{Number.isFinite(p.price) ? p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}</td>
+              </tr>)}
+            </tbody>
+          </table>
+        </div>
+        <button disabled={!!busy} onClick={() => void publish()} className="mt-5 rounded-xl bg-orange-600 text-white px-5 py-3 font-semibold disabled:opacity-50">
+          Enviar {total} produtos para importação em massa
+        </button>
+      </section>}
+
+      {!!jobs.length && <section className="mt-6 bg-white border rounded-2xl p-5">
+        <h2 className="text-xl font-bold">Processamento da importação</h2>
+        <p className="text-sm text-slate-600 mt-2">
+          Processados: {completedCount} de {total}. Erros: {errorCount}.
+        </p>
+        <div className="mt-4 space-y-3">
+          {jobs.map((job) => <div key={job.id} className="rounded-xl border p-4">
+            <div className="flex flex-wrap justify-between gap-2">
+              <strong>Lote {job.id.slice(0, 8)}</strong>
+              <span>{job.displayStatus || job.status}</span>
+            </div>
+            <div className="text-sm text-slate-600 mt-2">
+              {job.imported_count} importados · {job.updated_count} atualizados · {job.error_count} erros de {job.requested_count}
+            </div>
+          </div>)}
+        </div>
       </section>}
     </div>
   </main>;
