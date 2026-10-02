@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, enqueueShopeeBulk, getShopeeJob, refreshShopeeImages, repairShopeeCatalogState, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 
 type Preview = { id: string; title: string; price: number; image: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
@@ -37,39 +37,6 @@ export default function ShopeeImportAdmin() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Não foi possível preparar o lote.');
     } finally { setBusy(''); }
-  }
-
-  async function refreshImages() {
-    setError('');
-    setSuccess('');
-    setBusy('Tentando recuperar as imagens reais nas páginas da Shopee…');
-    try {
-      const result = await refreshShopeeImages(items, token);
-      if (result.failed) {
-        const details = result.failures.slice(0, 10).map((f) => f.itemId + ': ' + f.message).join(' | ');
-        setSuccess(result.processed + ' imagens atualizadas. ' + result.failed + ' falharam.' + (details ? ' ' + details : ''));
-      } else {
-        setSuccess(result.processed + ' imagens reais atualizadas com sucesso.');
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Falha ao atualizar imagens.');
-    } finally {
-      setBusy('');
-    }
-  }
-
-  async function repairCatalog() {
-    setError('');
-    setSuccess('');
-    setBusy('Restaurando o estado do catálogo Shopee sem alterar preços ou imagens…');
-    try {
-      const result = await repairShopeeCatalogState(token);
-      setSuccess(result.repaired + ' produtos Shopee reativados no catálogo.');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Falha ao reparar o catálogo Shopee.');
-    } finally {
-      setBusy('');
-    }
   }
 
   async function publish() {
@@ -197,9 +164,7 @@ export default function ShopeeImportAdmin() {
           <button disabled={!!busy} onClick={() => void repairCatalog()} className="rounded-xl border border-teal-700 text-teal-800 px-5 py-3 font-semibold disabled:opacity-50">
             Restaurar catálogo Shopee
           </button>
-          <button disabled={!!busy} onClick={() => void refreshImages()} className="rounded-xl border border-emerald-700 text-emerald-800 px-5 py-3 font-semibold disabled:opacity-50">
-            Tentar recuperar imagens reais
-          </button>
+
         </div>
       </section>}
 
