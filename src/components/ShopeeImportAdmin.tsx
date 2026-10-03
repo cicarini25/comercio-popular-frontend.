@@ -32,7 +32,7 @@ export default function ShopeeImportAdmin() {
         id: row.itemid,
         title: row.title,
         price: Number(row.sale_price || row.price),
-        image: row.image_link
+        image: row.image_link || '/favicon.png'
       })));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Não foi possível preparar o lote.');
@@ -143,7 +143,7 @@ export default function ShopeeImportAdmin() {
       {!!items.length && !jobs.length && <section className="mt-6 bg-white border rounded-2xl p-5">
         <h2 className="text-xl font-bold">Prévia: {total} produtos</h2>
         <p className="text-sm text-slate-600 mt-2">
-          O cruzamento foi feito pelo Item Id. Abaixo são mostrados até 50 produtos para conferência. Nada foi enviado ao backend ainda.
+          O sistema usa o Feed quando encontra o Item Id. Quando o Item Id não está no Feed, usa automaticamente os dados de Item Name, Price, Product Link e Offer Link do CSV de links em massa. Nada foi enviado ao backend ainda.
         </p>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-left text-sm">
