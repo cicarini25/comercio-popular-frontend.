@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 
 type Preview = { id: string; title: string; price: number; image: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
@@ -26,13 +26,15 @@ export default function ShopeeImportAdmin() {
     try {
       if (!feed || !token.trim()) throw new Error('Selecione o feed e informe o token administrativo.');
       const rows = await prepareFeed(feed, links, manual);
-      setItems(rows);
-      setTotal(rows.length);
-      setPreview(rows.slice(0, 50).map((row) => ({
+      setBusy('Recuperando imagens dos produtos Shopee…');
+      const withImages = await resolveShopeeImageUrls(rows, token);
+      setItems(withImages);
+      setTotal(withImages.length);
+      setPreview(withImages.slice(0, 50).map((row) => ({
         id: row.itemid,
         title: row.title,
         price: Number(row.sale_price || row.price),
-        image: row.image_link || '/favicon.png'
+        image: row.image_link
       })));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Não foi possível preparar o lote.');
