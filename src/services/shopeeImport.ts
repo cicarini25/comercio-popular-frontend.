@@ -277,6 +277,56 @@ function apiBaseUrl() {
   return (import.meta.env.VITE_API_URL || 'https://comercio-popular-backend-production.up.railway.app/api').replace(/\/+$/, '').replace(/\/api$/, '');
 }
 
+export async function resolveShopeeImageUrls(items: FeedItem[], token: string): Promise<FeedItem[]> {
+  const missing = items.filter((item) => !String(item.image_link || '').trim());
+  if (!missing.length) return items;
+  if (!token.trim()) throw new Error('Informe o token administrativo para recuperar as imagens Shopee.');
+
+  const payload = missing.map((item) => ({
+    itemid: item.itemid,
+    product_link: item.product_link,
+    title: item.title
+  }));
+
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/resolve-images', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token.trim()
+    },
+    body: JSON.stringify({ items: payload })
+  });
+
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao recuperar imagens Shopee.');
+  }
+
+  const resolved = new Map<string, string>(
+    Array.isArray(result.resolved)
+      ? result.resolved
+          .filter((row: any) => row?.itemId && row?.imageUrl)
+          .map((row: any) => [String(row.itemId), String(row.imageUrl)])
+      : []
+  );
+
+  const unresolved = Array.isArray(result.missing) ? result.missing : [];
+  if (unresolved.length || resolved.size !== missing.length) {
+    const ids = unresolved.map((row: any) => String(row.itemId || '')).filter(Boolean);
+    const extra = ids.length ? ': ' + ids.join(', ') : '';
+    throw new Error(
+      'A Shopee não retornou imagem para ' + (missing.length - resolved.size) +
+      ' produto(s)' + extra + '. Nada foi enviado ao backend.'
+    );
+  }
+
+  return items.map((item) => (
+    resolved.has(item.itemid)
+      ? { ...item, image_link: resolved.get(item.itemid)! }
+      : item
+  ));
+}
+
 export async function enqueueShopeeBulk(items: FeedItem[], token: string, chunkSize = DEFAULT_QUEUE_CHUNK_SIZE): Promise<ShopeeJob[]> {
   if (!items.length) throw new Error('Nenhum produto pronto para enfileirar.');
   if (!token.trim()) throw new Error('Informe o token administrativo.');
