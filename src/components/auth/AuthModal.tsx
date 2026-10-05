@@ -15,6 +15,7 @@ interface AuthModalProps {
   onClose: () => void;
   onSuccess: (user: User) => void;
   initialMode?: 'login' | 'signup';
+  message?: string;
 }
 
 type SocialPending = {
@@ -31,7 +32,7 @@ type LegalPending = {
   legalToken: string;
 };
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initialMode = 'signup' }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initialMode = 'signup', message }) => {
   const { login, signup, googleLogin, facebookLogin, loginWithToken, acceptSocialLegal } = useAuth();
   const location = useLocation();
   const [socialPending, setSocialPending] = useState<SocialPending | null>(null);
@@ -284,6 +285,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       </div> : <div className="space-y-4 p-6">
         <div className="flex rounded-xl bg-neutral-100 p-1">{(['signup', 'login'] as const).map(item => <button key={item} disabled={busy} type="button" onClick={() => { setSocialPending(null); setPassword(''); setMode(item); setStage(1); setProviderNotice(''); setError(''); }} className={`flex-1 rounded-lg p-2 text-sm ${mode === item ? 'bg-white text-teal-800 shadow-sm' : 'text-neutral-600'}`}>{item === 'signup' ? 'Criar conta' : 'Entrar com senha'}</button>)}</div>
         <h2 id="auth-title" className="text-center text-xl font-bold">{mode === 'signup' ? 'Cadastre-se no Comércio Popular' : 'Acesse sua conta'}</h2>
+        {message && <p role="status" className="rounded-xl bg-teal-50 p-3 text-center text-sm text-teal-900">{message}</p>}
         <div className="flex items-center justify-between text-sm text-neutral-600" aria-live="polite"><span>Etapa {stage} de 2</span><span>{stage === 1 ? 'Identificação' : mode === 'signup' ? 'Dados e senha' : 'Senha'}</span></div>
         {stage === 1 && <>
           <div className="grid grid-cols-4 gap-2">

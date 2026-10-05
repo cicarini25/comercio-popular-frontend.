@@ -37,6 +37,7 @@ export interface Product {
   discountPercentage?: number;
   platform: Platform;
   affiliateUrl?: string;
+  affiliateOfferId?: string;
   affiliateCommissionRate?: number; // ex: 8.5%
   rating: number;
   reviewCount: number;

@@ -15,10 +15,13 @@ import { formatCurrency } from '../../utils/formatters';
 interface AffiliateModalProps {
   product: Product | null;
   onClose: () => void;
+  onOpenStore: (product: Product) => Promise<string>;
 }
 
-export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose }) => {
+export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose, onOpenStore }) => {
   const [counter, setCounter] = useState(3);
+  const [opening, setOpening] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!product) return;
@@ -40,10 +43,19 @@ export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose
   const platform = PLATFORM_INFO[product.platform] || PLATFORM_INFO.parceiro;
 
   const handleOpenStore = () => {
-    if (product.affiliateUrl) {
-      window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer');
-    }
-    onClose();
+    if (!product.affiliateUrl || opening) return;
+    const popup = window.open('about:blank', '_blank');
+    if (popup) popup.opener = null;
+    setOpening(true);
+    setError('');
+    onOpenStore(product).then((url) => {
+      if (popup) popup.location.replace(url);
+      else window.location.assign(url);
+      onClose();
+    }).catch((err: unknown) => {
+      popup?.close();
+      setError(err instanceof Error ? err.message : 'Não foi possível abrir a oferta.');
+    }).finally(() => setOpening(false));
   };
 
   return (
@@ -115,6 +127,8 @@ export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose
           </p>
         </div>
 
+        {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-left text-xs text-rose-700">{error}</p>}
+
         {/* Action Button */}
         <button
           id="btn-confirm-affiliate-redirect"
@@ -122,7 +136,7 @@ export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose
           className="w-full py-3.5 rounded-xl text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-colors cursor-pointer"
           style={{ backgroundColor: platform.color }}
         >
-          <span>Acessar {platform.name} Agora</span>
+          <span>{opening ? 'Validando acesso...' : `Acessar ${platform.name} Agora`}</span>
           <ArrowRight size={16} />
         </button>
       </div>
