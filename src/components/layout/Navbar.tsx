@@ -178,7 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="hidden lg:flex min-w-0 flex-1 max-w-2xl items-center">
             <div className="relative w-full">
               <div
-                className={`relative w-full flex items-center bg-neutral-100 border rounded-xl transition-all ${
+                className={`relative w-full min-w-0 flex items-center bg-neutral-100 border rounded-xl transition-all ${
                   isListening
                     ? 'border-coral-500 ring-2 ring-coral-200 bg-coral-50/20'
                     : 'border-neutral-300 focus-within:border-teal-600 focus-within:ring-2 focus-within:ring-teal-100'
@@ -196,7 +196,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full bg-transparent px-3 py-2 text-sm text-neutral-800 placeholder-neutral-400 outline-none"
+                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-neutral-800 placeholder-neutral-400 outline-none"
                 />
 
                 {searchQuery && (
@@ -224,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   aria-label="Buscar produtos por comando de voz"
                   aria-haspopup="dialog"
                   aria-expanded={voiceModalOpen}
-                  className={`p-2 mr-1 rounded-lg transition-all cursor-pointer flex items-center justify-center relative ${
+                  className={`shrink-0 p-2 mr-1 rounded-lg transition-all cursor-pointer flex items-center justify-center relative ${
                     isListening
                       ? 'bg-coral-600 text-white shadow-md ring-2 ring-coral-300 animate-pulse'
                       : 'text-neutral-500 hover:text-teal-700 hover:bg-neutral-200/70'
@@ -251,7 +251,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={onOpenBarcodeScanner}
                     title="Escanear código de barras EAN/UPC pela câmera"
                     aria-label="Escanear código de barras pela câmera"
-                    className="p-2 mr-1 rounded-lg text-neutral-500 hover:text-teal-700 hover:bg-neutral-200/70 transition-all cursor-pointer flex items-center justify-center relative"
+                    className="shrink-0 p-2 mr-1 rounded-lg text-neutral-500 hover:text-teal-700 hover:bg-neutral-200/70 transition-all cursor-pointer flex items-center justify-center relative"
                   >
                     <ScanBarcode size={18} />
                   </button>
@@ -265,7 +265,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     if (input) input.blur();
                   }}
                   aria-label="Pesquisar produtos"
-                  className="bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 mr-1 rounded-lg text-sm font-medium transition-colors flex items-center justify-center cursor-pointer"
+                  className="shrink-0 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 mr-1 rounded-lg text-sm font-medium transition-colors flex items-center justify-center cursor-pointer"
                 >
                   <Search size={16} />
                 </button>
