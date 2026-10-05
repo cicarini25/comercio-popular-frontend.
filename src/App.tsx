@@ -1,4 +1,4 @@
-import { fetchShopeeCatalog } from './services/catalog';
+import { fetchAffiliateCatalog } from './services/catalog';
 import { CatalogProductDetail } from './components/products/CatalogProductDetail';
 import { mapApiUser } from './services/api';
 import { useAuth } from './context/AuthContext';
@@ -44,7 +44,7 @@ export default function App() {
     const controller = new AbortController();
     setCatalogLoading(true);
     setCatalogError('');
-    fetchShopeeCatalog(catalogOffset, controller.signal).then(({ products: incoming, hasMore }) => {
+    fetchAffiliateCatalog(catalogOffset, controller.signal).then(({ products: incoming, hasMore }) => {
       setProducts(previous => catalogOffset === 0 ? incoming :
         [...new Map([...previous, ...incoming].map(product => [product.id, product])).values()]);
       setCatalogHasMore(hasMore);
@@ -579,7 +579,7 @@ export default function App() {
                 matchingCount={filteredProducts.length}
               />
 
-              {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da Shopee…</p>}
+              {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
               {catalogError && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
                 <p>{catalogError}</p><button className="underline font-bold" onClick={() => setCatalogRetry(n => n + 1)}>Tentar novamente</button>
               </div>}
