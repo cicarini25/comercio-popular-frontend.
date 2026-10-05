@@ -92,7 +92,8 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(moda infantil|roupa infantil|roupas infantis|vestido infantil|conjunto infantil|roupa de bebe|roupas de bebe)/.test(text)) return 'Moda Infantil';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(notebook|laptop|chromebook)/.test(text)) return 'Notebook';
-  if (/(computador|desktop|pc gamer|placa mae|placa de video|memoria ram|camera de seguranca|camera wi fi|camera wifi)/.test(text)) return 'Computadores';
+  if (/(camera de seguranca|camera wi fi|camera wifi)/.test(text)) return 'Tecnologia';
+  if (/(computador|desktop|pc gamer|placa mae|placa de video|memoria ram)/.test(text)) return 'Computadores';
   if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
   if (/(capa para celular|capinha|pelicula para celular|carregador de celular|acessorio para celular)/.test(text)) return 'Acessórios para celulares';
   if (/(fone de ouvido|headphone|headset|earbud|caixa de som|soundbar|alto falante)/.test(text)) return 'Fones & Headphones';
