@@ -109,16 +109,6 @@ export default function App() {
   // Navigation & Filters
   const [selectedCategory, setSelectedCategory] = useState('Todas as Categorias');
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryScrollRequest, setCategoryScrollRequest] = useState(0);
-
-  useEffect(() => {
-    if (categoryScrollRequest === 0 || activeTab !== 'home') return;
-    const frame = window.requestAnimationFrame(() => {
-      document.getElementById('category-products-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [categoryScrollRequest, activeTab]);
-
   // Dynamic price bounds of full catalog and Price Range Filter State
   const catalogMinPrice = useMemo(() => {
     if (products.length === 0) return 0;
@@ -522,8 +512,10 @@ export default function App() {
         selectedCategory={selectedCategory}
         onSelectCategory={(cat) => {
           setSelectedCategory(cat);
-          setCategoryScrollRequest((request) => request + 1);
+          setSearchQuery('');
+          setPriceRange([catalogMinPrice, catalogMaxPrice]);
           setActiveTab('home');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onLogout={() => { logout(); navigate('/'); }}
         priceAlerts={priceAlerts}
@@ -543,6 +535,69 @@ export default function App() {
         {/* TAB 1: HOME */}
         {activeTab === 'home' && (
           <div className="space-y-8">
+            {selectedCategory !== 'Todas as Categorias' ? (
+              <section className="max-w-7xl mx-auto w-full px-4 py-8 space-y-5" aria-live="polite">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-4">
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-display">
+                      Produtos em {selectedCategory}
+                    </h1>
+                    <p className="text-sm text-neutral-500">
+                      {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategory('Todas as Categorias')}
+                    className="self-start sm:self-auto px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-sm font-semibold"
+                  >
+                    Ver todas as ofertas
+                  </button>
+                </div>
+                {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
+                {catalogError && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
+                  <p>{catalogError}</p><button className="underline font-bold" onClick={() => setCatalogRetry(n => n + 1)}>Tentar novamente</button>
+                </div>}
+                {filteredProducts.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    {filteredProducts.map((p) => (
+                      <ProductCard
+                        key={p.id}
+                        product={p}
+                        isFavorite={wishlistIds.includes(p.id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        onAddToCart={handleAddToCart}
+                        onViewDetails={setSelectedProduct}
+                        onDirectAffiliateClick={handleAffiliateClick}
+                      />
+                    ))}
+                  </div>
+                ) : !catalogLoading && !catalogError ? (
+                  <div className="py-12 px-4 text-center bg-white rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+                    <div className="w-14 h-14 mx-auto rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
+                      <SlidersHorizontal size={28} />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-neutral-800">Ainda não há produtos em {selectedCategory}</h2>
+                      <p className="text-sm text-neutral-500 mt-1">Escolha outra categoria para ver ofertas disponíveis.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategory('Todas as Categorias')}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold"
+                    >
+                      Ver todas as ofertas
+                    </button>
+                  </div>
+                ) : null}
+                {!catalogLoading && !catalogError && catalogHasMore && (
+                  <button className="p-3 rounded-xl bg-teal-700 text-white" onClick={() => setCatalogOffset(n => n + 100)}>
+                    Carregar mais produtos
+                  </button>
+                )}
+              </section>
+            ) : (
+              <>
             {/* Hero Banner */}
             <HeroBanner
               onExploreAchadinhos={() => {
@@ -625,7 +680,7 @@ export default function App() {
                 matchingCount={filteredProducts.length}
               />
 
-              <div id="category-products-results" className="scroll-mt-28 space-y-4">
+              <div className="space-y-4">
               {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
               {catalogError && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
                 <p>{catalogError}</p><button className="underline font-bold" onClick={() => setCatalogRetry(n => n + 1)}>Tentar novamente</button>
@@ -671,6 +726,8 @@ export default function App() {
               ) : null}
               </div>
             </section>
+              </>
+            )}
           </div>
         )}
 
