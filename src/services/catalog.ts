@@ -1,5 +1,6 @@
 import { Product } from '../types';
 import { API_BASE_URL, getAuthToken } from './api';
+import { resolveProductCategory } from '../utils/productCategories';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SUPPORTED_AFFILIATE_PLATFORMS = new Set(['shopee', 'shein']);
@@ -34,7 +35,7 @@ export function mapCatalogProduct(row: any): Product | null {
     platform: offer.platform.code as Product['platform'],
     affiliateUrl: `${API_BASE_URL}/api/catalog/offers/${offer.id}/go`,
     affiliateOfferId: offer.id,
-    images: [image], category: categories[row.category] || row.category || 'Outros',
+    images: [image], category: resolveProductCategory(categories[row.category] || row.category, row.title, row.description || ''),
     rating: 0, reviewCount: 0, reviews: [], isAchadinho: true,
     stockUnits: stock != null && Number.isInteger(stock) && stock >= 0 ? stock : null,
     isVerified: false, isFastShipping: offer.isFastShipping === true,
