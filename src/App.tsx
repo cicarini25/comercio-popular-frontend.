@@ -109,6 +109,15 @@ export default function App() {
   // Navigation & Filters
   const [selectedCategory, setSelectedCategory] = useState('Todas as Categorias');
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryScrollRequest, setCategoryScrollRequest] = useState(0);
+
+  useEffect(() => {
+    if (categoryScrollRequest === 0 || activeTab !== 'home') return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById('category-products-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [categoryScrollRequest, activeTab]);
 
   // Dynamic price bounds of full catalog and Price Range Filter State
   const catalogMinPrice = useMemo(() => {
@@ -513,6 +522,7 @@ export default function App() {
         selectedCategory={selectedCategory}
         onSelectCategory={(cat) => {
           setSelectedCategory(cat);
+          setCategoryScrollRequest((request) => request + 1);
           setActiveTab('home');
         }}
         onLogout={() => { logout(); navigate('/'); }}
@@ -615,6 +625,7 @@ export default function App() {
                 matchingCount={filteredProducts.length}
               />
 
+              <div id="category-products-results" className="scroll-mt-28 space-y-4">
               {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
               {catalogError && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
                 <p>{catalogError}</p><button className="underline font-bold" onClick={() => setCatalogRetry(n => n + 1)}>Tentar novamente</button>
@@ -658,6 +669,7 @@ export default function App() {
                   </button>
                 </div>
               ) : null}
+              </div>
             </section>
           </div>
         )}
