@@ -6,11 +6,19 @@ import App from './App.tsx';
 import './index.css';
 import { setupServiceWorker } from './registerSW';
 import ShopeeImportAdmin from './components/ShopeeImportAdmin';
+import SheinImportAdmin from './components/SheinImportAdmin';
 
 setupServiceWorker();
 
+const currentPath = window.location.pathname.replace(/\/+$/, '');
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter><AuthProvider>{window.location.pathname.replace(/\/+$/, '') === '/admin/importar-shopee' ? <ShopeeImportAdmin /> : <App />}</AuthProvider></BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        {currentPath === '/admin/importar-shopee' ? <ShopeeImportAdmin /> :
+          currentPath === '/admin/importar-shein' ? <SheinImportAdmin /> : <App />}
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>,
 );
