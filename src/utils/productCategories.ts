@@ -111,7 +111,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (exact) return exact;
 
   // Some feeds return hierarchical category paths; inspect the most specific segments first.
-  const pathParts = key.split(/\s*(?:>|\/|::)\s*/).filter(Boolean).reverse();
+  const pathParts = raw.split(/[>/|:]+/).map(normalizeKey).filter(Boolean).reverse();
   for (const part of pathParts) {
     const mapped = canonicalCategories.get(part) || categoryAliases[part];
     if (mapped) return mapped;
