@@ -482,6 +482,7 @@ export const CATEGORIES = [
   'TVs',
   'Calçados',
   'Esportes & Lazer',
+  'Bike Elétrica e Acessórios',
   'Cuidado & Beleza',
   'Alimentos & Bebidas'
 ];
