@@ -540,7 +540,7 @@ export default function App() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-4">
                   <div>
                     <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-display">
-                      Produtos em {selectedCategory}
+                      {selectedCategory}
                     </h1>
                     <p className="text-sm text-neutral-500">
                       {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
