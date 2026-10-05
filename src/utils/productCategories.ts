@@ -102,7 +102,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(panela|frigideira|prato|talher|utensilio de cozinha|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
   if (/(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)/.test(text)) return 'Móveis';
   if (/(ferramenta|furadeira|parafusadeira|torneira|tinta|material de construcao|aparador de cerca|cerca viva|jardinagem)/.test(text)) return 'Casa & Construção';
-  if (/(tenis|sandalia|sapato|chinelo|bota|calcado)/.test(text)) return 'Calçados';
+  if (/(tenis|sandalia|sapato|chinelo|chuteira|bota|calcado)/.test(text)) return 'Calçados';
   if (/(academia|halter|esteira|bicicleta|camping|esporte|fitness|bola de futebol)/.test(text)) return 'Esportes & Lazer';
   if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza|monitor de pressao|aparelho de pressao)/.test(text)) return 'Cuidado & Beleza';
   if (/(cafe|cha|alimento|bebida|suplemento|chocolate|mantimento)/.test(text)) return 'Alimentos & Bebidas';
@@ -121,6 +121,9 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const raw = typeof category === 'string' ? category.trim() : '';
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
+  const inferred = inferFromText(title, description);
+  const specificCategories = new Set(['Brinquedos', 'Calçados', 'Pets', 'Instrumentos Musicais']);
+  if (inferred && (specificCategories.has(inferred) || !exact)) return inferred;
   if (exact) return exact;
 
   // Some feeds return hierarchical category paths; inspect the most specific segments first.
@@ -130,5 +133,5 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     if (mapped) return mapped;
   }
 
-  return inferFromText(title, description) || raw || 'Outros';
+  return inferred || raw || 'Outros';
 }
