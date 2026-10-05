@@ -1,4 +1,4 @@
-import { fetchAffiliateCatalog } from './services/catalog';
+import { fetchAffiliateCatalog, resolveAffiliateRedirect } from './services/catalog';
 import { CatalogProductDetail } from './components/products/CatalogProductDetail';
 import { mapApiUser } from './services/api';
 import { useAuth } from './context/AuthContext';
@@ -30,6 +30,8 @@ import { formatCurrency } from './utils/formatters';
 import { Flame, Store, Sparkles, Filter, CheckCircle2, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { notifyWishlistPriceDrop } from './services/notificationService';
+
+const PENDING_AFFILIATE_KEY = 'cp_pending_affiliate_product';
 
 export default function App() {
   // Products catalog
@@ -135,6 +137,27 @@ export default function App() {
   const isSellerDashboardOpen = location.pathname === '/vendedor';
   const setIsSellerDashboardOpen = (open: boolean) => navigate(open ? '/vendedor' : '/lojas');
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
+
+  useEffect(() => {
+    if (!user || loading || affiliateProduct) return;
+    const pendingValue = sessionStorage.getItem(PENDING_AFFILIATE_KEY);
+    if (!pendingValue) return;
+    let storedProduct: Product | null = null;
+    try {
+      const parsed = JSON.parse(pendingValue) as Product;
+      if (parsed && typeof parsed.id === 'string' && typeof parsed.title === 'string' && typeof parsed.affiliateUrl === 'string') {
+        storedProduct = parsed;
+      }
+    } catch {
+      sessionStorage.removeItem(PENDING_AFFILIATE_KEY);
+      return;
+    }
+    const pendingProduct = products.find((product) => product.id === storedProduct?.id) || storedProduct;
+    if (pendingProduct) {
+      sessionStorage.removeItem(PENDING_AFFILIATE_KEY);
+      setAffiliateProduct(pendingProduct);
+    }
+  }, [user, loading, products, affiliateProduct]);
 
   // Direct product URL deep-linking support (?produto=... or #produto=...)
   useEffect(() => {
@@ -404,8 +427,20 @@ export default function App() {
     setCartItems((prev) => prev.filter((item) => item.product.id !== productId));
   };
 
+  const handleAffiliateClick = (product: Product) => {
+    if (!product.affiliateUrl || loading) return;
+    if (!user) {
+      sessionStorage.setItem(PENDING_AFFILIATE_KEY, JSON.stringify(product));
+      setAffiliateProduct(null);
+      setSelectedProduct(null);
+      navigate('/cadastro');
+      return;
+    }
+    setAffiliateProduct(product);
+  };
+
   const handleBuyNow = (product: Product) => {
-    if (product.platform !== "parceiro") { setAffiliateProduct(product); return; }
+    if (product.platform !== "parceiro") { handleAffiliateClick(product); return; }
     handleAddToCart(product, 1);
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
@@ -517,7 +552,7 @@ export default function App() {
               products={products}
               onAddToCart={handleAddToCart}
               onViewDetails={setSelectedProduct}
-              onAffiliateClick={setAffiliateProduct}
+              onAffiliateClick={handleAffiliateClick}
               wishlistIds={wishlistIds}
               onToggleFavorite={handleToggleFavorite}
             />
@@ -595,7 +630,7 @@ export default function App() {
                       onToggleFavorite={handleToggleFavorite}
                       onAddToCart={handleAddToCart}
                       onViewDetails={setSelectedProduct}
-                      onDirectAffiliateClick={setAffiliateProduct}
+                      onDirectAffiliateClick={handleAffiliateClick}
                     />
                   ))}
                 </div>
@@ -633,7 +668,7 @@ export default function App() {
               products={products}
               onAddToCart={handleAddToCart}
               onViewDetails={setSelectedProduct}
-              onAffiliateClick={setAffiliateProduct}
+              onAffiliateClick={handleAffiliateClick}
               isDedicatedPage={true}
               wishlistIds={wishlistIds}
               onToggleFavorite={handleToggleFavorite}
@@ -674,7 +709,7 @@ export default function App() {
             onAddToCart={handleAddToCart}
             onAddAllToCart={handleAddAllWishlistToCart}
             onViewDetails={setSelectedProduct}
-            onDirectAffiliateClick={setAffiliateProduct}
+            onDirectAffiliateClick={handleAffiliateClick}
             onExploreProducts={() => {
               setActiveTab('achadinhos');
               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -709,7 +744,14 @@ export default function App() {
 
       {/* Product Detail Modal */}
       {selectedProduct?.catalogSource === 'api' && (
-        <CatalogProductDetail product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+        <CatalogProductDetail
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAffiliateClick={(product) => {
+            setSelectedProduct(null);
+            handleAffiliateClick(product);
+          }}
+        />
       )}
       {selectedProduct && selectedProduct.catalogSource !== 'api' && (
         <ProductDetailModal
@@ -721,7 +763,7 @@ export default function App() {
           onBuyNow={handleBuyNow}
           onAffiliateRedirect={(prod) => {
             setSelectedProduct(null);
-            setAffiliateProduct(prod);
+            handleAffiliateClick(prod);
           }}
           priceAlerts={priceAlerts}
           onSavePriceAlert={handleSavePriceAlert}
@@ -738,6 +780,7 @@ export default function App() {
         <AffiliateModal
           product={affiliateProduct}
           onClose={() => setAffiliateProduct(null)}
+          onOpenStore={resolveAffiliateRedirect}
         />
       )}
 
@@ -767,8 +810,15 @@ export default function App() {
       {isAuthOpen && (
         <AuthModal
           isOpen={isAuthOpen}
-          onClose={() => setIsAuthOpen(false)}
+          onClose={() => {
+            sessionStorage.removeItem(PENDING_AFFILIATE_KEY);
+            setSelectedProduct(null);
+            setIsAuthOpen(false);
+          }}
           initialMode={location.pathname === '/cadastro' ? 'signup' : 'login'}
+          message={sessionStorage.getItem(PENDING_AFFILIATE_KEY)
+            ? 'Entre ou crie sua conta para liberar esta oferta e continuar para a loja parceira.'
+            : undefined}
           onSuccess={() => {
             if (!['/conta', '/vendedor'].includes(location.pathname)) navigate('/');
           }}

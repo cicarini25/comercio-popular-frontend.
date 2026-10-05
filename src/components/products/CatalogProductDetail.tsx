@@ -4,7 +4,7 @@ import { Product } from '../../types';
 import { formatCurrency } from '../../utils/formatters';
 import { PLATFORM_INFO } from '../../data/mockProducts';
 
-export function CatalogProductDetail({ product, onClose }: { product: Product; onClose: () => void }) {
+export function CatalogProductDetail({ product, onClose, onAffiliateClick }: { product: Product; onClose: () => void; onAffiliateClick: (product: Product) => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     dialog.current?.showModal();
@@ -22,8 +22,8 @@ export function CatalogProductDetail({ product, onClose }: { product: Product; o
         {product.originalPrice && <p className="line-through text-neutral-500">{formatCurrency(product.originalPrice)}</p>}
         <p className="text-3xl font-bold text-teal-800">{formatCurrency(product.price)}</p>
         <p className="text-sm text-neutral-600">Preço informado no catálogo. Confirme preço final, disponibilidade, variações, frete e cupons na {platformName}.</p>
-        {product.stockUnits === 0 ? <p>Oferta indisponível.</p> : <a href={product.affiliateUrl} target="_blank" rel="sponsored noopener noreferrer"
-          className="flex items-center justify-center gap-2 bg-coral-600 text-white font-bold p-3 rounded-xl">Comprar na {platformName} <ExternalLink size={18} /></a>}
+        {product.stockUnits === 0 ? <p>Oferta indisponível.</p> : <button type="button" onClick={() => onAffiliateClick(product)}
+          className="flex w-full items-center justify-center gap-2 bg-coral-600 text-white font-bold p-3 rounded-xl">Comprar na {platformName} <ExternalLink size={18} /></button>}
         <p className="text-xs text-neutral-500">A compra e o pagamento são realizados na {platformName}. O Comércio Popular pode receber comissão, sem custo adicional para você.</p>
         <p className="text-sm text-neutral-600">Consulte as avaliações do produto na {platformName}.</p>
       </div>
