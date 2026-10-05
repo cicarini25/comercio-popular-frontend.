@@ -175,7 +175,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           />
 
           {/* Desktop Search Bar with Category Dropdown & Voice Search */}
-          <div className="hidden lg:flex min-w-0 flex-1 max-w-2xl items-center">
+          <div className="hidden 2xl:flex min-w-0 flex-1 max-w-2xl items-center">
             <div className="relative w-full">
               <div
                 className={`relative w-full min-w-0 flex items-center bg-neutral-100 border rounded-xl transition-all ${
@@ -742,7 +742,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile Search Bar with Voice Search */}
-        <div className="mt-2.5 lg:hidden relative">
+        <div className="mt-2.5 2xl:hidden relative">
           <div
             className={`relative flex items-center bg-neutral-100 border rounded-xl transition-all ${
               isListening
