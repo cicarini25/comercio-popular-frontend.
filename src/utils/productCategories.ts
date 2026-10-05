@@ -99,8 +99,8 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(fone de ouvido|headphone|headset|earbud|caixa de som|soundbar|alto falante)/.test(text)) return 'Fones & Headphones';
   if (/(playstation|xbox|nintendo|videogame|video game|console gamer|joystick|controle gamer)/.test(text)) return 'Games';
   if (/(geladeira|refrigerador|fogao|microondas|micro ondas|lava roupa|lavadora|air fryer|ar condicionado)/.test(text)) return 'Eletrodomésticos';
-  if (/(panela|frigideira|prato|talher|utensilio de cozinha|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
   if (/(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)/.test(text)) return 'Móveis';
+  if (/(panela|frigideira|prato|talher|utensilio de cozinha|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
   if (/(ferramenta|furadeira|parafusadeira|torneira|tinta|material de construcao|aparador de cerca|cerca viva|jardinagem)/.test(text)) return 'Casa & Construção';
   if (/(tenis|sandalia|sapato|chinelo|chuteira|bota|calcado)/.test(text)) return 'Calçados';
   if (/(bicicleta|bike|e bike|ebike|scooter).{0,45}(eletric|bateria|motor)|bateria.{0,35}(bicicleta|bike|scooter)|acessorio.{0,35}(bicicleta|bike eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
@@ -123,7 +123,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const inferred = inferFromText(title, description);
-  const specificCategories = new Set(['Brinquedos', 'Calçados', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios']);
+  const specificCategories = new Set(['Brinquedos', 'Calçados', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios', 'Móveis']);
   if (inferred && (specificCategories.has(inferred) || !exact)) return inferred;
   if (exact) return exact;
 
