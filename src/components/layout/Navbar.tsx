@@ -165,7 +165,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Main Bar */}
       <div className="max-w-7xl mx-auto px-4 py-3 sm:py-3.5">
-        <div className="flex items-center justify-between gap-3 sm:gap-6">
+        <div className="flex items-center justify-between gap-3 lg:gap-3 2xl:gap-6">
           {/* Logo */}
           <Logo
             onClick={() => {
@@ -175,7 +175,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           />
 
           {/* Desktop Search Bar with Category Dropdown & Voice Search */}
-          <div className="hidden lg:flex flex-1 max-w-2xl items-center">
+          <div className="hidden lg:flex min-w-0 flex-1 max-w-2xl items-center">
             <div className="relative w-full">
               <div
                 className={`relative w-full flex items-center bg-neutral-100 border rounded-xl transition-all ${
@@ -324,7 +324,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* User & Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2 2xl:gap-3">
             {/* Seller Quick Action Button */}
             <button
               id="btn-nav-seller"
@@ -714,7 +714,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="btn-cart-header"
               onClick={onOpenCart}
               aria-label="Abrir sacola de compras"
-              className="relative flex items-center gap-2 p-2 sm:px-3.5 sm:py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs sm:text-sm transition-colors cursor-pointer shadow-xs"
+              className="relative flex shrink-0 items-center gap-2 p-2 sm:px-3.5 sm:py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs sm:text-sm transition-colors cursor-pointer shadow-xs"
             >
               <ShoppingCart size={18} />
               <span className="hidden md:inline">Sacola</span>
