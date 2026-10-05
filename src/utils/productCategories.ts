@@ -2,7 +2,7 @@ import { CATEGORIES } from '../data/mockProducts';
 
 const normalizeKey = (value: unknown) =>
   typeof value === 'string'
-    ? value.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+    ? value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
     : '';
 
 const canonicalCategories = new Map(
@@ -74,7 +74,7 @@ const categoryAliases: Record<string, string> = {
 };
 
 const inferFromText = (title: string, description: string): string | undefined => {
-  const text = normalizeKey(`${title} ${description}`);
+  const text = normalizeKey(title + ' ' + description);
 
   if (/(brinqued|toys?|bonec|lego|pelucia|quebra cabeca|massinha de modelar|playset|carrinho infantil)/.test(text)) return 'Brinquedos';
   if (/(moda infantil|roupa infantil|roupas infantis|vestido infantil|conjunto infantil|roupa de bebe|roupas de bebe)/.test(text)) return 'Moda Infantil';
@@ -111,7 +111,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (exact) return exact;
 
   // Some feeds return hierarchical category paths; inspect the most specific segments first.
-  const pathParts = key.split(/\\s*(?:>|\\/|::)\\s*/).filter(Boolean).reverse();
+  const pathParts = key.split(/\s*(?:>|\/|::)\s*/).filter(Boolean).reverse();
   for (const part of pathParts) {
     const mapped = canonicalCategories.get(part) || categoryAliases[part];
     if (mapped) return mapped;
