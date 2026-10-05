@@ -86,6 +86,10 @@ const categoryAliases: Record<string, string> = {
 const inferFromText = (title: string, description: string): string | undefined => {
   const text = normalizeKey(title + ' ' + description);
 
+  if (/(coala home|odorizante|aromatizante|difusor de aromas|home spray|antimofo|evita mofo|desumidificador|limpeza|limpador)/.test(text)) return 'Utilidades';
+  if (/(relogio despertador|despertador|relogio de mesa)/.test(text)) return 'Utilidades';
+  if (/(vela.{0,25}(filtro de barro|filtro de agua)|filtro de barro.{0,25}vela)/.test(text)) return 'Casa & Cozinha';
+  if (/(caminhao.{0,35}(engolir|dinossauro)|dinossauro.{0,35}(caminhao|carros))/.test(text)) return 'Brinquedos';
   if (/(brinqued|toys?|bonec|lego|pelucia|quebra cabeca|massinha de modelar|playset|carrinho infantil)/.test(text)) return 'Brinquedos';
   if (/(petisco|racao|coleira|peitoral|cachorro|cao\b|gato\b|animal de estimacao|produto pet|pets?)/.test(text)) return 'Pets';
   if (/(instrumento musical|violino|violao|guitarra|ukulele|espaleira|cavaquinho|bateria musical|teclado musical)/.test(text)) return 'Instrumentos Musicais';
@@ -103,9 +107,9 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(panela|frigideira|prato|talher|utensilio de cozinha|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
   if (/(ferramenta|furadeira|parafusadeira|torneira|tinta|material de construcao|aparador de cerca|cerca viva|jardinagem)/.test(text)) return 'Casa & Construção';
   if (/(tenis|sandalia|sapato|chinelo|chuteira|bota|calcado)/.test(text)) return 'Calçados';
-  if (/(bicicleta|bike|e bike|ebike|scooter).{0,45}(eletric|bateria|motor)|bateria.{0,35}(bicicleta|bike|scooter)|acessorio.{0,35}(bicicleta|bike eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
+  if (/(electric scooter|scooter eletrica)/.test(text) || /(bicicleta|bike|e bike|ebike|scooter).{0,45}(eletric|bateria|motor)|bateria.{0,35}(bicicleta|bike|scooter)|acessorio.{0,35}(bicicleta|bike eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
   if (/(academia|halter|esteira|bicicleta|camping|esporte|fitness|bola de futebol)/.test(text)) return 'Esportes & Lazer';
-  if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza|monitor de pressao|aparelho de pressao)/.test(text)) return 'Cuidado & Beleza';
+  if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza|monitor de pressao|aparelho de pressao|manicure|unhas?|esmalte|gel uv|pinceis)/.test(text)) return 'Cuidado & Beleza';
   if (/(cafe|cha|alimento|bebida|suplemento|chocolate|mantimento)/.test(text)) return 'Alimentos & Bebidas';
   if (/(carro|automotivo|moto|veiculo|scooter|patinete eletrico|acessorio automotivo)/.test(text)) return 'Automotivo';
   if (/(utilidade|organizador|selador|limpeza|armazenamento|pote hermetico)/.test(text)) return 'Utilidades';
@@ -127,7 +131,13 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
 
   // O título do produto é o melhor sinal para corrigir categorias genéricas erradas do feed.
   const titleCategory = inferFromText(title, '');
-  const titleDrivenCategories = new Set(['Moda Feminina', 'Moda Masculina', 'Moda Infantil', 'Calçados', 'Casa & Cozinha']);
+  const titleDrivenCategories = new Set([
+    'Brinquedos', 'Pets', 'Instrumentos Musicais', 'Moda Feminina', 'Moda Masculina', 'Moda Infantil',
+    'TVs', 'Notebook', 'Tecnologia', 'Computadores', 'Smartphones', 'Acessórios para celulares',
+    'Fones & Headphones', 'Games', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Casa & Construção',
+    'Calçados', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
+    'Automotivo', 'Utilidades',
+  ]);
   if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
   const inferred = inferFromText(title, description);
