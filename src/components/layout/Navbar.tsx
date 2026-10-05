@@ -750,6 +750,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'border-neutral-200'
             }`}
           >
+            <CategoryPicker value={selectedCategory} onChange={onSelectCategory} compact />
             <Search size={16} className="text-neutral-400 ml-3 shrink-0" />
             <input
               id="mobile-search-input"
@@ -761,7 +762,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-transparent px-3 py-2 text-sm outline-none"
+              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm outline-none"
             />
             {searchQuery && (
               <button
