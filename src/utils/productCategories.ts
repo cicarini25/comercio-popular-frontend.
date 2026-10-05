@@ -127,7 +127,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
 
   // O título do produto é o melhor sinal para corrigir categorias genéricas erradas do feed.
   const titleCategory = inferFromText(title, '');
-  const titleDrivenCategories = new Set(['Moda Feminina', 'Moda Masculina', 'Moda Infantil', 'Calçados']);
+  const titleDrivenCategories = new Set(['Moda Feminina', 'Moda Masculina', 'Moda Infantil', 'Calçados', 'Casa & Cozinha']);
   if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
   const inferred = inferFromText(title, description);
