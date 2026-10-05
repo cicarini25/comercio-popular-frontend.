@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import {
   readSheinCsv,
   sendSheinFeed,
@@ -24,7 +24,7 @@ export default function SheinImportAdmin() {
     setFinished(false);
   }
 
-  async function prepare(event: React.FormEvent) {
+  async function prepare(event: FormEvent) {
     event.preventDefault();
     reset();
     setBusy(true);
@@ -68,7 +68,7 @@ export default function SheinImportAdmin() {
     link.href = url;
     link.download = 'modelo-importacao-shein.csv';
     link.click();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   const inputClass = 'block w-full rounded-xl border border-slate-300 bg-white p-3 mt-2 text-sm';
@@ -139,7 +139,7 @@ export default function SheinImportAdmin() {
 
         {!!preview.length && (
           <section className="mt-6 rounded-2xl border bg-white p-5">
-            <h2 className="text-xl font-bold">Prévia: {preview.length === items.length ? preview.length : items.length} produtos</h2>
+            <h2 className="text-xl font-bold">Prévia: {items.length} produtos</h2>
             <p className="mt-2 text-sm text-slate-600">
               Revise os dados abaixo. A gravação cria ou atualiza os produtos no catálogo e suas ofertas afiliadas.
             </p>
