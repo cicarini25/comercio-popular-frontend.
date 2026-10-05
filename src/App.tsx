@@ -25,6 +25,7 @@ import { PriceRangeSlider } from './components/products/PriceRangeSlider';
 
 import { Product, CartItem, User, Order, SellerPlan, PriceAlert, ProductReview } from './types';
 import { CATEGORIES } from './data/mockProducts';
+import { resolveProductCategory } from './utils/productCategories';
 import { getOrGenerateReviews } from './data/mockReviews';
 import { formatCurrency } from './utils/formatters';
 import { Flame, Store, Sparkles, Filter, CheckCircle2, SlidersHorizontal, RotateCcw } from 'lucide-react';
@@ -474,7 +475,7 @@ export default function App() {
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchesCategory =
-        selectedCategory === 'Todas as Categorias' || p.category === selectedCategory;
+        selectedCategory === 'Todas as Categorias' || resolveProductCategory(p.category, p.title, p.description) === selectedCategory;
       const q = searchQuery.toLowerCase();
       const matchesSearch =
         searchQuery === '' ||
