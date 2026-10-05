@@ -123,7 +123,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
-  if (/(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)/.test(titleKey)) return 'Móveis';
+  if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey)) return 'Móveis';
 
   const inferred = inferFromText(title, description);
   const specificCategories = new Set(['Brinquedos', 'Calçados', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios', 'Móveis']);
