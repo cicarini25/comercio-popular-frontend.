@@ -47,6 +47,16 @@ const categoryAliases: Record<string, string> = {
   'audio equipment': 'Aparelhos de Som',
   'headphones': 'Fones & Headphones',
   'earphones': 'Fones & Headphones',
+  'women clothes': 'Moda Feminina',
+  'men clothes': 'Moda Masculina',
+  'baby kids fashion': 'Moda Infantil',
+  'pets animals': 'Pets',
+  'pet supplies': 'Pets',
+  'pet accessories': 'Pets',
+  'animal supplies': 'Pets',
+  'musical instruments': 'Instrumentos Musicais',
+  'music instruments': 'Instrumentos Musicais',
+  'instruments': 'Instrumentos Musicais',
   'automotive': 'Automotivo',
   'car accessories': 'Automotivo',
   'mens clothing': 'Moda Masculina',
@@ -77,23 +87,26 @@ const inferFromText = (title: string, description: string): string | undefined =
   const text = normalizeKey(title + ' ' + description);
 
   if (/(brinqued|toys?|bonec|lego|pelucia|quebra cabeca|massinha de modelar|playset|carrinho infantil)/.test(text)) return 'Brinquedos';
+  if (/(petisco|racao|coleira|peitoral|cachorro|cao\b|gato\b|animal de estimacao|produto pet|pets?)/.test(text)) return 'Pets';
+  if (/(instrumento musical|violino|violao|guitarra|ukulele|espaleira|cavaquinho|bateria musical|teclado musical)/.test(text)) return 'Instrumentos Musicais';
   if (/(moda infantil|roupa infantil|roupas infantis|vestido infantil|conjunto infantil|roupa de bebe|roupas de bebe)/.test(text)) return 'Moda Infantil';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(notebook|laptop|chromebook)/.test(text)) return 'Notebook';
+  if (/(camera de seguranca|camera wi fi|camera wifi)/.test(text)) return 'Tecnologia';
   if (/(computador|desktop|pc gamer|placa mae|placa de video|memoria ram)/.test(text)) return 'Computadores';
   if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
   if (/(capa para celular|capinha|pelicula para celular|carregador de celular|acessorio para celular)/.test(text)) return 'Acessórios para celulares';
   if (/(fone de ouvido|headphone|headset|earbud|caixa de som|soundbar|alto falante)/.test(text)) return 'Fones & Headphones';
   if (/(playstation|xbox|nintendo|videogame|video game|console gamer|joystick|controle gamer)/.test(text)) return 'Games';
   if (/(geladeira|refrigerador|fogao|microondas|micro ondas|lava roupa|lavadora|air fryer|ar condicionado)/.test(text)) return 'Eletrodomésticos';
-  if (/(panela|frigideira|prato|talher|utensilio de cozinha|cozinha|garrafa termica|cafeteira)/.test(text)) return 'Casa & Cozinha';
+  if (/(panela|frigideira|prato|talher|utensilio de cozinha|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
   if (/(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)/.test(text)) return 'Móveis';
-  if (/(ferramenta|furadeira|parafusadeira|torneira|tinta|material de construcao)/.test(text)) return 'Casa & Construção';
-  if (/(tenis|sandalia|sapato|chinelo|bota|calcado)/.test(text)) return 'Calçados';
+  if (/(ferramenta|furadeira|parafusadeira|torneira|tinta|material de construcao|aparador de cerca|cerca viva|jardinagem)/.test(text)) return 'Casa & Construção';
+  if (/(tenis|sandalia|sapato|chinelo|chuteira|bota|calcado)/.test(text)) return 'Calçados';
   if (/(academia|halter|esteira|bicicleta|camping|esporte|fitness|bola de futebol)/.test(text)) return 'Esportes & Lazer';
-  if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza)/.test(text)) return 'Cuidado & Beleza';
+  if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza|monitor de pressao|aparelho de pressao)/.test(text)) return 'Cuidado & Beleza';
   if (/(cafe|cha|alimento|bebida|suplemento|chocolate|mantimento)/.test(text)) return 'Alimentos & Bebidas';
-  if (/(carro|automotivo|moto|veiculo|acessorio automotivo)/.test(text)) return 'Automotivo';
+  if (/(carro|automotivo|moto|veiculo|scooter|patinete eletrico|acessorio automotivo)/.test(text)) return 'Automotivo';
   if (/(utilidade|organizador|selador|limpeza|armazenamento|pote hermetico)/.test(text)) return 'Utilidades';
   if (/(camisa|camiseta|calca|blusa|saia|vestido|roupa|jaqueta)/.test(text)) {
     if (/(masculin|homem|men\b)/.test(text)) return 'Moda Masculina';
@@ -108,6 +121,9 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const raw = typeof category === 'string' ? category.trim() : '';
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
+  const inferred = inferFromText(title, description);
+  const specificCategories = new Set(['Brinquedos', 'Calçados', 'Pets', 'Instrumentos Musicais']);
+  if (inferred && (specificCategories.has(inferred) || !exact)) return inferred;
   if (exact) return exact;
 
   // Some feeds return hierarchical category paths; inspect the most specific segments first.
@@ -117,5 +133,5 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     if (mapped) return mapped;
   }
 
-  return inferFromText(title, description) || raw || 'Outros';
+  return inferred || raw || 'Outros';
 }

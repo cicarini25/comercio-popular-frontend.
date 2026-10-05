@@ -1,8 +1,8 @@
 import React, {useRef} from 'react';
-import {Grid2X2, Package, CookingPot, Hammer, Refrigerator, Armchair, Cpu, Gamepad2, Monitor, Laptop, Smartphone, Cable, Speaker, Headphones, Car, Shirt, Baby, ToyBrick, Tv, Footprints, Sparkles, Coffee, ChevronDown} from 'lucide-react';
+import {Grid2X2, Package, CookingPot, Hammer, Refrigerator, Armchair, Cpu, Gamepad2, Monitor, Laptop, Smartphone, Cable, Speaker, Headphones, Music, PawPrint, Car, Shirt, Baby, ToyBrick, Tv, Footprints, Sparkles, Coffee, ChevronDown} from 'lucide-react';
 import {CATEGORIES} from '../../data/mockProducts';
 const icons:Record<string,React.ElementType>={
-'Todas as Categorias':Grid2X2,'Utilidades':Package,'Casa & Cozinha':CookingPot,'Casa & Construção':Hammer,'Eletrodomésticos':Refrigerator,'Móveis':Armchair,'Tecnologia':Cpu,'Games':Gamepad2,'Computadores':Monitor,'Notebook':Laptop,'Smartphones':Smartphone,'Acessórios para celulares':Cable,'Aparelhos de Som':Speaker,'Fones & Headphones':Headphones,'Automotivo':Car,'Moda Masculina':Shirt,'Moda Feminina':Shirt,'Moda Infantil':Baby,'Brinquedos':ToyBrick,'TVs':Tv,'Calçados':Footprints,'Cuidado & Beleza':Sparkles,'Alimentos & Bebidas':Coffee};
+'Todas as Categorias':Grid2X2,'Utilidades':Package,'Casa & Cozinha':CookingPot,'Casa & Construção':Hammer,'Eletrodomésticos':Refrigerator,'Móveis':Armchair,'Tecnologia':Cpu,'Games':Gamepad2,'Computadores':Monitor,'Notebook':Laptop,'Smartphones':Smartphone,'Acessórios para celulares':Cable,'Aparelhos de Som':Speaker,'Fones & Headphones':Headphones,'Instrumentos Musicais':Music,'Automotivo':Car,'Pets':PawPrint,'Moda Masculina':Shirt,'Moda Feminina':Shirt,'Moda Infantil':Baby,'Brinquedos':ToyBrick,'TVs':Tv,'Calçados':Footprints,'Cuidado & Beleza':Sparkles,'Alimentos & Bebidas':Coffee};
 const categoryColors: Record<string, [string, string]> = {
  'Todas as Categorias':['#0f766e','#ccfbf1'], 'Utilidades':['#b45309','#fef3c7'],
  'Casa & Cozinha':['#c2410c','#ffedd5'], 'Casa & Construção':['#a16207','#fef9c3'],
@@ -10,8 +10,8 @@ const categoryColors: Record<string, [string, string]> = {
  'Tecnologia':['#4338ca','#e0e7ff'], 'Games':['#7e22ce','#f3e8ff'],
  'Computadores':['#1d4ed8','#dbeafe'], 'Notebook':['#0369a1','#e0f2fe'],
  'Smartphones':['#0e7490','#cffafe'], 'Acessórios para celulares':['#6d28d9','#ede9fe'],
- 'Aparelhos de Som':['#a21caf','#fae8ff'], 'Fones & Headphones':['#be185d','#fce7f3'],
- 'Automotivo':['#b91c1c','#fee2e2'], 'Moda Masculina':['#1d4ed8','#dbeafe'],
+ 'Aparelhos de Som':['#a21caf','#fae8ff'], 'Fones & Headphones':['#be185d','#fce7f3'], 'Instrumentos Musicais':['#7c3aed','#ede9fe'],
+ 'Automotivo':['#b91c1c','#fee2e2'], 'Pets':['#92400e','#fef3c7'], 'Moda Masculina':['#1d4ed8','#dbeafe'],
  'Moda Feminina':['#be185d','#fce7f3'], 'Moda Infantil':['#c2410c','#ffedd5'],
  'Brinquedos':['#a16207','#fef9c3'], 'TVs':['#4338ca','#e0e7ff'],
  'Calçados':['#047857','#d1fae5'], 'Cuidado & Beleza':['#a21caf','#fae8ff'],
