@@ -109,7 +109,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(cafe|cha|alimento|bebida|suplemento|chocolate|mantimento)/.test(text)) return 'Alimentos & Bebidas';
   if (/(carro|automotivo|moto|veiculo|scooter|patinete eletrico|acessorio automotivo)/.test(text)) return 'Automotivo';
   if (/(utilidade|organizador|selador|limpeza|armazenamento|pote hermetico)/.test(text)) return 'Utilidades';
-  if (/(camisa|camiseta|calca|blusa|saia|vestido|roupa|jaqueta)/.test(text)) {
+  if (/(camisa|camiseta|shorts?|bermuda|calca|blusa|saia|vestido|roupa|jaqueta|cropped|lingerie)/.test(text)) {
     if (/(masculin|homem|men\b)/.test(text)) return 'Moda Masculina';
     if (/(infantil|bebe|crianca|kids)/.test(text)) return 'Moda Infantil';
     return 'Moda Feminina';
@@ -124,6 +124,11 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
   if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey)) return 'Móveis';
+
+  // O título do produto é o melhor sinal para corrigir categorias genéricas erradas do feed.
+  const titleCategory = inferFromText(title, '');
+  const titleDrivenCategories = new Set(['Moda Feminina', 'Moda Masculina', 'Moda Infantil', 'Calçados']);
+  if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
   const inferred = inferFromText(title, description);
   const specificCategories = new Set(['Brinquedos', 'Calçados', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios', 'Móveis']);
