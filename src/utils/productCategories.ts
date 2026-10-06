@@ -57,9 +57,9 @@ const categoryAliases: Record<string, string> = {
   'musical instruments': 'Instrumentos Musicais',
   'music instruments': 'Instrumentos Musicais',
   'instruments': 'Instrumentos Musicais',
-  'automotivo': 'Motos & Acessórios',
-  'automotive': 'Motos & Acessórios',
-  'car accessories': 'Motos & Acessórios',
+  'automotivo': 'MOTOS & ACESSÓRIOS',
+  'automotive': 'MOTOS & ACESSÓRIOS',
+  'car accessories': 'MOTOS & ACESSÓRIOS',
   'mens clothing': 'Moda Masculina',
   'men clothing': 'Moda Masculina',
   'mens fashion': 'Moda Masculina',
@@ -112,7 +112,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(academia|halter|esteira|bicicleta|camping|esporte|fitness|bola de futebol)/.test(text)) return 'Esportes & Lazer';
   if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza|monitor de pressao|aparelho de pressao|manicure|unhas?|esmalte|gel uv|pinceis)/.test(text)) return 'Cuidado & Beleza';
   if (/(cafe|\bcha\b|alimento|bebida|suplemento|chocolate|mantimento)/.test(text)) return 'Alimentos & Bebidas';
-  if (/(carro|automotivo|moto|veiculo|scooter|patinete eletrico|acessorio automotivo)/.test(text)) return 'Motos & Acessórios';
+  if (/(carro|automotivo|moto|veiculo|scooter|patinete eletrico|acessorio automotivo)/.test(text)) return 'MOTOS & ACESSÓRIOS';
   if (/(utilidade|organizador|selador|limpeza|armazenamento|pote hermetico)/.test(text)) return 'Utilidades';
   if (/(camisa|camiseta|shorts?|bermuda|calca|blusa|saia|vestido|roupa|jaqueta|cropped|lingerie)/.test(text)) {
     if (/(masculin|homem|men\b)/.test(text)) return 'Moda Masculina';
@@ -137,7 +137,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     'TVs', 'Notebook', 'Tecnologia', 'Computadores', 'Smartphones', 'Acessórios para celulares',
     'Fones & Headphones', 'Games', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Casa & Construção',
     'Calçados', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
-    'Motos & Acessórios', 'Utilidades',
+    'MOTOS & ACESSÓRIOS', 'Utilidades',
   ]);
   if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
