@@ -952,7 +952,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="rounded-xl transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-                  aria-label={`Abrir ${platform} em nova aba`}
+                  aria-label={platform === 'shein' ? 'Abrir ofertas SHEIN em nova aba (link de afiliado)' : `Abrir ${platform} em nova aba`}
                 >
                   <PlatformLogo platform={platform} className="hover:border-teal-400 hover:shadow-md" />
                 </a>

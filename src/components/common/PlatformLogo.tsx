@@ -28,7 +28,7 @@ export const PLATFORM_LINKS: Record<PlatformId, string> = {
   mercadolivre: 'https://www.mercadolivre.com.br/',
   amazon: 'https://www.amazon.com.br/',
   aliexpress: 'https://pt.aliexpress.com/',
-  shein: 'https://br.shein.com/',
+  shein: 'https://onelink.shein.com/55/6451ng39q848',
   magalu: 'https://www.magazineluiza.com.br/'
 };
 
