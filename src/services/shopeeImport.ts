@@ -1,5 +1,10 @@
 export type FeedItem = Record<string, string>;
 
+export type ShopeeApiSearchResult = {
+  items: FeedItem[];
+  skipped: number;
+};
+
 export const MAX_BULK_ITEMS = 30000;
 export const DEFAULT_QUEUE_CHUNK_SIZE = 500;
 
@@ -64,6 +69,101 @@ export function validAffiliate(value: string): boolean {
     return u.protocol === 'https:' && u.hostname === 's.shopee.com.br' &&
       !u.username && !u.password && !u.port && !u.search && !u.hash && /^\/[A-Za-z0-9]+$/.test(u.pathname);
   } catch { return false; }
+}
+
+export async function searchShopeeOffers(
+  keyword: string,
+  category: string,
+  token: string,
+  requested = 60
+): Promise<ShopeeApiSearchResult> {
+  const searchTerm = keyword.trim();
+  const destinationCategory = category.trim();
+  if (!searchTerm) throw new Error('Informe um termo para buscar produtos na Shopee.');
+  if (!destinationCategory || destinationCategory === 'Todas as Categorias') {
+    throw new Error('Escolha a categoria de destino no site.');
+  }
+  if (!token.trim()) throw new Error('Informe o token administrativo do backend.');
+
+  const target = Math.max(1, Math.min(Number(requested) || 60, 60));
+  const results: any[] = [];
+  const seen = new Set<string>();
+  let page = 1;
+  let hasNextPage = true;
+
+  while (results.length < target && hasNextPage && page <= 3) {
+    const pageLimit = Math.min(50, target - results.length);
+    const query = new URLSearchParams({
+      keyword: searchTerm,
+      page: String(page),
+      limit: String(pageLimit)
+    });
+    const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/search?' + query.toString(), {
+      headers: { Authorization: 'Bearer ' + token.trim() }
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao consultar a API Shopee.');
+    }
+
+    const products = Array.isArray(result.products) ? result.products : [];
+    for (const product of products) {
+      const id = String(product?.externalId || '');
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      results.push(product);
+      if (results.length >= target) break;
+    }
+    hasNextPage = Boolean(result.pageInfo?.hasNextPage);
+    page += 1;
+  }
+
+  const items: FeedItem[] = [];
+  let skipped = 0;
+  for (const product of results) {
+    const id = String(product.externalId || '');
+    const title = String(product.title || '').trim();
+    const price = Number(product.price);
+    const image = String(product.imageUrl || '').trim();
+    const productUrl = String(product.productUrl || '').trim();
+    const affiliateUrl = String(product.affiliateUrl || '').trim();
+    let validProductUrl = false;
+    let validImage = false;
+    try {
+      const url = new URL(productUrl);
+      const match = url.pathname.match(/^\/product\/(\d+)\/(\d+)(?:\/|$)/);
+      validProductUrl = url.protocol === 'https:' && url.hostname === 'shopee.com.br' && match?.[2] === id;
+    } catch { /* A linha será descartada na validação abaixo. */ }
+    try {
+      const url = new URL(image);
+      validImage = url.protocol === 'https:';
+    } catch { /* A linha será descartada na validação abaixo. */ }
+
+    if (!/^\d+$/.test(id) || !title || title.length > 255 || !Number.isFinite(price) || price <= 0 ||
+        !validImage || !validProductUrl || !validAffiliate(affiliateUrl)) {
+      skipped += 1;
+      continue;
+    }
+
+    const originalPrice = Number(product.originalPrice);
+    items.push({
+      itemid: id,
+      title,
+      price: String(Number.isFinite(originalPrice) && originalPrice > price ? originalPrice : price),
+      sale_price: String(price),
+      description: '',
+      global_category1: destinationCategory,
+      shop_name: String(product.shopName || ''),
+      image_link: image,
+      product_link: productUrl,
+      affiliateUrl
+    });
+  }
+
+  if (!items.length) {
+    throw new Error('A API não retornou ofertas completas para esse termo. Tente uma busca mais específica.');
+  }
+  return { items, skipped };
 }
 
 export async function readAffiliateLinks(linksFile: File | null, manual = '') {
@@ -365,4 +465,5 @@ export async function getShopeeJob(token: string, jobId: string): Promise<Shopee
   }
   return result.job as ShopeeJobStatus;
 }
+
 
