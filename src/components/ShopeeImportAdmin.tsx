@@ -43,7 +43,7 @@ export default function ShopeeImportAdmin() {
       }
       setItems(prepared);
       setTotal(prepared.length);
-      setPreview(prepared.slice(0, 50).map((row) => ({
+      setPreview(prepared.map((row) => ({
         id: row.itemid,
         title: row.title,
         price: Number(row.sale_price || row.price),
