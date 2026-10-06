@@ -57,6 +57,7 @@ const categoryAliases: Record<string, string> = {
   'musical instruments': 'Instrumentos Musicais',
   'music instruments': 'Instrumentos Musicais',
   'instruments': 'Instrumentos Musicais',
+  'automotivo': 'Motos & Acessórios',
   'automotive': 'Motos & Acessórios',
   'car accessories': 'Motos & Acessórios',
   'mens clothing': 'Moda Masculina',
