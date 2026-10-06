@@ -473,7 +473,7 @@ export const CATEGORIES = [
   'Aparelhos de Som',
   'Fones & Headphones',
   'Instrumentos Musicais',
-  'Motos & Acessórios',
+  'MOTOS & ACESSÓRIOS',
   'Pets',
   'Moda Masculina',
   'Moda Feminina',
