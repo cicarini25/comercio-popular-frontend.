@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, searchShopeeOffers, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { CATEGORIES } from '../data/mockProducts';
 
 type Preview = { id: string; title: string; price: number; image: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
 
-const API_NOTE = 'Os links devem vir do CSV "BatchProductLinks" / "Offer Link" gerado pela Shopee.';
+const API_NOTE = 'A busca pela API procura pelo nome do produto. A categoria selecionada abaixo define em qual seção do site ele será publicado.';
 
 export default function ShopeeImportAdmin() {
+  const [mode, setMode] = useState<'api' | 'csv'>('api');
+  const [keyword, setKeyword] = useState('');
+  const [targetCategory, setTargetCategory] = useState('');
   const [feed, setFeed] = useState<File | null>(null);
   const [links, setLinks] = useState<File | null>(null);
   const [manual, setManual] = useState('');
@@ -14,23 +18,32 @@ export default function ShopeeImportAdmin() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [preview, setPreview] = useState<Preview[]>([]);
   const [total, setTotal] = useState(0);
+  const [skipped, setSkipped] = useState(0);
   const [jobs, setJobs] = useState<JobView[]>([]);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const reset = () => { setItems([]); setPreview([]); setTotal(0); setJobs([]); setError(''); setSuccess(''); };
+  const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setJobs([]); setError(''); setSuccess(''); };
 
   async function check() {
     reset();
-    setBusy('Lendo o Feed Shopee e cruzando os Item Ids com os Offer Links…');
     try {
-      if (!feed || !token.trim()) throw new Error('Selecione o feed e informe o token administrativo.');
-      const rows = await prepareFeed(feed, links, manual);
-      setBusy('Recuperando imagens dos produtos Shopee…');
-      const withImages = await resolveShopeeImageUrls(rows, token);
-      setItems(withImages);
-      setTotal(withImages.length);
-      setPreview(withImages.slice(0, 50).map((row) => ({
+      let prepared: FeedItem[];
+      if (mode === 'api') {
+        setBusy('Consultando ofertas na API da Shopee e preparando a prévia…');
+        const result = await searchShopeeOffers(keyword, targetCategory, token, 60);
+        prepared = result.items;
+        setSkipped(result.skipped);
+      } else {
+        setBusy('Lendo o Feed Shopee e cruzando os Item Ids com os Offer Links…');
+        if (!feed || !token.trim()) throw new Error('Selecione o feed e informe o token administrativo.');
+        const rows = await prepareFeed(feed, links, manual);
+        setBusy('Recuperando imagens dos produtos Shopee…');
+        prepared = await resolveShopeeImageUrls(rows, token);
+      }
+      setItems(prepared);
+      setTotal(prepared.length);
+      setPreview(prepared.slice(0, 50).map((row) => ({
         id: row.itemid,
         title: row.title,
         price: Number(row.sale_price || row.price),
@@ -107,12 +120,31 @@ export default function ShopeeImportAdmin() {
       <a href="/" className="text-emerald-700 underline">Voltar à vitrine</a>
       <h1 className="text-3xl font-bold mt-6">Importação Shopee em massa</h1>
       <p className="mt-2 text-slate-600">
-        Use o Feed de Produto da Shopee junto do CSV de links em massa. O sistema cruza pelo Item Id e envia os produtos para processamento em fila.
+        Separe os produtos por categoria, confira a prévia e só então envie o lote para o site.
       </p>
-      <p className="mt-1 text-sm text-slate-500">{API_NOTE}</p>
+      <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="Modo de busca">
+        <button type="button" onClick={() => { reset(); setMode('api'); }} aria-pressed={mode === 'api'} className={'rounded-xl px-4 py-2 font-semibold ' + (mode === 'api' ? 'bg-orange-600 text-white' : 'border bg-white text-slate-700')}>
+          Buscar pela API Shopee
+        </button>
+        <button type="button" onClick={() => { reset(); setMode('csv'); }} aria-pressed={mode === 'csv'} className={'rounded-xl px-4 py-2 font-semibold ' + (mode === 'csv' ? 'bg-orange-600 text-white' : 'border bg-white text-slate-700')}>
+          Importar por CSV
+        </button>
+      </div>
+      {mode === 'api' && <p className="mt-2 text-sm text-slate-500">{API_NOTE} Serão preparados até 60 produtos por busca. A API usa o termo informado; ela não seleciona automaticamente a aba de categoria visual da Shopee.</p>}
 
       <form onSubmit={(e) => { e.preventDefault(); void check(); }} className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mt-6">
         <fieldset disabled={!!busy} className="space-y-5 disabled:opacity-60">
+          {mode === 'api' ? <>
+            <label className="block font-semibold">1. Categoria de destino no site
+              <select className={input} required value={targetCategory} onChange={(e) => { reset(); setTargetCategory(e.target.value); }}>
+                <option value="">Selecione a categoria do site</option>
+                {CATEGORIES.filter((category) => category !== 'Todas as Categorias').map((category) => <option key={category} value={category}>{category}</option>)}
+              </select>
+            </label>
+            <label className="block font-semibold">2. Termo para buscar na Shopee
+              <input className={input} required value={keyword} onChange={(e) => { reset(); setKeyword(e.target.value); }} placeholder="Ex.: fone bluetooth" maxLength={100} />
+            </label>
+          </> : <>
           <label className="block font-semibold">1. Feed de produto da Shopee (CSV)
             <input className={input} type="file" accept=".csv,text/csv" required onChange={(e) => { reset(); setFeed(e.target.files?.[0] || null); }} />
             <span className="text-sm font-normal text-slate-500">Esse arquivo fornece imagem, descrição, categoria, preço e demais dados do produto.</span>
@@ -126,6 +158,7 @@ export default function ShopeeImportAdmin() {
           <label className="block font-semibold">Ou informe os IDs e links manualmente <span className="text-sm font-normal text-slate-500">(opcional)</span>
             <textarea className={input} rows={4} value={manual} onChange={(e) => { reset(); setManual(e.target.value); }} placeholder="58217601055 https://s.shopee.com.br/seulink" spellCheck={false} />
           </label>
+          </>}
 
           <label className="block font-semibold">3. Token administrativo
             <input className={input} type="password" autoComplete="off" required value={token} onChange={(e) => { reset(); setToken(e.target.value); }} />
@@ -133,7 +166,7 @@ export default function ShopeeImportAdmin() {
           </label>
 
           <button className="rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold" type="submit">
-            Preparar carga
+            {mode === 'api' ? 'Buscar e preparar prévia' : 'Preparar carga'}
           </button>
         </fieldset>
       </form>
@@ -145,7 +178,9 @@ export default function ShopeeImportAdmin() {
       {!!items.length && !jobs.length && <section className="mt-6 bg-white border rounded-2xl p-5">
         <h2 className="text-xl font-bold">Prévia: {total} produtos</h2>
         <p className="text-sm text-slate-600 mt-2">
+          {mode === 'api' ? <>Categoria de destino: <strong>{targetCategory}</strong>. Busca: <strong>{keyword}</strong>. Revise a lista antes de enviar.{skipped > 0 ? ' ' + skipped + ' oferta(s) incompleta(s) foram ignoradas.' : ''}</> : <>
           O sistema usa o Feed quando encontra o Item Id. Quando o Item Id não está no Feed, usa automaticamente os dados de Item Name, Price, Product Link e Offer Link do CSV de links em massa. Nada foi enviado ao backend ainda.
+          </>}
         </p>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-left text-sm">
@@ -195,3 +230,4 @@ export default function ShopeeImportAdmin() {
     </div>
   </main>;
 }
+
