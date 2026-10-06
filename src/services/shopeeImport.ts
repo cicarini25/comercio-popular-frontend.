@@ -131,12 +131,13 @@ export async function searchShopeeOffers(
     let validImage = false;
     try {
       const url = new URL(productUrl);
-      const match = url.pathname.match(/^\/product\/(\d+)\/(\d+)(?:\/|$)/);
-      validProductUrl = url.protocol === 'https:' && url.hostname === 'shopee.com.br' && match?.[2] === id;
+      const match = url.pathname.match(/^\/product\/(\d+)\/(\d+)$/);
+      validProductUrl = url.protocol === 'https:' && url.hostname === 'shopee.com.br' &&
+        !url.username && !url.password && !url.port && match?.[2] === id;
     } catch { /* A linha será descartada na validação abaixo. */ }
     try {
       const url = new URL(image);
-      validImage = url.protocol === 'https:';
+      validImage = url.protocol === 'https:' && !url.username && !url.password;
     } catch { /* A linha será descartada na validação abaixo. */ }
 
     if (!/^\d+$/.test(id) || !title || title.length > 255 || !Number.isFinite(price) || price <= 0 ||
