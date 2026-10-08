@@ -62,7 +62,7 @@ export default function ShopeeImportAdmin() {
 
     try {
       const created = await enqueueShopeeBulk(items, token);
-      const initial = created.map((job) => ({
+      const initial: JobView[] = created.map((job) => ({
         id: job.id,
         status: job.status,
         requested_count: job.requested,
