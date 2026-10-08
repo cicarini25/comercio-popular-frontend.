@@ -8,6 +8,11 @@ const normalizeKey = (value: unknown) =>
 
 // Categorias definidas para os produtos selecionados dos lotes do feed Shopee.
 const curatedCategoryByTitle = new Map<string, string>([
+  [normalizeKey("Pote herméticos quadrado Ou 800ml Linha Click"), 'Casa & Cozinha'],
+  [normalizeKey("Pote hermético organizador retangular Ou 2,3L Linha Keep"), 'Casa & Cozinha'],
+  [normalizeKey("Porta Tempero Inox Giratório Vidro 12 Potes 360"), 'Casa & Cozinha'],
+  [normalizeKey("espátula de silicone redonda com cabo de madeira resistente para cozinha - oikos"), 'Casa & Cozinha'],
+  [normalizeKey("Tabua de Corte Dupla Face Antiderrapante Carnes Legumes 35cm"), 'Casa & Cozinha'],
   [normalizeKey("Bolsa Pequena Feminina de Mão e Tiracolo Bolsinha Transversal Clutch Mini Bag"), 'Moda Feminina'],
   [normalizeKey("Edredom Cama Quarto Casal Queen Dupla Face Quentinho"), 'Utilidades'],
   [normalizeKey("Kit Cobre Leito Colcha Casal 3 Peças Boutis Estampada Dupla Face Porta Travesseiro Aba Americana"), 'Utilidades'],
