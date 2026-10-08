@@ -8,6 +8,8 @@ const normalizeKey = (value: unknown) =>
 
 // Categorias definidas para os produtos selecionados dos lotes do feed Shopee.
 const curatedCategoryByTitle = new Map<string, string>([
+  [normalizeKey("Caneta esferográfica 1.0 Trilux Colors SM/032ESC10\\343210 com 10 unidades Faber-Castell"), 'Utilidades'],
+  [normalizeKey("Caderno Moleskine | C/Pauta | Floresça Onde Deus Te Plantou"), 'Utilidades'],
   [normalizeKey("Kit 5 Peças Dry Fit 3 Camisetas e 2 Bermudas Alpha Co"), 'Esportes & Lazer'],
   [normalizeKey("Mini Bike Ergometrica Cicloergometro Pedalinho Monitor Lcd"), 'Esportes & Lazer'],
   [normalizeKey("Kit Jogo Frescobol Tênis De Praia 2 Raquetes Madeira + Bola"), 'Esportes & Lazer'],
