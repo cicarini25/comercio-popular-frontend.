@@ -8,6 +8,9 @@ const normalizeKey = (value: unknown) =>
 
 // Categorias definidas para os produtos selecionados dos lotes do feed Shopee.
 const curatedCategoryByTitle = new Map<string, string>([
+  [normalizeKey("Kit 5 Peças Dry Fit 3 Camisetas e 2 Bermudas Alpha Co"), 'Esportes & Lazer'],
+  [normalizeKey("Mini Bike Ergometrica Cicloergometro Pedalinho Monitor Lcd"), 'Esportes & Lazer'],
+  [normalizeKey("Kit Jogo Frescobol Tênis De Praia 2 Raquetes Madeira + Bola"), 'Esportes & Lazer'],
   [normalizeKey("Pote herméticos quadrado Ou 800ml Linha Click"), 'Casa & Cozinha'],
   [normalizeKey("Pote hermético organizador retangular Ou 2,3L Linha Keep"), 'Casa & Cozinha'],
   [normalizeKey("Porta Tempero Inox Giratório Vidro 12 Potes 360"), 'Casa & Cozinha'],
