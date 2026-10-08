@@ -102,6 +102,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(vela.{0,25}(filtro de barro|filtro de agua)|filtro de barro.{0,25}vela)/.test(text)) return 'Casa & Cozinha';
   if (/(caminhao.{0,35}(engolir|dinossauro)|dinossauro.{0,35}(caminhao|carros))/.test(text)) return 'Brinquedos';
   if (/(brinqued|toys?|bonec|lego|pelucia|quebra cabeca|massinha de modelar|playset|carrinho infantil)/.test(text)) return 'Brinquedos';
+  if (/\b(creme facial|hidratante facial|protetor solar|creme para pentear|escova secadora|oleo nutritivo)\b/.test(text)) return 'Cuidado & Beleza';
   if (/\b(petiscos?|racao|racoes|coleiras?|peitoral|cachorros?|cao|caes|gatos?|animal de estimacao|produto pet|pets?)\b/.test(text)) return 'Pets';
   if (/(instrumento musical|violino|violao|guitarra|ukulele|espaleira|cavaquinho|bateria musical|teclado musical)/.test(text)) return 'Instrumentos Musicais';
   if (/(moda infantil|roupa infantil|roupas infantis|vestido infantil|conjunto infantil|roupa de bebe|roupas de bebe)/.test(text)) return 'Moda Infantil';
