@@ -5,6 +5,16 @@ const normalizeKey = (value: unknown) =>
     ? value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
     : '';
 
+
+// Categorias escolhidas pelo administrador para o segundo lote do feed Shopee.
+const curatedCategoryByTitle = new Map<string, string>([
+  [normalizeKey("Edredom Cama Quarto Casal Queen Dupla Face Quentinho"), 'Utilidades'],
+  [normalizeKey("Kit Cobre Leito Colcha Casal 3 Peças Boutis Estampada Dupla Face Porta Travesseiro Aba Americana"), 'Utilidades'],
+  [normalizeKey("Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial"), 'Utilidades'],
+  [normalizeKey("Kit Jogo Pano De Prato Cozinha Copa Cheff Algodão Sortidos"), 'Utilidades'],
+  [normalizeKey("Tapete Sala 1,50x1,00 Peludo 4 Cm De Altura Shaggy Promoção"), 'Utilidades'],
+]);
+
 const canonicalCategories = new Map(
   CATEGORIES.filter((category) => category !== 'Todas as Categorias')
     .map((category) => [normalizeKey(category), category])
@@ -130,6 +140,8 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  const curatedCategory = curatedCategoryByTitle.get(titleKey);
+  if (curatedCategory) return curatedCategory;
   if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey)) return 'Móveis';
 
   // O título do produto é o melhor sinal para corrigir categorias genéricas erradas do feed.
