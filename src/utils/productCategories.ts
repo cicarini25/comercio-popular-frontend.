@@ -8,6 +8,7 @@ const normalizeKey = (value: unknown) =>
 
 // Categorias definidas para os produtos selecionados dos lotes do feed Shopee.
 const curatedCategoryByTitle = new Map<string, string>([
+  [normalizeKey("Bolsa Pequena Feminina de Mão e Tiracolo Bolsinha Transversal Clutch Mini Bag"), 'Moda Feminina'],
   [normalizeKey("Edredom Cama Quarto Casal Queen Dupla Face Quentinho"), 'Utilidades'],
   [normalizeKey("Kit Cobre Leito Colcha Casal 3 Peças Boutis Estampada Dupla Face Porta Travesseiro Aba Americana"), 'Utilidades'],
   [normalizeKey("Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial"), 'Utilidades'],
