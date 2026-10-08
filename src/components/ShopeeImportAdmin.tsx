@@ -104,6 +104,14 @@ export default function ShopeeImportAdmin() {
       const imported = finished.reduce((sum, job) => sum + job.imported_count, 0);
       const updated = finished.reduce((sum, job) => sum + job.updated_count, 0);
       const errors = finished.reduce((sum, job) => sum + job.error_count, 0);
+      const failed = finished.filter((job) => job.status === 'falhou');
+      if (failed.length) {
+        const reason = failed.find((job) => job.metadata?.lastError)?.metadata?.lastError;
+        throw new Error(
+          imported + updated + ' produtos processados. ' + failed.length +
+          ' lote(s) falharam.' + (reason ? ' ' + reason : ' Confira os detalhes abaixo.')
+        );
+      }
       setSuccess(imported + updated + ' produtos processados. ' + errors + ' com erro.');
       setBusy('');
     } catch (e) {
