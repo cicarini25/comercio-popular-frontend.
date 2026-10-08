@@ -1,3 +1,5 @@
+import { CATEGORIES } from '../data/mockProducts';
+
 export type FeedItem = Record<string, string>;
 
 export type ShopeeApiSearchResult = {
@@ -154,6 +156,7 @@ export async function searchShopeeOffers(
       sale_price: String(price),
       description: '',
       global_category1: destinationCategory,
+      categoryOverride: destinationCategory,
       shop_name: String(product.shopName || ''),
       image_link: image,
       product_link: productUrl,
@@ -220,6 +223,7 @@ type AffiliateCatalogRow = {
   seller: string;
   productUrl: string;
   offerLink: string;
+  category: string;
 };
 
 function parseShopeePrice(value: string): number {
@@ -254,7 +258,11 @@ async function readAffiliateCatalogRows(linksFile: File): Promise<Map<string, Af
     const price = parseShopeePrice(get('Price'));
     const productUrl = get('Product Link');
     const offerLink = get('Offer Link');
-    const seller = headers.includes('Nome da loja') ? get('Nome da loja') : '';
+    const seller = get('Shop Name') || get('Nome da loja');
+    const category = get('Categoria') || get('Category');
+    if (category && (!CATEGORIES.includes(category) || category === 'Todas as Categorias')) {
+      throw new Error('Item ' + id + ': categoria de destino inválida no CSV.');
+    }
 
     if (!/^\d+$/.test(id)) throw new Error('Item Id inválido no CSV de links: ' + id);
     if (!title || title.length > 255) throw new Error('Item ' + id + ': nome do produto inválido.');
@@ -284,21 +292,25 @@ async function readAffiliateCatalogRows(linksFile: File): Promise<Map<string, Af
       price,
       seller,
       productUrl: product.href,
-      offerLink
+      offerLink,
+      category
     });
   }
 
   return rows;
 }
 
-export async function prepareFeed(feed: File, linksFile: File | null, manual = '') {
+export async function prepareFeed(feed: File | null, linksFile: File | null, manual = '', destinationCategory = '') {
+  if (destinationCategory && (!CATEGORIES.includes(destinationCategory) || destinationCategory === 'Todas as Categorias')) {
+    throw new Error('Escolha uma categoria de destino válida.');
+  }
   const links = await readAffiliateLinks(linksFile, manual);
   const catalogRows = linksFile ? await readAffiliateCatalogRows(linksFile) : new Map<string, AffiliateCatalogRow>();
   const items: FeedItem[] = [];
   let headers: string[] | null = null;
   const found = new Set<string>();
 
-  for await (const row of csvRows(feed)) {
+  if (feed) for await (const row of csvRows(feed)) {
     if (!headers) {
       headers = row.map((s) => s.trim());
       for (const key of ['itemid', 'title', 'price', 'product_link', 'image_link']) {
@@ -345,7 +357,7 @@ export async function prepareFeed(feed: File, linksFile: File | null, manual = '
         price: String(source.price),
         sale_price: String(source.price),
         description: '',
-        global_category1: 'Moda Feminina',
+        global_category1: source.category || 'Outros',
         shop_name: source.seller,
         image_link: '',
         product_link: source.productUrl,
@@ -355,7 +367,12 @@ export async function prepareFeed(feed: File, linksFile: File | null, manual = '
     }
   }
 
-  return items;
+  return items.map((item) => {
+    const chosenCategory = destinationCategory || catalogRows.get(item.itemid)?.category || '';
+    return chosenCategory
+      ? { ...item, global_category1: chosenCategory, categoryOverride: chosenCategory }
+      : item;
+  });
 }
 
 export function toBulkPayload(items: FeedItem[]): FeedItem[] {
@@ -366,6 +383,7 @@ export function toBulkPayload(items: FeedItem[]): FeedItem[] {
     sale_price: item.sale_price || '',
     description: (item.description || '').slice(0, 5000),
     global_category1: item.global_category1 || '',
+    categoryOverride: item.categoryOverride || '',
     shop_name: item.shop_name || '',
     image_link: item.image_link,
     product_link: item.product_link,
@@ -378,54 +396,62 @@ function apiBaseUrl() {
   return (import.meta.env.VITE_API_URL || 'https://comercio-popular-backend-production.up.railway.app/api').replace(/\/+$/, '').replace(/\/api$/, '');
 }
 
-export async function resolveShopeeImageUrls(items: FeedItem[], token: string): Promise<FeedItem[]> {
+export async function resolveShopeeImageUrls(
+  items: FeedItem[],
+  token: string,
+  onProgress?: (done: number, total: number) => void
+): Promise<FeedItem[]> {
   const missing = items.filter((item) => !String(item.image_link || '').trim());
   if (!missing.length) return items;
   if (!token.trim()) throw new Error('Informe o token administrativo para recuperar as imagens Shopee.');
 
-  const payload = missing.map((item) => ({
-    itemid: item.itemid,
-    product_link: item.product_link,
-    title: item.title
-  }));
+  const resolved = new Map<string, string>();
+  onProgress?.(0, missing.length);
+  for (let start = 0; start < missing.length; start += 100) {
+    const chunk = missing.slice(start, start + 100);
+    const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/resolve-images', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token.trim()
+      },
+      body: JSON.stringify({ items: chunk.map((item) => ({
+        itemid: item.itemid,
+        product_link: item.product_link,
+        title: item.title
+      })) })
+    });
 
-  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/resolve-images', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token.trim()
-    },
-    body: JSON.stringify({ items: payload })
-  });
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao recuperar imagens Shopee.');
+    }
+    const expected = new Set(chunk.map((item) => item.itemid));
+    for (const row of Array.isArray(result.resolved) ? result.resolved : []) {
+      const id = String(row?.itemId || '');
+      const image = String(row?.imageUrl || '');
+      if (!expected.has(id)) continue;
+      try {
+        const url = new URL(image);
+        if (url.protocol === 'https:' && !url.username && !url.password) resolved.set(id, url.href);
+      } catch { /* Imagens inválidas permanecem pendentes. */ }
+    }
 
-  const result = await response.json();
-  if (!response.ok || !result.ok) {
-    throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao recuperar imagens Shopee.');
+    const unresolved = chunk.filter((item) => !resolved.has(item.itemid));
+    if (unresolved.length) {
+      const shown = unresolved.slice(0, 15).map((item) => item.itemid).join(', ');
+      throw new Error(
+        'A Shopee não retornou imagem para ' + unresolved.length +
+        ' produto(s) desta etapa: ' + shown +
+        (unresolved.length > 15 ? ' e mais ' + (unresolved.length - 15) : '') +
+        '. Nada foi publicado. Envie um feed que contenha esses produtos para completar as imagens.'
+      );
+    }
+    onProgress?.(Math.min(start + chunk.length, missing.length), missing.length);
   }
-
-  const resolved = new Map<string, string>(
-    Array.isArray(result.resolved)
-      ? result.resolved
-          .filter((row: any) => row?.itemId && row?.imageUrl)
-          .map((row: any) => [String(row.itemId), String(row.imageUrl)])
-      : []
-  );
-
-  const unresolved = Array.isArray(result.missing) ? result.missing : [];
-  if (unresolved.length || resolved.size !== missing.length) {
-    const ids = unresolved.map((row: any) => String(row.itemId || '')).filter(Boolean);
-    const extra = ids.length ? ': ' + ids.join(', ') : '';
-    throw new Error(
-      'A Shopee não retornou imagem para ' + (missing.length - resolved.size) +
-      ' produto(s)' + extra + '. Nada foi enviado ao backend.'
-    );
-  }
-
-  return items.map((item) => (
-    resolved.has(item.itemid)
-      ? { ...item, image_link: resolved.get(item.itemid)! }
-      : item
-  ));
+  return items.map((item) => resolved.has(item.itemid)
+    ? { ...item, image_link: resolved.get(item.itemid)! }
+    : item);
 }
 
 export async function enqueueShopeeBulk(items: FeedItem[], token: string, chunkSize = DEFAULT_QUEUE_CHUNK_SIZE): Promise<ShopeeJob[]> {
@@ -468,3 +494,14 @@ export async function getShopeeJob(token: string, jobId: string): Promise<Shopee
 }
 
 
+
+export async function repairShopeeCatalogState(token: string) {
+  if (!token.trim()) throw new Error('Informe o token administrativo.');
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/repair-catalog-state', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token.trim() }
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) throw new Error(result.error || 'Falha ao restaurar o catálogo Shopee.');
+  return result;
+}

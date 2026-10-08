@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, searchShopeeOffers, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
+import { resolveProductCategory } from '../utils/productCategories';
 
-type Preview = { id: string; title: string; price: number; image: string };
+type Preview = { id: string; title: string; price: number; image: string; category: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
 
 const API_NOTE = 'A busca pela API procura pelo nome do produto. A categoria selecionada abaixo define em qual seção do site ele será publicado.';
@@ -36,10 +37,13 @@ export default function ShopeeImportAdmin() {
         setSkipped(result.skipped);
       } else {
         setBusy('Lendo o Feed Shopee e cruzando os Item Ids com os Offer Links…');
-        if (!feed || !token.trim()) throw new Error('Selecione o feed e informe o token administrativo.');
-        const rows = await prepareFeed(feed, links, manual);
+        if (!token.trim()) throw new Error('Informe o token administrativo.');
+        if (!feed && !links) throw new Error('Selecione o CSV de links em massa ou um feed com os IDs e links manuais.');
+        const rows = await prepareFeed(feed, links, manual, targetCategory);
         setBusy('Recuperando imagens dos produtos Shopee…');
-        prepared = await resolveShopeeImageUrls(rows, token);
+        prepared = await resolveShopeeImageUrls(rows, token, (done, count) => {
+          setBusy('Recuperando imagens dos produtos Shopee: ' + done + ' de ' + count + '…');
+        });
       }
       setItems(prepared);
       setTotal(prepared.length);
@@ -47,7 +51,8 @@ export default function ShopeeImportAdmin() {
         id: row.itemid,
         title: row.title,
         price: Number(row.sale_price || row.price),
-        image: row.image_link
+        image: row.image_link,
+        category: row.categoryOverride || resolveProductCategory(row.global_category1, row.title, row.description)
       })));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Não foi possível preparar o lote.');
@@ -120,6 +125,18 @@ export default function ShopeeImportAdmin() {
     }
   }
 
+  async function repairCatalog() {
+    setError('');
+    setSuccess('');
+    setBusy('Restaurando o catálogo Shopee…');
+    try {
+      const result = await repairShopeeCatalogState(token);
+      setSuccess('Catálogo restaurado: ' + result.repaired_products + ' produtos e ' + result.repaired_offers + ' ofertas.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Não foi possível restaurar o catálogo.');
+    } finally { setBusy(''); }
+  }
+
   const input = 'block w-full rounded-xl border border-slate-300 bg-white p-3 mt-2 text-sm';
   const completedCount = jobs.reduce((sum, job) => sum + job.imported_count + job.updated_count, 0);
   const errorCount = jobs.reduce((sum, job) => sum + job.error_count, 0);
@@ -153,9 +170,16 @@ export default function ShopeeImportAdmin() {
               <input className={input} required value={keyword} onChange={(e) => { reset(); setKeyword(e.target.value); }} placeholder="Ex.: fone bluetooth" maxLength={100} />
             </label>
           </> : <>
-          <label className="block font-semibold">1. Feed de produto da Shopee (CSV)
-            <input className={input} type="file" accept=".csv,text/csv" required onChange={(e) => { reset(); setFeed(e.target.files?.[0] || null); }} />
-            <span className="text-sm font-normal text-slate-500">Esse arquivo fornece imagem, descrição, categoria, preço e demais dados do produto.</span>
+          <label className="block font-semibold">Categoria de destino no site <span className="text-sm font-normal text-slate-500">(opcional)</span>
+            <select className={input} value={targetCategory} onChange={(e) => { reset(); setTargetCategory(e.target.value); }}>
+              <option value="">Usar as categorias do arquivo</option>
+              {CATEGORIES.filter((category) => category !== 'Todas as Categorias').map((category) => <option key={category} value={category}>{category}</option>)}
+            </select>
+            <span className="text-sm font-normal text-slate-500">Escolha uma categoria quando todos os produtos do lote pertencem à mesma aba.</span>
+          </label>
+          <label className="block font-semibold">1. Feed de produto da Shopee (CSV) — opcional com o CSV de links completo
+            <input className={input} type="file" accept=".csv,text/csv" required={!links} onChange={(e) => { reset(); setFeed(e.target.files?.[0] || null); }} />
+            <span className="text-sm font-normal text-slate-500">Fornece as imagens e os dados completos. Sem ele, o sistema usa o CSV de links e tenta recuperar as imagens na Shopee.</span>
           </label>
 
           <label className="block font-semibold">2. CSV de links em massa da Shopee (CSV)
@@ -187,16 +211,17 @@ export default function ShopeeImportAdmin() {
         <h2 className="text-xl font-bold">Prévia: {total} produtos</h2>
         <p className="text-sm text-slate-600 mt-2">
           {mode === 'api' ? <>Categoria de destino: <strong>{targetCategory}</strong>. Busca: <strong>{keyword}</strong>. Revise a lista antes de enviar.{skipped > 0 ? ' ' + skipped + ' oferta(s) incompleta(s) foram ignoradas.' : ''}</> : <>
-          O sistema usa o Feed quando encontra o Item Id. Quando o Item Id não está no Feed, usa automaticamente os dados de Item Name, Price, Product Link e Offer Link do CSV de links em massa. Nada foi enviado ao backend ainda.
+          {targetCategory && <>Categoria de destino: <strong>{targetCategory}</strong>. </>}O sistema usa o feed quando encontra o Item Id. Para os demais produtos, usa os dados do CSV de links e recupera as imagens. Confira a categoria de cada produto abaixo. Nada foi publicado ainda.
           </>}
         </p>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-left text-sm">
-            <thead><tr><th className="p-2">Produto</th><th className="p-2">ID</th><th className="p-2">Preço</th></tr></thead>
+            <thead><tr><th className="p-2">Produto</th><th className="p-2">ID</th><th className="p-2">Categoria</th><th className="p-2">Preço</th></tr></thead>
             <tbody>
               {preview.map((p) => <tr key={p.id} className="border-t">
                 <td className="p-2"><div className="flex items-center gap-3"><img className="w-14 h-14 object-contain" src={p.image} alt="" referrerPolicy="no-referrer" /><span>{p.title}</span></div></td>
                 <td className="p-2">{p.id}</td>
+                <td className="p-2">{p.category}</td>
                 <td className="p-2 whitespace-nowrap">{Number.isFinite(p.price) ? p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}</td>
               </tr>)}
             </tbody>

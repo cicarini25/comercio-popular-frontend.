@@ -1,6 +1,7 @@
 import { Product } from '../types';
 import { API_BASE_URL, getAuthToken } from './api';
 import { resolveProductCategory } from '../utils/productCategories';
+import { CATEGORIES } from '../data/mockProducts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SUPPORTED_AFFILIATE_PLATFORMS = new Set(['shopee', 'shein']);
@@ -23,6 +24,9 @@ export function mapCatalogProduct(row: any): Product | null {
       .sort((a: any, b: any) => Number(a.price) - Number(b.price))[0]
     : null;
   if (!offer || !UUID.test(row.id) || typeof row.title !== 'string' || !row.title.trim()) return null;
+  const selectedCategory = typeof row.category_override === 'string' &&
+    row.category_override !== 'Todas as Categorias' && CATEGORIES.includes(row.category_override)
+    ? row.category_override : '';
   const price = Number(offer.price);
   const original = Number(offer.originalPrice);
   const stock = offer.stockUnits == null ? null : Number(offer.stockUnits);
@@ -35,7 +39,7 @@ export function mapCatalogProduct(row: any): Product | null {
     platform: offer.platform.code as Product['platform'],
     affiliateUrl: `${API_BASE_URL}/api/catalog/offers/${offer.id}/go`,
     affiliateOfferId: offer.id,
-    images: [image], category: resolveProductCategory(categories[row.category] || row.category, row.title, row.description || ''),
+    images: [image], category: selectedCategory || resolveProductCategory(categories[row.category] || row.category, row.title, row.description || ''),
     rating: 0, reviewCount: 0, reviews: [], isAchadinho: true,
     stockUnits: stock != null && Number.isInteger(stock) && stock >= 0 ? stock : null,
     isVerified: false, isFastShipping: offer.isFastShipping === true,
