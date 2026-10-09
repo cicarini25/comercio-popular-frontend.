@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, searchShopeeOffers, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
 import { resolveProductCategory } from '../utils/productCategories';
 
@@ -24,6 +24,7 @@ export default function ShopeeImportAdmin() {
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [categoryFixPrefix, setCategoryFixPrefix] = useState('83e72945');
   const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setJobs([]); setError(''); setSuccess(''); };
 
   async function check() {
@@ -137,6 +138,24 @@ export default function ShopeeImportAdmin() {
     } finally { setBusy(''); }
   }
 
+  async function fixImportedCategories() {
+    setError('');
+    setSuccess('');
+    setBusy('Corrigindo somente as categorias dos produtos deste lote Shopee…');
+    try {
+      const result = await reclassifyShopeeImportCategories(categoryFixPrefix, token);
+      setSuccess(
+        'Lote ' + result.jobPrefix + ': ' + result.updatedCount +
+        ' produto(s) ajustado(s), sendo ' + result.utilidades + ' em Utilidades e ' +
+        result.brinquedos + ' em Brinquedos. Preços, imagens e links foram preservados.'
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Não foi possível corrigir as categorias do lote.');
+    } finally {
+      setBusy('');
+    }
+  }
+
   const input = 'block w-full rounded-xl border border-slate-300 bg-white p-3 mt-2 text-sm';
   const completedCount = jobs.reduce((sum, job) => sum + job.imported_count + job.updated_count, 0);
   const errorCount = jobs.reduce((sum, job) => sum + job.error_count, 0);
@@ -202,6 +221,36 @@ export default function ShopeeImportAdmin() {
           </button>
         </fieldset>
       </form>
+
+      <section className="mt-6 bg-white rounded-2xl border border-slate-200 p-5">
+        <h2 className="text-xl font-bold">Corrigir categorias do lote já importado</h2>
+        <p className="mt-2 text-sm text-slate-600">
+          Corrige somente produtos ligados ao lote indicado. Luminárias e abajures vão para Utilidades; caminhão de controle remoto vai para Brinquedos. Os outros produtos e os dados comerciais ficam intactos.
+        </p>
+        <form onSubmit={(e) => { e.preventDefault(); void fixImportedCategories(); }} className="mt-4 flex flex-wrap items-end gap-3">
+          <label className="block font-semibold text-sm">
+            Prefixo do lote (8 primeiros caracteres)
+            <input
+              className={input}
+              value={categoryFixPrefix}
+              onChange={(e) => setCategoryFixPrefix(e.target.value)}
+              pattern="[a-fA-F0-9]{8}"
+              maxLength={8}
+              required
+              spellCheck={false}
+            />
+          </label>
+          <button
+            className="rounded-xl bg-teal-700 text-white px-5 py-3 font-semibold disabled:opacity-50"
+            type="submit"
+            disabled={!!busy || !token.trim()}
+            title={!token.trim() ? 'Informe o token administrativo no campo abaixo do formulário principal.' : 'Corrigir categorias deste lote'}
+          >
+            Corrigir categorias deste lote
+          </button>
+        </form>
+        {!token.trim() && <p className="mt-2 text-xs text-slate-500">Informe o token administrativo no campo “3. Token administrativo” do formulário acima; não compartilhe o token no chat.</p>}
+      </section>
 
       {busy && <p role="status" className="p-4 mt-4 bg-blue-50 rounded-xl">{busy}</p>}
       {error && <p role="alert" className="p-4 mt-4 bg-red-50 text-red-800 rounded-xl break-words">{error}</p>}
