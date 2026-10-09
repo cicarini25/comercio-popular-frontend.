@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, SHOPEE_SEARCH_SUGGESTIONS, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
 import { resolveProductCategory } from '../utils/productCategories';
 
 type Preview = { id: string; title: string; price: number; image: string; category: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
 
-const API_NOTE = 'A busca pela API procura pelo nome do produto. A categoria selecionada abaixo define em qual seção do site ele será publicado.';
+const API_NOTE = 'Busque pelo tipo de produto. O filtro de categoria retira da prévia os títulos que não combinam com a seção escolhida.';
 
 export default function ShopeeImportAdmin() {
   const [mode, setMode] = useState<'api' | 'csv'>('api');
@@ -20,12 +20,15 @@ export default function ShopeeImportAdmin() {
   const [preview, setPreview] = useState<Preview[]>([]);
   const [total, setTotal] = useState(0);
   const [skipped, setSkipped] = useState(0);
+  const [excluded, setExcluded] = useState(0);
+  const [examined, setExamined] = useState(0);
+  const [filterCategory, setFilterCategory] = useState(true);
   const [jobs, setJobs] = useState<JobView[]>([]);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [categoryFixPrefix, setCategoryFixPrefix] = useState('83e72945');
-  const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setJobs([]); setError(''); setSuccess(''); };
+  const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setExcluded(0); setExamined(0); setJobs([]); setError(''); setSuccess(''); };
 
   async function check() {
     reset();
@@ -33,9 +36,11 @@ export default function ShopeeImportAdmin() {
       let prepared: FeedItem[];
       if (mode === 'api') {
         setBusy('Consultando ofertas na API da Shopee e preparando a prévia…');
-        const result = await searchShopeeOffers(keyword, targetCategory, token, 60);
+        const result = await searchShopeeOffers(keyword, targetCategory, token, 60, filterCategory);
         prepared = result.items;
         setSkipped(result.skipped);
+        setExcluded(result.excluded);
+        setExamined(result.examined);
       } else {
         setBusy('Lendo o Feed Shopee e cruzando os Item Ids com os Offer Links…');
         if (!token.trim()) throw new Error('Informe o token administrativo.');
@@ -174,7 +179,7 @@ export default function ShopeeImportAdmin() {
           Importar por CSV
         </button>
       </div>
-      {mode === 'api' && <p className="mt-2 text-sm text-slate-500">{API_NOTE} Serão preparados até 60 produtos por busca. A API usa o termo informado; ela não seleciona automaticamente a aba de categoria visual da Shopee.</p>}
+      {mode === 'api' && <p className="mt-2 text-sm text-slate-500">{API_NOTE} Serão consultadas até 3 páginas para preparar no máximo 60 produtos. Confira as imagens e retire da prévia qualquer item inadequado.</p>}
 
       <form onSubmit={(e) => { e.preventDefault(); void check(); }} className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mt-6">
         <fieldset disabled={!!busy} className="space-y-5 disabled:opacity-60">
@@ -187,6 +192,16 @@ export default function ShopeeImportAdmin() {
             </label>
             <label className="block font-semibold">2. Termo para buscar na Shopee
               <input className={input} required value={keyword} onChange={(e) => { reset(); setKeyword(e.target.value); }} placeholder="Ex.: fone bluetooth" maxLength={100} />
+            </label>
+            {(SHOPEE_SEARCH_SUGGESTIONS[targetCategory] || []).length > 0 && <div>
+              <p className="text-sm text-slate-600 mb-2">Sugestões para {targetCategory}:</p>
+              <div className="flex flex-wrap gap-2">
+                {SHOPEE_SEARCH_SUGGESTIONS[targetCategory].map((term) => <button key={term} type="button" onClick={() => { reset(); setKeyword(term); }} className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 px-3 py-2 text-sm">{term}</button>)}
+              </div>
+            </div>}
+            <label className="flex items-start gap-3 text-sm">
+              <input type="checkbox" checked={filterCategory} onChange={(e) => { reset(); setFilterCategory(e.target.checked); }} className="mt-1" />
+              <span><strong>Filtrar produtos pela categoria escolhida</strong><br />Usa o título para reduzir itens fora da categoria. Produtos com títulos pouco claros podem ficar de fora; revise a prévia antes de importar.</span>
             </label>
           </> : <>
           <label className="block font-semibold">Categoria de destino no site <span className="text-sm font-normal text-slate-500">(opcional)</span>
@@ -259,19 +274,20 @@ export default function ShopeeImportAdmin() {
       {!!items.length && !jobs.length && <section className="mt-6 bg-white border rounded-2xl p-5">
         <h2 className="text-xl font-bold">Prévia: {total} produtos</h2>
         <p className="text-sm text-slate-600 mt-2">
-          {mode === 'api' ? <>Categoria de destino: <strong>{targetCategory}</strong>. Busca: <strong>{keyword}</strong>. Revise a lista antes de enviar.{skipped > 0 ? ' ' + skipped + ' oferta(s) incompleta(s) foram ignoradas.' : ''}</> : <>
+          {mode === 'api' ? <>Categoria de destino: <strong>{targetCategory}</strong>. Busca: <strong>{keyword}</strong>. Revise a lista antes de enviar.{examined > 0 && <> Consultadas {examined} ofertas; {excluded} fora da categoria ficaram de fora.</>}{skipped > 0 ? ' ' + skipped + ' oferta(s) incompleta(s) foram ignoradas.' : ''}</> : <>
           {targetCategory && <>Categoria de destino: <strong>{targetCategory}</strong>. </>}O sistema usa o feed quando encontra o Item Id. Para os demais produtos, usa os dados do CSV de links e recupera as imagens. Confira a categoria de cada produto abaixo. Nada foi publicado ainda.
           </>}
         </p>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-left text-sm">
-            <thead><tr><th className="p-2">Produto</th><th className="p-2">ID</th><th className="p-2">Categoria</th><th className="p-2">Preço</th></tr></thead>
+            <thead><tr><th className="p-2">Produto</th><th className="p-2">ID</th><th className="p-2">Categoria</th><th className="p-2">Preço</th><th className="p-2">Revisão</th></tr></thead>
             <tbody>
               {preview.map((p) => <tr key={p.id} className="border-t">
                 <td className="p-2"><div className="flex items-center gap-3"><img className="w-14 h-14 object-contain" src={p.image} alt="" referrerPolicy="no-referrer" /><span>{p.title}</span></div></td>
                 <td className="p-2">{p.id}</td>
                 <td className="p-2">{p.category}</td>
                 <td className="p-2 whitespace-nowrap">{Number.isFinite(p.price) ? p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}</td>
+                <td className="p-2"><button type="button" disabled={!!busy} onClick={() => { setItems((current) => current.filter((row) => row.itemid !== p.id)); setPreview((current) => current.filter((row) => row.id !== p.id)); setTotal((current) => Math.max(0, current - 1)); }} className="rounded-lg border border-red-200 text-red-700 px-3 py-2 whitespace-nowrap" aria-label={'Retirar da prévia: ' + p.title}>Retirar da prévia</button></td>
               </tr>)}
             </tbody>
           </table>
