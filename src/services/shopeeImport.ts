@@ -495,6 +495,33 @@ export async function getShopeeJob(token: string, jobId: string): Promise<Shopee
 
 
 
+export async function reclassifyShopeeImportCategories(jobPrefix: string, token: string) {
+  const prefix = jobPrefix.trim();
+  if (!/^[a-f0-9]{8}$/i.test(prefix)) throw new Error('Informe os 8 primeiros caracteres do ID do lote.');
+  if (!token.trim()) throw new Error('Informe o token administrativo do backend.');
+
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/reclassify-import-job-categories', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token.trim()
+    },
+    body: JSON.stringify({ jobPrefix: prefix })
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || 'Falha ao corrigir as categorias do lote Shopee.');
+  }
+  return result as {
+    ok: boolean;
+    jobPrefix: string;
+    updatedCount: number;
+    utilidades: number;
+    brinquedos: number;
+    changed: Array<{ id: string; title: string; category: string }>;
+  };
+}
+
 export async function repairShopeeCatalogState(token: string) {
   if (!token.trim()) throw new Error('Informe o token administrativo.');
   const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/repair-catalog-state', {
