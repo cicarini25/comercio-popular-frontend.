@@ -121,7 +121,10 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   const text = searchText(title);
   const child = childTerms.test(text);
   const pet = petTerms.test(text);
-  if (category === 'Móveis') return furnitureTerms.test(text) && !furnitureAccessories.test(text) && !pet;
+  if (category === 'Móveis') {
+    const startsWithFurniture = /^(?:(?:kit|conjunto|combo|par|pares|pecas|de|com|[0-9]+)\s+){0,8}(mesa|mesas|sofa|sofas|cadeira|cadeiras|poltrona|armario|guarda roupa|roupeiro|estante|escrivaninha|comoda|rack|aparador|criado mudo|balcao|gabinete|sapateira|beliche|berco|cama|colchao|livreiro|nicho)\b/.test(text);
+    return startsWithFurniture && !furnitureAccessories.test(text) && !pet;
+  }
   if (category === 'Pets') return pet;
   if (category === 'Moda Infantil') return child && (clothingTerms.test(text) || footwearTerms.test(text) || /\b(manta|cobertor|babador)\b/.test(text)) && !pet;
   if (category === 'Calçados') return footwearTerms.test(text) && !child && !/\b(sacos?|sacola|porta sapatos|organizador|palmilha|cadarco|cadarcos)\b/.test(text);
