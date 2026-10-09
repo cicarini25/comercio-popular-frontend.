@@ -39,25 +39,36 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState('');
-  const [catalogOffset, setCatalogOffset] = useState(0);
-  const [catalogHasMore, setCatalogHasMore] = useState(false);
   const [catalogRetry, setCatalogRetry] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
     setCatalogLoading(true);
     setCatalogError('');
-    fetchAffiliateCatalog(catalogOffset, controller.signal).then(({ products: incoming, hasMore }) => {
-      setProducts(previous => catalogOffset === 0 ? incoming :
-        [...new Map([...previous, ...incoming].map(product => [product.id, product])).values()]);
-      setCatalogHasMore(hasMore);
-    }).catch(error => {
-      if (!controller.signal.aborted) setCatalogError(error.message);
-    }).finally(() => {
-      if (!controller.signal.aborted) setCatalogLoading(false);
-    });
+    const loadCatalog = async () => {
+      let offset = 0;
+      const completeCatalog = new Map<string, Product>();
+      try {
+        let hasMore = true;
+        while (hasMore && !controller.signal.aborted) {
+          const page = await fetchAffiliateCatalog(offset, controller.signal);
+          if (controller.signal.aborted) return;
+          page.products.forEach(product => completeCatalog.set(product.id, product));
+          hasMore = page.hasMore;
+          offset += 100;
+        }
+        if (!controller.signal.aborted) setProducts([...completeCatalog.values()]);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setCatalogError(error instanceof Error ? error.message : 'Não foi possível carregar a vitrine.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setCatalogLoading(false);
+      }
+    };
+    void loadCatalog();
     return () => controller.abort();
-  }, [catalogOffset, catalogRetry]);
+  }, [catalogRetry]);
 
   const { user: sessionUser, loading, logout } = useAuth();
   const user: User | null = sessionUser ? mapApiUser(sessionUser) : null;
@@ -473,8 +484,12 @@ export default function App() {
   // Filtered products for home and category views
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
+      // A categoria dos produtos da API já foi normalizada no catálogo.
+      const productCategory = p.catalogSource === 'api'
+        ? p.category
+        : resolveProductCategory(p.category, p.title, p.description);
       const matchesCategory =
-        selectedCategory === 'Todas as Categorias' || resolveProductCategory(p.category, p.title, p.description) === selectedCategory;
+        selectedCategory === 'Todas as Categorias' || productCategory === selectedCategory;
       const q = searchQuery.toLowerCase();
       const matchesSearch =
         searchQuery === '' ||
@@ -590,11 +605,6 @@ export default function App() {
                     </button>
                   </div>
                 ) : null}
-                {!catalogLoading && !catalogError && catalogHasMore && (
-                  <button className="p-3 rounded-xl bg-teal-700 text-white" onClick={() => setCatalogOffset(n => n + 100)}>
-                    Carregar mais produtos
-                  </button>
-                )}
               </section>
             ) : (
               <>
@@ -685,7 +695,6 @@ export default function App() {
               {catalogError && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
                 <p>{catalogError}</p><button className="underline font-bold" onClick={() => setCatalogRetry(n => n + 1)}>Tentar novamente</button>
               </div>}
-              {!catalogLoading && !catalogError && catalogHasMore && <button className="p-3 rounded-xl bg-teal-700 text-white" onClick={() => setCatalogOffset(n => n + 100)}>Carregar mais produtos</button>}
               {/* Grid or Empty State */}
               {filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
