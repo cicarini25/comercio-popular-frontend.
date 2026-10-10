@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, type FeedItem, type ShopeeJobStatus, type ShopeeCategoryReclassificationResult } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, analyzeShopeeImportJobs, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, type FeedItem, type ShopeeJobStatus, type ShopeeCategoryReclassificationResult, type ShopeeAutoCategoryReview } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
 import { resolveProductCategory } from '../utils/productCategories';
 
@@ -32,6 +32,8 @@ export default function ShopeeImportAdmin() {
   const [categoryFixPrefix, setCategoryFixPrefix] = useState('6d225389');
   const [categoryFixTargetCategory, setCategoryFixTargetCategory] = useState('MOTOS & ACESSÓRIOS');
   const [categoryBatchPreview, setCategoryBatchPreview] = useState<ShopeeCategoryReclassificationResult | null>(null);
+  const [autoCategoryPrefixes, setAutoCategoryPrefixes] = useState('3ca15e9a, 61971574');
+  const [autoCategoryReview, setAutoCategoryReview] = useState<ShopeeAutoCategoryReview | null>(null);
   const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setExcluded(0); setExamined(0); setSearchTerms([]); setJobs([]); setError(''); setSuccess(''); };
 
   async function check() {
@@ -146,6 +148,49 @@ export default function ShopeeImportAdmin() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Não foi possível restaurar o catálogo.');
     } finally { setBusy(''); }
+  }
+
+  async function reviewShopeeBatchCategories() {
+    setError('');
+    setSuccess('');
+    setAutoCategoryReview(null);
+    setBusy('Analisando os produtos dos lotes e sugerindo as categorias corretas…');
+    try {
+      const prefixes = autoCategoryPrefixes.split(/[;,\\s]+/).map((value) => value.trim()).filter(Boolean);
+      const result = await analyzeShopeeImportJobs(prefixes, token, true);
+      setAutoCategoryReview(result);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Não foi possível analisar os lotes Shopee.');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function applyShopeeBatchCategories() {
+    if (!autoCategoryReview || !autoCategoryReview.jobPrefixes.length) {
+      setError('Faça a análise dos lotes antes de aplicar as categorias.');
+      return;
+    }
+    setError('');
+    setSuccess('');
+    setBusy('Aplicando as categorias sugeridas aos produtos destes lotes…');
+    try {
+      const result = await analyzeShopeeImportJobs(autoCategoryReview.jobPrefixes, token, false);
+      const summary = Object.entries(result.categoryCounts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([category, count]) => category + ': ' + count)
+        .join('; ');
+      setAutoCategoryReview(result);
+      setSuccess(
+        'Análise aplicada a ' + result.totalProducts + ' produto(s). ' +
+        (result.updatedCount ?? 0) + ' produto(s) tiveram a categoria/aba atualizada. ' + summary +
+        '. Preços, títulos, imagens e links foram preservados.'
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Não foi possível aplicar a classificação dos lotes.');
+    } finally {
+      setBusy('');
+    }
   }
 
   async function previewImportedCategories() {
@@ -275,6 +320,83 @@ export default function ShopeeImportAdmin() {
           </button>
         </fieldset>
       </form>
+
+      <section className="mt-6 bg-white rounded-2xl border border-slate-200 p-5">
+        <h2 className="text-xl font-bold">Classificar automaticamente produtos já importados</h2>
+        <p className="mt-2 text-sm text-slate-600">
+          Informe os prefixos dos lotes já processados. A análise usa o título e a categoria de origem para sugerir a aba correta, inclusive MOTOS &amp; ACESSÓRIOS. Primeiro mostra uma prévia sem alterar os produtos; só muda a categoria depois de clicar em aplicar. Preços, títulos, imagens e links são preservados.
+        </p>
+        <form onSubmit={(e) => { e.preventDefault(); void reviewShopeeBatchCategories(); }} className="mt-4 flex flex-wrap items-end gap-3">
+          <label className="block font-semibold text-sm flex-1 min-w-64">
+            Prefixos dos lotes (separe por vírgula)
+            <input
+              className={input + ' w-full'}
+              value={autoCategoryPrefixes}
+              onChange={(e) => { setAutoCategoryPrefixes(e.target.value); setAutoCategoryReview(null); setError(''); setSuccess(''); }}
+              placeholder="3ca15e9a, 61971574"
+              required
+              spellCheck={false}
+            />
+          </label>
+          <button
+            className="rounded-xl bg-teal-700 text-white px-5 py-3 font-semibold disabled:opacity-50"
+            type="submit"
+            disabled={!!busy || !token.trim()}
+          >
+            Analisar lotes sem alterar
+          </button>
+        </form>
+        {!token.trim() && <p className="mt-2 text-xs text-slate-500">Informe o token administrativo no campo “3. Token administrativo” do formulário principal. Não compartilhe o token no chat.</p>}
+        {autoCategoryReview && (
+          <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <h3 className="font-bold">Resultado da análise: {autoCategoryReview.totalProducts} produto(s) distintos</h3>
+            <p className="mt-1 text-sm text-slate-700">
+              Categoria sugerida para {autoCategoryReview.motoCount} produto(s): <strong>MOTOS &amp; ACESSÓRIOS</strong>.
+              {autoCategoryReview.dryRun
+                ? ' Esta prévia não alterou nenhum produto.'
+                : ' A classificação foi aplicada aos lotes indicados.'}
+            </p>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {Object.entries(autoCategoryReview.categoryCounts).sort((a, b) => b[1] - a[1]).map(([category, count]) => (
+                <div key={category} className="rounded-lg border bg-white px-3 py-2 text-sm flex justify-between gap-3">
+                  <span>{category}</span><strong>{count}</strong>
+                </div>
+              ))}
+            </div>
+            {!!autoCategoryReview.jobs.length && (
+              <div className="mt-3 text-xs text-slate-600">
+                Lotes conferidos: {autoCategoryReview.jobs.map((job) => job.prefix + ' (' + job.linkedProductCount + ' produtos vinculados)').join(' · ')}
+              </div>
+            )}
+            <details className="mt-4">
+              <summary className="cursor-pointer font-semibold text-sm">Conferir produtos e categorias sugeridas ({autoCategoryReview.products.length})</summary>
+              <div className="mt-3 max-h-96 overflow-auto space-y-2">
+                {autoCategoryReview.products.map((product) => (
+                  <div key={product.productId} className="rounded-lg border bg-white px-3 py-2 text-sm">
+                    <div className="font-medium">{product.title}</div>
+                    <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-slate-600">
+                      <span>Atual: {product.currentCategory}</span>
+                      <span>→</span>
+                      <strong>Sugerida: {product.suggestedCategory}</strong>
+                      <span>({product.matchedBy})</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </details>
+            {autoCategoryReview.dryRun && (
+              <button
+                className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold disabled:opacity-50"
+                type="button"
+                disabled={!!busy || !token.trim() || autoCategoryReview.plannedChanges === 0}
+                onClick={() => void applyShopeeBatchCategories()}
+              >
+                Aplicar classificação dos {autoCategoryReview.totalProducts} produtos
+              </button>
+            )}
+          </div>
+        )}
+      </section>
 
       <section className="mt-6 bg-white rounded-2xl border border-slate-200 p-5">
         <h2 className="text-xl font-bold">Transferir lote Shopee para outra categoria</h2>
