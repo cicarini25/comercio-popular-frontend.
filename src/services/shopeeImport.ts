@@ -110,6 +110,7 @@ const importCategoryRules: Record<string, RegExp> = {
 };
 
 export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
+  'ELETRO & ACESSÓRIOS': ['fogão', 'geladeira', 'air fryer', 'cafeteira elétrica', 'peças para fogão', 'acessórios para air fryer', 'peças para lavadora'],
   "Alimentos & Bebidas": ["café","chocolate","azeite","chá","suplemento alimentar"],
   "Cuidado & Beleza": ["maquiagem","perfume","shampoo","hidratante corporal","esmalte"],
   "Bike Elétrica e Acessórios": ["bicicleta elétrica","acessório bicicleta elétrica","patinete elétrico"],
@@ -207,6 +208,7 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
     const startsWithFurniture = /^(?:(?:kit|conjunto|combo|par|pares|pecas|de|com|[0-9]+)\s+){0,8}(mesa|mesas|sofa|sofas|cadeira|cadeiras|poltrona|armario|guarda roupa|roupeiro|estante|escrivaninha|comoda|rack|aparador|criado mudo|balcao|gabinete|sapateira|beliche|berco|cama|colchao|livreiro|nicho)\b/.test(text);
     return startsWithFurniture && !furnitureAccessories.test(text) && !pet;
   }
+  if (category === 'ELETRO & ACESSÓRIOS') return !child && !pet && !/\b(brinquedo|miniatura|mini cozinha)\b/.test(text) && (applianceTerms.test(text) || /\beletrodomesticos?\b/.test(text));
   if (category === 'Eletrodomésticos') {
     const appliance = applianceTerms.exec(text);
     if (!appliance || child || pet) return false;
