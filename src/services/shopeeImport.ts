@@ -139,6 +139,65 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
   'Fones & Headphones': ['fone bluetooth', 'headset gamer', 'fone de ouvido'],
 };
 
+
+const GENERIC_SEARCH_TERMS = new Set(['produto', 'produtos', 'roupa', 'roupas', 'calcado', 'calcados', 'moveis', 'eletrodomestico', 'eletrodomesticos', 'acessorio', 'acessorios', 'utilidade', 'utilidades']);
+export function isGeneralShopeeSearch(keyword: string, category: string): boolean {
+  const term = searchText(keyword);
+  return GENERIC_SEARCH_TERMS.has(term) || term === searchText(category);
+}
+
+const searchProductTypes = [
+  /\b(fogao|fogoes)\b/, /\bcooktop\b/, /\b(geladeiras?|refrigeradores?)\b/,
+  /\bfreezers?\b/, /\bfrigobar\b/, /\b(microondas|micro ondas)\b/,
+  /\b(air fryer|airfryer|fritadeira eletrica)\b/, /\bcafeteiras?\b/,
+  /\bchaleiras?\b/, /\bliquidificadores?\b/, /\bbatedeiras?\b/,
+  /\b(mixer|mixers)\b/, /\b(aspiradores?|robo aspirador)\b/,
+  /\b(lavadoras?|maquina de lavar|lava roupas?|tanquinho)\b/,
+  /\b(sanduicheiras?|grill eletrico)\b/, /\btorradeiras?\b/,
+  /\bventiladores?\b/, /\bar condicionado\b/, /\bforno eletrico\b/,
+  /\bpanela eletrica\b/, /\bpurificadores? de agua\b/, /\bbebedouros?\b/,
+  /\b(ferro de passar|ferro a vapor)\b/,
+  /\b(notebook|laptop|chromebook)\b/, /\b(tv|televisor|televisao|smart tv)\b/,
+  /\b(smartphone|celular|iphone)\b/, /\b(caixa de som|alto falante|soundbar)\b/,
+  /\b(headset)\b/, /\b(fones?|headphones?|earbuds?|earphones?|tws)\b/,
+  /\b(computador|desktop|pc)\b/, /\bmonitores?\b/,
+  /\b(violao|violoes)\b/, /\bguitarras?\b/, /\bviolinos?\b/,
+  /\bmesas?\b/, /\b(sofa|sofas)\b/, /\bcadeiras?\b/, /\bpoltronas?\b/,
+  /\b(guarda roupa|roupeiro|armario)\b/, /\bestantes?\b/, /\bescrivaninhas?\b/,
+  /\bcomodas?\b/, /\b(colchao|colchoes)\b/, /\bcamas?\b/,
+  /\bfuradeiras?\b/, /\bparafusadeiras?\b/,
+  /\b(camiseta|camisetas|t shirt|t shirts|tshirt|tshirts)\b/,
+  /\bcamisas?\b/, /\b(blusa|blusas|blusinha|blusinhas)\b/,
+  /\bvestidos?\b/, /\bcalcas?\b/, /\b(shorts?|bermudas?)\b/,
+  /\bsapatos?\b/, /\b(tenis|sapatenis)\b/, /\bsandalias?\b/, /\bchinelos?\b/,
+  /\bpanelas?\b/, /\bfrigideiras?\b/, /\bgarrafas?\b/, /\bpotes?\b/,
+];
+const accessoryTitleWords = /\b(pecas?|acessorios?|reposicao|conserto|reparo|compativel|capas?|capinhas?|peliculas?|suportes?|bases?|filtros?|refis?|borrachas?|vedacoes?|mangueiras?|cabos?|adaptadores?|carregadores?|resistencias?|termostatos?|placas?|helices?|correias?|botoes|botao|puxadores?|tampas?|laminas?|cestos?|cestas?|bandejas?|formas?|forros?|papel|silicone|tapetes?|protetores?|rodizios?|sacos?|escovas?|bocais?|prateleiras?|gavetas?|dobradicas?|controles?|agulhas?|desentupidoras?|desentupidores?|pasta|polir|limpa|limpeza|desengordurante|spray|registro|ramal|grade|grades|trempe|trempes|queimadores?|bicos?|injetores?|valvulas?|chapas?|pegadores?|tigelas?|miniatura|brinquedo)\b/;
+
+// Busca específica exige o produto pedido; peças não passam só por mencionar sua compatibilidade.
+export function matchesShopeeSearchIntent(title: string, keyword: string): boolean {
+  const text = searchText(title);
+  const term = searchText(keyword);
+  const type = searchProductTypes.find((pattern) => pattern.test(term));
+  let qualifiers = term;
+  if (type) {
+    const mainProduct = type.exec(text);
+    if (!mainProduct) return false;
+    const asksForAccessory = accessoryTitleWords.test(term.replace(type, ' '));
+    if (!asksForAccessory) {
+      if (accessoryTitleWords.test(text.slice(0, mainProduct.index))) return false;
+      const suffix = text.slice(mainProduct.index + mainProduct[0].length).trim();
+      if (new RegExp('^' + accessoryTitleWords.source).test(suffix)) return false;
+      if (/\b(para|compativel com|compativel para|reposicao|conserto|reparo|brinquedo|miniatura)\b/.test(text.slice(0, mainProduct.index))) return false;
+    }
+    qualifiers = term.replace(type, ' ');
+  }
+  const singular = (word: string) => word.length > 4 ? word.replace(/s$/, '') : word;
+  const titleWords = text.split(' ').map(singular);
+  const queryWords = qualifiers.split(' ').filter((word) => word && !['de','do','da','dos','das','para','com','e','a','o','em','um','uma','p'].includes(word)).map(singular);
+  return queryWords.every((word) => titleWords.includes(word));
+}
+
 // A triagem usa o tipo de produto no título, não a categoria de destino atribuída pelo importador.
 export function matchesShopeeImportCategory(title: string, category: string): boolean {
   const text = searchText(title);
@@ -155,7 +214,8 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
     const suffix = text.slice(appliance.index + appliance[0].length).trim();
     if (/^(papel|silicone|cesta|cesto|forma|forro|capa|filtro|refil|suporte|peca|resistencia|placa)\b/.test(suffix)) return false;
     const prefix = text.slice(0, appliance.index);
-    if (appliance.index > 100 || appliancePartTerms.test(prefix)) return false;
+    if (appliance.index > 100 || appliancePartTerms.test(prefix) || accessoryTitleWords.test(prefix)) return false;
+    if (/\b(para|compativel com|compativel para)\b/.test(prefix)) return false;
     if (/\b(reposicao|substituicao|sobressalente|conserto|reparo|compativel com|compativel para|miniatura|brinquedo)\b/.test(text)) return false;
     // "Aspirador com filtro" é um aparelho; "filtro para aspirador" é uma peça.
     if (/\b(pecas?|acessorios?|filtros?|capas?|suportes?|copos?|jarras?|cestos?|cestas?|bandejas?|formas?|controles?|helices?|motores?|placas?|resistencias?)\s+(?:de|do|da|para|p)\b/.test(text)) return false;
@@ -218,10 +278,9 @@ export async function searchShopeeOffers(
   let excluded = 0;
   let examined = 0;
   const suggestions = SHOPEE_SEARCH_SUGGESTIONS[destinationCategory] || [];
-  const genericTerms = ['produto', 'produtos', 'roupa', 'roupas', 'calcado', 'calcados', 'sapato', 'sapatos', 'moveis', 'eletrodomestico', 'eletrodomesticos', 'acessorio', 'acessorios', 'utilidade', 'utilidades'];
-  const genericSearch = genericTerms.includes(searchText(searchTerm)) || searchText(searchTerm) === searchText(destinationCategory);
-  const terms = filterCategory && completeCategory
-    ? [...new Set(genericSearch ? [...suggestions, searchTerm] : [searchTerm, ...suggestions])]
+  const genericSearch = isGeneralShopeeSearch(searchTerm, destinationCategory);
+  const terms = filterCategory && completeCategory && genericSearch
+    ? [...new Set([...suggestions, searchTerm])]
     : [searchTerm];
   const searchTerms: string[] = [];
   let requests = 0;
@@ -254,7 +313,8 @@ export async function searchShopeeOffers(
         if (!id || seen.has(id)) continue;
         seen.add(id);
         examined += 1;
-        if (filterCategory && !matchesShopeeImportCategory(String(product?.title || ''), destinationCategory)) {
+        if ((filterCategory && !matchesShopeeImportCategory(String(product?.title || ''), destinationCategory)) ||
+            (!genericSearch && !matchesShopeeSearchIntent(String(product?.title || ''), searchTerm))) {
           excluded += 1;
           continue;
         }
@@ -312,7 +372,7 @@ export async function searchShopeeOffers(
 
   if (!items.length) {
     throw new Error(filterCategory
-      ? 'Nenhum produto compatível com ' + destinationCategory + ' foi encontrado entre ' + examined + ' ofertas consultadas. Tente um dos termos sugeridos ou uma busca mais específica.'
+      ? 'Nenhum produto compatível com a busca “' + searchTerm + '” em ' + destinationCategory + ' foi encontrado entre ' + examined + ' ofertas consultadas. Peças e produtos diferentes foram excluídos. Tente um termo mais preciso ou busque pela categoria para ver outros tipos de produto.'
       : 'A API não retornou ofertas completas para esse termo. Tente uma busca mais específica.');
   }
   return { items, skipped, excluded, examined, searchTerms };
