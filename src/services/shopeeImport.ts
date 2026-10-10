@@ -87,7 +87,7 @@ const furnitureAccessories = /\b(centro de mesa|mesa posta|mesa de som|mesa digi
 
 // Identifica o aparelho principal e descarta anúncios de componentes vendidos à parte.
 const applianceTerms = /\b(geladeiras?|refrigeradores?|freezers?|frigobar|fogao|fogoes|cooktop|microondas|micro ondas|lavadoras?|maquina de lavar|lava roupas?|lava loucas|secadora|tanquinho|air fryer|airfryer|fritadeira eletrica|cafeteiras?|liquidificadores?|batedeiras?|mixers?|aspiradores?|robo aspirador|sanduicheiras?|torradeiras?|ar condicionado|ventiladores?|climatizadores?|purificadores? de agua|bebedouros?|espremedor eletrico|panela eletrica|chaleira eletrica|grill eletrico|forno eletrico|ferro de passar|ferro a vapor)\b/;
-const appliancePartTerms = /\b(pecas?|acessorios?|capas?|capinhas?|suportes?|bases?|pedestais?|filtros?|refil|refis|borrachas?|vedacoes?|anel|aneis|mangueiras?|cabos?|adaptadores?|plugues?|tomadas?|resistencias?|termostatos?|sensores?|placas?|motores?|helices?|turbinas?|correias?|rolamentos?|engrenagens?|botoes?|puxadores?|tampas?|copos?|jarras?|laminas?|cestos?|cestas?|bandejas?|formas?|protetores?|adesivos?|rodizios?|pes|peneiras?|sacos?|escovas?|bocais?|dutos?|prateleiras?|gavetas?|dobradicas?|travas?|fusivel|fusiveis|capacitores?|controles?)\b/;
+const appliancePartTerms = /\b(forro|forros|papel|silicone|panela|panelas|chapa|chapas|tapete|tapetes|pegador|pegadores|pinca|pincas|tigela|tigelas|botao|desengordurante|spray|limpa|limpeza|pecas?|acessorios?|capas?|capinhas?|suportes?|bases?|pedestais?|filtros?|refil|refis|borrachas?|vedacoes?|anel|aneis|mangueiras?|cabos?|adaptadores?|plugues?|tomadas?|resistencias?|termostatos?|sensores?|placas?|motores?|helices?|turbinas?|correias?|rolamentos?|engrenagens?|botoes?|puxadores?|tampas?|copos?|jarras?|laminas?|cestos?|cestas?|bandejas?|formas?|protetores?|adesivos?|rodizios?|pes|peneiras?|sacos?|escovas?|bocais?|dutos?|prateleiras?|gavetas?|dobradicas?|travas?|fusivel|fusiveis|capacitores?|controles?)\b/;
 
 const importCategoryRules: Record<string, RegExp> = {
   'Casa & Cozinha': /\b(panela|frigideira|prato|talher|copo|taca|pote|garrafa|chaleira|jarra|faqueiro|utensilio|confeitaria|cozinha|biscoito|paliteiro)\b/,
@@ -151,6 +151,7 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   if (category === 'Eletrodomésticos') {
     const appliance = applianceTerms.exec(text);
     if (!appliance || child || pet) return false;
+    if (/\b(limpa air fryer|limpa forno|desengordurante|spray de limpeza|mini cozinha|cozinha de brinquedo|chama direta)\b/.test(text)) return false;
     const suffix = text.slice(appliance.index + appliance[0].length).trim();
     if (/^(papel|silicone|cesta|cesto|forma|forro|capa|filtro|refil|suporte|peca|resistencia|placa)\b/.test(suffix)) return false;
     const prefix = text.slice(0, appliance.index);
