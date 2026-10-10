@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, SHOPEE_SEARCH_SUGGESTIONS, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, SHOPEE_SEARCH_SUGGESTIONS, isGeneralShopeeSearch, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
 import { resolveProductCategory } from '../utils/productCategories';
 
 type Preview = { id: string; title: string; price: number; image: string; category: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
 
-const API_NOTE = 'Busque pelo tipo de produto. O filtro de categoria retira da prévia os títulos que não combinam com a seção escolhida.';
+const API_NOTE = 'Uma busca específica procura o produto digitado e filtra peças e acessórios. Uma busca geral pela categoria pode combinar diferentes tipos de produtos.';
 
 export default function ShopeeImportAdmin() {
   const [mode, setMode] = useState<'api' | 'csv'>('api');
@@ -206,9 +206,9 @@ export default function ShopeeImportAdmin() {
               <input type="checkbox" checked={filterCategory} onChange={(e) => { reset(); setFilterCategory(e.target.checked); }} className="mt-1" />
               <span><strong>Filtrar produtos pela categoria escolhida</strong><br />Usa o título para reduzir itens fora da categoria. Produtos com títulos pouco claros podem ficar de fora; revise a prévia antes de importar.</span>
             </label>
-            {filterCategory && (SHOPEE_SEARCH_SUGGESTIONS[targetCategory] || []).length > 0 && <label className="flex items-start gap-3 text-sm">
+            {filterCategory && isGeneralShopeeSearch(keyword, targetCategory) && (SHOPEE_SEARCH_SUGGESTIONS[targetCategory] || []).length > 0 && <label className="flex items-start gap-3 text-sm">
               <input type="checkbox" checked={completeCategory} onChange={(e) => { reset(); setCompleteCategory(e.target.checked); }} className="mt-1" />
-              <span><strong>Completar lote com buscas da mesma categoria</strong><br />Quando faltarem produtos, usa também os termos sugeridos acima. Desmarque para pesquisar somente o termo informado.</span>
+              <span><strong>Completar lote com buscas da mesma categoria</strong><br />Nas buscas gerais, combina os tipos de produtos sugeridos acima. Buscas específicas usam somente o produto digitado.</span>
             </label>}
           </> : <>
           <label className="block font-semibold">Categoria de destino no site <span className="text-sm font-normal text-slate-500">(opcional)</span>
@@ -281,7 +281,7 @@ export default function ShopeeImportAdmin() {
       {!!items.length && !jobs.length && <section className="mt-6 bg-white border rounded-2xl p-5">
         <h2 className="text-xl font-bold">Prévia: {total} produtos</h2>
         <p className="text-sm text-slate-600 mt-2">
-          {mode === 'api' ? <>Categoria de destino: <strong>{targetCategory}</strong>. Busca: <strong>{keyword}</strong>. Revise a lista antes de enviar.{examined > 0 && <> Consultadas {examined} ofertas; {excluded} fora da categoria ficaram de fora.</>}{searchTerms.length > 1 && <> Termos consultados: {searchTerms.join(', ')}.</>}{total < 60 && <> Foram encontrados {total} produtos válidos nesta busca; 60 é o limite máximo.</>}{skipped > 0 ? ' ' + skipped + ' oferta(s) incompleta(s) foram ignoradas.' : ''}</> : <>
+          {mode === 'api' ? <>Categoria de destino: <strong>{targetCategory}</strong>. Busca: <strong>{keyword}</strong>. Revise a lista antes de enviar.{examined > 0 && <> Consultadas {examined} ofertas; {excluded} incompatíveis com a categoria ou com o produto buscado ficaram de fora.</>}{searchTerms.length > 1 && <> Termos consultados: {searchTerms.join(', ')}.</>}{total < 60 && <> Foram encontrados {total} produtos válidos nesta busca; 60 é o limite máximo.</>}{skipped > 0 ? ' ' + skipped + ' oferta(s) incompleta(s) foram ignoradas.' : ''}</> : <>
           {targetCategory && <>Categoria de destino: <strong>{targetCategory}</strong>. </>}O sistema usa o feed quando encontra o Item Id. Para os demais produtos, usa os dados do CSV de links e recupera as imagens. Confira a categoria de cada produto abaixo. Nada foi publicado ainda.
           </>}
         </p>
