@@ -7,6 +7,7 @@ export type ShopeeApiSearchResult = {
   skipped: number;
   excluded: number;
   examined: number;
+  searchTerms: string[];
 };
 
 export const MAX_BULK_ITEMS = 30000;
@@ -77,8 +78,8 @@ export function validAffiliate(value: string): boolean {
 
 
 const searchText = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-const childTerms = /\b(infantil|infantis|bebe|bebes|crianca|criancas|kids|menino|menina|juvenil)\b/;
-const clothingTerms = /\b(camiseta|camisa|blusa|moletom|calca|short|shorts|bermuda|saia|vestido|roupa|jaqueta|cropped|lingerie|meias?|pijama)\b/;
+const childTerms = /\b(infantil|infantis|bebe|bebes|crianca|criancas|kids|meninos?|meninas?|juvenil)\b/;
+const clothingTerms = /\b(camisetas?|camisas?|blusas?|moletom|moletons|calcas?|shorts?|bermudas?|saias?|vestidos?|roupas?|jaquetas?|croppeds?|lingeries?|meias?|pijamas?|macacoes?|macaquinho|macaquinhos|bodies|body|bodi|bata|batas|casacos?|cardigans?|sueter|sueteres|regatas?|sutias?|calcinhas?|cuecas?|biquinis?|maios?|legging|leggings)\b/;
 const footwearTerms = /\b(tenis|sandalia|sapato|chinelo|chuteira|bota|botina|calcado|mocassim|sapatilha|sapatenis|coturno|tamanco)\b/;
 const petTerms = /\b(pets?|gatos?|cachorros?|caes|racao|racoes|coleira|arranhador|aquario|peitoral para cachorro)\b/;
 const furnitureTerms = /\b(sofa|sofas|cadeiras?|poltrona|armario|guarda roupa|roupeiro|estante|escrivaninha|comoda|rack|aparador|criado mudo|balcao|gabinete|sapateira|beliche|berco|cama|colchao|mesas?)\b/;
@@ -105,6 +106,8 @@ const importCategoryRules: Record<string, RegExp> = {
 };
 
 export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
+  'Moda Feminina': ['roupa feminina', 'vestido feminino', 'blusa feminina', 'conjunto feminino', 'calça feminina'],
+  'Moda Masculina': ['camiseta masculina', 'bermuda masculina', 'calça masculina', 'camisa masculina'],
   'Móveis': ['mesa de jantar', 'escrivaninha', 'guarda-roupa', 'sofá', 'cômoda', 'cadeira de escritório'],
   'Calçados': ['sapato masculino', 'tênis feminino', 'sandália feminina', 'chinelo masculino'],
   'Moda Infantil': ['tênis infantil', 'sandália infantil', 'roupa infantil', 'pijama infantil'],
@@ -129,9 +132,9 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   if (category === 'Moda Infantil') return child && (clothingTerms.test(text) || footwearTerms.test(text) || /\b(manta|cobertor|babador)\b/.test(text)) && !pet;
   if (category === 'Calçados') return footwearTerms.test(text) && !child && !/\b(sacos?|sacola|porta sapatos|organizador|palmilha|cadarco|cadarcos)\b/.test(text);
   if (category === 'Moda Masculina' || category === 'Moda Feminina') {
-    if (!clothingTerms.test(text) || child || pet) return false;
-    if (category === 'Moda Masculina') return /\b(masculin[oa]|homem|unissex)\b/.test(text);
-    return /\b(feminin[oa]|mulher|unissex|vestido|saia|cropped|lingerie)\b/.test(text);
+    if (!(clothingTerms.test(text) || (/\bconjuntos?\b/.test(text) && /\b(masculin[oa]s?|feminin[oa]s?|homem|homens|mulher|mulheres|unissex)\b/.test(text))) || child || pet || /\b(bonecas?|bonecos?|cabide|cabides|organizador|saco para|sacos para|lavar roupa|lavar roupas|roupa de cama|capa para|capas para)\b/.test(text)) return false;
+    if (category === 'Moda Masculina') return /\b(masculin[oa]s?|homem|homens|unissex|cuecas?)\b/.test(text);
+    return /\b(feminin[oa]s?|mulher|mulheres|unissex|vestidos?|saias?|croppeds?|lingeries?|sutias?|calcinhas?|biquinis?|maios?)\b/.test(text);
   }
   if (category === 'Brinquedos') return !pet && !clothingTerms.test(text) && !footwearTerms.test(text) &&
     !/\b(cortador|cortadores|carimbo|confeitaria|organizador|manta|cobertor|lembrancinha|decoracao de festa)\b/.test(text) &&
@@ -152,7 +155,8 @@ export async function searchShopeeOffers(
   category: string,
   token: string,
   requested = 60,
-  filterCategory = true
+  filterCategory = true,
+  completeCategory = true
 ): Promise<ShopeeApiSearchResult> {
   const searchTerm = keyword.trim();
   const destinationCategory = category.trim();
@@ -167,39 +171,51 @@ export async function searchShopeeOffers(
   const seen = new Set<string>();
   let excluded = 0;
   let examined = 0;
-  let page = 1;
-  let hasNextPage = true;
+  const terms = filterCategory && completeCategory
+    ? [...new Set([searchTerm, ...(SHOPEE_SEARCH_SUGGESTIONS[destinationCategory] || [])])]
+    : [searchTerm];
+  const searchTerms: string[] = [];
+  let requests = 0;
 
-  while (results.length < target && hasNextPage && page <= 3) {
-    const pageLimit = 50;
-    const query = new URLSearchParams({
-      keyword: searchTerm,
-      page: String(page),
-      limit: String(pageLimit)
-    });
-    const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/search?' + query.toString(), {
-      headers: { Authorization: 'Bearer ' + token.trim() }
-    });
-    const result = await response.json();
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao consultar a API Shopee.');
-    }
-
-    const products = Array.isArray(result.products) ? result.products : [];
-    for (const product of products) {
-      const id = String(product?.externalId || '');
-      if (!id || seen.has(id)) continue;
-      seen.add(id);
-      examined += 1;
-      if (filterCategory && !matchesShopeeImportCategory(String(product?.title || ''), destinationCategory)) {
-        excluded += 1;
-        continue;
+  // Consulta limitada a 12 chamadas, com IDs únicos entre termos e páginas.
+  for (const term of terms) {
+    if (results.length >= target || requests >= 12) break;
+    searchTerms.push(term);
+    let page = 1;
+    let hasNextPage = true;
+    const maxPages = terms.length > 1 ? 3 : 12;
+    while (results.length < target && hasNextPage && page <= maxPages && requests < 12) {
+      const pageLimit = 50;
+      const query = new URLSearchParams({
+        keyword: term,
+        page: String(page),
+        limit: String(pageLimit)
+      });
+      requests += 1;
+      const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/search?' + query.toString(), {
+        headers: { Authorization: 'Bearer ' + token.trim() }
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao consultar a API Shopee.');
       }
-      results.push(product);
-      if (results.length >= target) break;
+
+      const products = Array.isArray(result.products) ? result.products : [];
+      for (const product of products) {
+        const id = String(product?.externalId || '');
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        examined += 1;
+        if (filterCategory && !matchesShopeeImportCategory(String(product?.title || ''), destinationCategory)) {
+          excluded += 1;
+          continue;
+        }
+        results.push(product);
+        if (results.length >= target) break;
+      }
+      hasNextPage = Boolean(result.pageInfo?.hasNextPage);
+      page += 1;
     }
-    hasNextPage = Boolean(result.pageInfo?.hasNextPage);
-    page += 1;
   }
 
   const items: FeedItem[] = [];
@@ -251,7 +267,7 @@ export async function searchShopeeOffers(
       ? 'Nenhum produto compatível com ' + destinationCategory + ' foi encontrado entre ' + examined + ' ofertas consultadas. Tente um dos termos sugeridos ou uma busca mais específica.'
       : 'A API não retornou ofertas completas para esse termo. Tente uma busca mais específica.');
   }
-  return { items, skipped, excluded, examined };
+  return { items, skipped, excluded, examined, searchTerms };
 }
 
 export async function readAffiliateLinks(linksFile: File | null, manual = '') {
