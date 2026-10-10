@@ -1445,3 +1445,60 @@ export async function analyzeShopeeImportJobs(
   }
   return result as ShopeeAutoCategoryReview;
 }
+
+
+export type ShopeeBatchCategoryTransferResult = {
+  ok: boolean;
+  dryRun: boolean;
+  jobPrefixes: string[];
+  targetCategory: 'MOTOS & ACESSÓRIOS';
+  jobs: Array<{
+    id: string;
+    prefix: string;
+    status: string;
+    requestedCount: number;
+    linkedProductCount: number;
+  }>;
+  totalProducts: number;
+  totalLinkedRecords: number;
+  plannedChanges: number;
+  updatedCount: number;
+  products: Array<{
+    productId: string;
+    title: string;
+    currentCategory: string;
+    targetCategory: 'MOTOS & ACESSÓRIOS';
+    jobId: string;
+    willChange: boolean;
+  }>;
+};
+
+export async function transferShopeeImportJobsToMotos(
+  jobPrefixes: string[],
+  token: string,
+  dryRun = true
+): Promise<ShopeeBatchCategoryTransferResult> {
+  const prefixes = [...new Set(jobPrefixes.map((value) => value.trim().toLowerCase()).filter(Boolean))];
+  if (!prefixes.length || prefixes.length > 10 || prefixes.some((value) => !/^[a-f0-9]{8}$/.test(value))) {
+    throw new Error('Informe os prefixos dos lotes com 8 caracteres hexadecimais, separados por vírgula.');
+  }
+  if (!token.trim()) throw new Error('Informe o token administrativo no painel do site.');
+
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/reclassify-import-jobs-to-category', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token.trim()
+    },
+    body: JSON.stringify({
+      jobPrefixes: prefixes,
+      targetCategory: 'MOTOS & ACESSÓRIOS',
+      dryRun
+    })
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || 'Não foi possível transferir os lotes para MOTOS & ACESSÓRIOS.');
+  }
+  return result as ShopeeBatchCategoryTransferResult;
+}
