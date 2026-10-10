@@ -85,6 +85,10 @@ const petTerms = /\b(pets?|gatos?|cachorros?|caes|racao|racoes|coleira|arranhado
 const furnitureTerms = /\b(sofa|sofas|cadeiras?|poltrona|armario|guarda roupa|roupeiro|estante|escrivaninha|comoda|rack|aparador|criado mudo|balcao|gabinete|sapateira|beliche|berco|cama|colchao|mesas?)\b/;
 const furnitureAccessories = /\b(centro de mesa|mesa posta|mesa de som|mesa digitalizadora|mesa de luz|mesa de corte|cama elastica|cama para pet|toalha|toalhas|capa|capas|forro|lencol|lencois|colcha|edredom|cobre leito|protetor|puxador|dobradica|corredica|rodizio|pezinho|adesivo|caneta|canetas|cachepot|lembrancinha|lembrancinhas|decoracao de festa|enfeite|enfeites|organizador de cabos|organizador para cabos|suporte para monitor|suporte para tv|prateleira.{0,20}(monitor|tv)|porta paliteiro|paliteiro|porta guardanapo|jogo americano|mouse pad|mousepad|ventilador|luminaria|abajur|relogio|tapete|brinquedo|miniatura|boneca|bonecas|casa de boneca|cortador|carimbo|pasta americana|tabua|bandeja|peneira|escorredor|churrasqueira|fogareiro|materiais? para|pecas? para|acessorios? para|kit de montagem)\b/;
 
+// Identifica o aparelho principal e descarta anúncios de componentes vendidos à parte.
+const applianceTerms = /\b(geladeiras?|refrigeradores?|freezers?|frigobar|fogao|fogoes|cooktop|microondas|micro ondas|lavadoras?|maquina de lavar|lava roupas?|lava loucas|secadora|tanquinho|air fryer|airfryer|fritadeira eletrica|cafeteiras?|liquidificadores?|batedeiras?|mixers?|aspiradores?|robo aspirador|sanduicheiras?|torradeiras?|ar condicionado|ventiladores?|climatizadores?|purificadores? de agua|bebedouros?|espremedor eletrico|panela eletrica|chaleira eletrica|grill eletrico|forno eletrico|ferro de passar|ferro a vapor)\b/;
+const appliancePartTerms = /\b(pecas?|acessorios?|capas?|capinhas?|suportes?|bases?|pedestais?|filtros?|refil|refis|borrachas?|vedacoes?|anel|aneis|mangueiras?|cabos?|adaptadores?|plugues?|tomadas?|resistencias?|termostatos?|sensores?|placas?|motores?|helices?|turbinas?|correias?|rolamentos?|engrenagens?|botoes?|puxadores?|tampas?|copos?|jarras?|laminas?|cestos?|cestas?|bandejas?|formas?|protetores?|adesivos?|rodizios?|pes|peneiras?|sacos?|escovas?|bocais?|dutos?|prateleiras?|gavetas?|dobradicas?|travas?|fusivel|fusiveis|capacitores?|controles?)\b/;
+
 const importCategoryRules: Record<string, RegExp> = {
   'Casa & Cozinha': /\b(panela|frigideira|prato|talher|copo|taca|pote|garrafa|chaleira|jarra|faqueiro|utensilio|confeitaria|cozinha|biscoito|paliteiro)\b/,
   'Casa & Construção': /\b(ferramenta|furadeira|parafusadeira|serra|motosserra|solda|nivel|trena|parafuso|broca|torneira|tinta|pedreiro|construcao|desempenadeira|espatula|alicate|martelo|chave|jardinagem)\b/,
@@ -106,6 +110,7 @@ const importCategoryRules: Record<string, RegExp> = {
 };
 
 export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
+  'Eletrodomésticos': ['air fryer', 'liquidificador', 'cafeteira elétrica', 'sanduicheira elétrica', 'aspirador de pó', 'geladeira', 'máquina de lavar'],
   'Moda Feminina': ['roupa feminina', 'vestido feminino', 'blusa feminina', 'conjunto feminino', 'calça feminina'],
   'Moda Masculina': ['camiseta masculina', 'bermuda masculina', 'calça masculina', 'camisa masculina'],
   'Móveis': ['mesa de jantar', 'escrivaninha', 'guarda-roupa', 'sofá', 'cômoda', 'cadeira de escritório'],
@@ -127,6 +132,18 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   if (category === 'Móveis') {
     const startsWithFurniture = /^(?:(?:kit|conjunto|combo|par|pares|pecas|de|com|[0-9]+)\s+){0,8}(mesa|mesas|sofa|sofas|cadeira|cadeiras|poltrona|armario|guarda roupa|roupeiro|estante|escrivaninha|comoda|rack|aparador|criado mudo|balcao|gabinete|sapateira|beliche|berco|cama|colchao|livreiro|nicho)\b/.test(text);
     return startsWithFurniture && !furnitureAccessories.test(text) && !pet;
+  }
+  if (category === 'Eletrodomésticos') {
+    const appliance = applianceTerms.exec(text);
+    if (!appliance || child || pet) return false;
+    const suffix = text.slice(appliance.index + appliance[0].length).trim();
+    if (/^(papel|silicone|cesta|cesto|forma|forro|capa|filtro|refil|suporte|peca|resistencia|placa)\b/.test(suffix)) return false;
+    const prefix = text.slice(0, appliance.index);
+    if (appliance.index > 100 || appliancePartTerms.test(prefix)) return false;
+    if (/\b(reposicao|substituicao|sobressalente|conserto|reparo|compativel com|compativel para|miniatura|brinquedo)\b/.test(text)) return false;
+    // "Aspirador com filtro" é um aparelho; "filtro para aspirador" é uma peça.
+    if (/\b(pecas?|acessorios?|filtros?|capas?|suportes?|copos?|jarras?|cestos?|cestas?|bandejas?|formas?|controles?|helices?|motores?|placas?|resistencias?)\s+(?:de|do|da|para|p)\b/.test(text)) return false;
+    return true;
   }
   if (category === 'Pets') return pet;
   if (category === 'Moda Infantil') return child && (clothingTerms.test(text) || footwearTerms.test(text) || /\b(manta|cobertor|babador)\b/.test(text)) && !pet;
