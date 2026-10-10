@@ -156,7 +156,7 @@ export default function ShopeeImportAdmin() {
     setAutoCategoryReview(null);
     setBusy('Analisando os produtos dos lotes e sugerindo as categorias corretas…');
     try {
-      const prefixes = autoCategoryPrefixes.split(/[;,\\s]+/).map((value) => value.trim()).filter(Boolean);
+      const prefixes = autoCategoryPrefixes.split(/[;,\s]+/).map((value) => value.trim()).filter(Boolean);
       const result = await analyzeShopeeImportJobs(prefixes, token, true);
       setAutoCategoryReview(result);
     } catch (e) {
