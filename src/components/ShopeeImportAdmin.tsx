@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, type FeedItem, type ShopeeJobStatus, type ShopeeCategoryReclassificationResult } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
 import { resolveProductCategory } from '../utils/productCategories';
 
@@ -29,7 +29,9 @@ export default function ShopeeImportAdmin() {
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [categoryFixPrefix, setCategoryFixPrefix] = useState('83e72945');
+  const [categoryFixPrefix, setCategoryFixPrefix] = useState('6d225389');
+  const [categoryFixTargetCategory, setCategoryFixTargetCategory] = useState('MOTOS & ACESSÓRIOS');
+  const [categoryBatchPreview, setCategoryBatchPreview] = useState<ShopeeCategoryReclassificationResult | null>(null);
   const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setExcluded(0); setExamined(0); setSearchTerms([]); setJobs([]); setError(''); setSuccess(''); };
 
   async function check() {
@@ -146,19 +148,47 @@ export default function ShopeeImportAdmin() {
     } finally { setBusy(''); }
   }
 
+  async function previewImportedCategories() {
+    setError('');
+    setSuccess('');
+    setCategoryBatchPreview(null);
+    setBusy('Conferindo o lote Shopee sem alterar produtos…');
+    try {
+      const result = await reclassifyShopeeImportCategories(
+        categoryFixPrefix, token, categoryFixTargetCategory, true
+      );
+      setCategoryBatchPreview(result);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Não foi possível conferir o lote Shopee.');
+    } finally {
+      setBusy('');
+    }
+  }
+
   async function fixImportedCategories() {
     setError('');
     setSuccess('');
-    setBusy('Corrigindo somente as categorias dos produtos deste lote Shopee…');
+    const previewMatches = categoryBatchPreview
+      && categoryBatchPreview.jobPrefix.toLowerCase() === categoryFixPrefix.trim().toLowerCase()
+      && categoryBatchPreview.category === categoryFixTargetCategory;
+    if (!previewMatches) {
+      setError('Confira novamente o lote e a categoria antes de confirmar a transferência.');
+      return;
+    }
+    setBusy('Atualizando somente a categoria dos produtos vinculados a este lote…');
     try {
-      const result = await reclassifyShopeeImportCategories(categoryFixPrefix, token);
-      setSuccess(
-        'Lote ' + result.jobPrefix + ': ' + result.updatedCount +
-        ' produto(s) ajustado(s), sendo ' + result.utilidades + ' em Utilidades e ' +
-        result.brinquedos + ' em Brinquedos. Preços, imagens e links foram preservados.'
+      const result = await reclassifyShopeeImportCategories(
+        categoryFixPrefix, token, categoryFixTargetCategory, false
       );
+      setSuccess(
+        'Lote ' + result.jobPrefix + ': ' + (result.matchedCount ?? 0) +
+        ' produto(s) conferidos; ' + (result.updatedCount ?? 0) +
+        ' atualizado(s) para ' + categoryFixTargetCategory +
+        '. Preços, imagens, títulos e links foram preservados.'
+      );
+      setCategoryBatchPreview(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Não foi possível corrigir as categorias do lote.');
+      setError(e instanceof Error ? e.message : 'Não foi possível transferir o lote.');
     } finally {
       setBusy('');
     }
@@ -247,33 +277,77 @@ export default function ShopeeImportAdmin() {
       </form>
 
       <section className="mt-6 bg-white rounded-2xl border border-slate-200 p-5">
-        <h2 className="text-xl font-bold">Corrigir categorias do lote já importado</h2>
+        <h2 className="text-xl font-bold">Transferir lote Shopee para outra categoria</h2>
         <p className="mt-2 text-sm text-slate-600">
-          Corrige somente produtos ligados ao lote indicado. Luminárias e abajures vão para Utilidades; caminhão de controle remoto vai para Brinquedos. Os outros produtos e os dados comerciais ficam intactos.
+          Primeiro, confira quantos produtos estão vinculados ao lote e veja uma amostra dos títulos. A conferência não altera nada. Depois da confirmação, somente a categoria dos produtos desse lote será atualizada; preços, imagens, títulos e links de afiliado serão preservados.
         </p>
-        <form onSubmit={(e) => { e.preventDefault(); void fixImportedCategories(); }} className="mt-4 flex flex-wrap items-end gap-3">
+        <form onSubmit={(e) => { e.preventDefault(); void previewImportedCategories(); }} className="mt-4 flex flex-wrap items-end gap-3">
           <label className="block font-semibold text-sm">
             Prefixo do lote (8 primeiros caracteres)
             <input
               className={input}
               value={categoryFixPrefix}
-              onChange={(e) => setCategoryFixPrefix(e.target.value)}
+              onChange={(e) => { setCategoryFixPrefix(e.target.value); setCategoryBatchPreview(null); setError(''); setSuccess(''); }}
               pattern="[a-fA-F0-9]{8}"
               maxLength={8}
               required
               spellCheck={false}
             />
           </label>
+          <label className="block font-semibold text-sm">
+            Categoria de destino
+            <select
+              className={input}
+              value={categoryFixTargetCategory}
+              onChange={(e) => { setCategoryFixTargetCategory(e.target.value); setCategoryBatchPreview(null); setError(''); setSuccess(''); }}
+              required
+            >
+              <option value="">Selecione a categoria de destino</option>
+              {CATEGORIES.filter((category) => category !== 'Todas as Categorias').map((category) => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </label>
           <button
             className="rounded-xl bg-teal-700 text-white px-5 py-3 font-semibold disabled:opacity-50"
             type="submit"
             disabled={!!busy || !token.trim()}
-            title={!token.trim() ? 'Informe o token administrativo no campo abaixo do formulário principal.' : 'Corrigir categorias deste lote'}
+            title={!token.trim() ? 'Informe o token administrativo no campo acima.' : 'Conferir lote sem alterar os produtos'}
           >
-            Corrigir categorias deste lote
+            Conferir lote antes de transferir
           </button>
         </form>
-        {!token.trim() && <p className="mt-2 text-xs text-slate-500">Informe o token administrativo no campo “3. Token administrativo” do formulário acima; não compartilhe o token no chat.</p>}
+        {!token.trim() && <p className="mt-2 text-xs text-slate-500">Informe o token administrativo no campo “3. Token administrativo” do formulário principal. Não compartilhe o token no chat.</p>}
+        {categoryBatchPreview && categoryBatchPreview.jobPrefix.toLowerCase() === categoryFixPrefix.trim().toLowerCase() && categoryBatchPreview.category === categoryFixTargetCategory && (
+          <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <h3 className="font-bold">Lote {categoryBatchPreview.jobPrefix}</h3>
+            <p className="mt-1 text-sm text-slate-700">
+              Foram localizados {categoryBatchPreview.matchedCount ?? 0} produto(s) vinculados a este lote para a categoria <strong>{categoryFixTargetCategory}</strong>. Nenhum produto foi alterado nesta etapa.
+            </p>
+            {!!categoryBatchPreview.preview?.length && (
+              <div className="mt-3 space-y-2">
+                <p className="text-sm font-semibold">Amostra dos produtos e categorias atuais:</p>
+                {categoryBatchPreview.preview.map((item) => (
+                  <div key={item.id} className="rounded-lg border bg-white px-3 py-2 text-sm">
+                    <div className="font-medium">{item.title}</div>
+                    <div className="text-slate-500">Categoria atual: {item.category || 'Sem categoria'}</div>
+                  </div>
+                ))}
+                {(categoryBatchPreview.matchedCount ?? 0) > categoryBatchPreview.preview.length && (
+                  <p className="text-xs text-slate-500">A amostra mostra os primeiros {categoryBatchPreview.preview.length} produtos; o total do lote aparece acima.</p>
+                )}
+              </div>
+            )}
+            <button
+              className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold disabled:opacity-50"
+              type="button"
+              disabled={!!busy || !token.trim() || !(categoryBatchPreview.matchedCount ?? 0)}
+              onClick={() => void fixImportedCategories()}
+            >
+              Confirmar transferência de {categoryBatchPreview.matchedCount ?? 0} produto(s)
+            </button>
+          </div>
+        )}
       </section>
 
       {busy && <p role="status" className="p-4 mt-4 bg-blue-50 rounded-xl">{busy}</p>}
