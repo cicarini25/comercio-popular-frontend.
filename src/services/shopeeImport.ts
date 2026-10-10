@@ -1389,3 +1389,59 @@ export async function repairShopeeCatalogState(token: string) {
   if (!response.ok || !result.ok) throw new Error(result.error || 'Falha ao restaurar o catálogo Shopee.');
   return result;
 }
+
+
+export type ShopeeAutoCategoryProduct = {
+  productId: string;
+  title: string;
+  currentCategory: string;
+  suggestedCategory: string;
+  matchedBy: string;
+  jobId: string;
+  willChange: boolean;
+};
+
+export type ShopeeAutoCategoryReview = {
+  ok: boolean;
+  dryRun: boolean;
+  jobPrefixes: string[];
+  jobs: Array<{
+    id: string;
+    prefix: string;
+    status: string;
+    requestedCount: number;
+    linkedProductCount: number;
+  }>;
+  totalProducts: number;
+  categoryCounts: Record<string, number>;
+  motoCount: number;
+  plannedChanges: number;
+  updatedCount: number;
+  products: ShopeeAutoCategoryProduct[];
+};
+
+export async function analyzeShopeeImportJobs(
+  jobPrefixes: string[],
+  token: string,
+  dryRun = true
+): Promise<ShopeeAutoCategoryReview> {
+  const prefixes = [...new Set(jobPrefixes.map((value) => value.trim().toLowerCase()).filter(Boolean))];
+  if (!prefixes.length || prefixes.length > 10 || prefixes.some((value) => !/^[a-f0-9]{8}$/.test(value))) {
+    throw new Error('Informe os prefixos dos lotes com 8 caracteres hexadecimais, separados por vírgula.');
+  }
+  if (!token.trim()) throw new Error('Informe o token administrativo no painel do site.');
+
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/reclassify-import-jobs-auto-categories', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token.trim()
+    },
+    body: JSON.stringify({ jobPrefixes: prefixes, dryRun })
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || 'Não foi possível analisar os lotes Shopee.');
+  }
+  return result as ShopeeAutoCategoryReview;
+}
