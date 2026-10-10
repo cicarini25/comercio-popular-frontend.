@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, SHOPEE_SEARCH_SUGGESTIONS, isGeneralShopeeSearch, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, type FeedItem, type ShopeeJobStatus } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
 import { resolveProductCategory } from '../utils/productCategories';
 
 type Preview = { id: string; title: string; price: number; image: string; category: string };
 type JobView = ShopeeJobStatus & { displayStatus?: string };
 
-const API_NOTE = 'Uma busca específica procura o produto digitado e filtra peças e acessórios. Uma busca geral pela categoria pode combinar diferentes tipos de produtos.';
+const API_NOTE = 'Uma busca específica procura o produto digitado e suas variações, mantendo os detalhes informados e filtrando peças e acessórios. Uma busca geral pela categoria combina diferentes tipos de produtos.';
 
 export default function ShopeeImportAdmin() {
   const [mode, setMode] = useState<'api' | 'csv'>('api');
@@ -164,6 +164,8 @@ export default function ShopeeImportAdmin() {
     }
   }
 
+  const suggestions = getShopeeSearchSuggestions(keyword, targetCategory);
+  const generalSearch = isGeneralShopeeSearch(keyword, targetCategory);
   const input = 'block w-full rounded-xl border border-slate-300 bg-white p-3 mt-2 text-sm';
   const completedCount = jobs.reduce((sum, job) => sum + job.imported_count + job.updated_count, 0);
   const errorCount = jobs.reduce((sum, job) => sum + job.error_count, 0);
@@ -196,19 +198,19 @@ export default function ShopeeImportAdmin() {
             <label className="block font-semibold">2. Termo para buscar na Shopee
               <input className={input} required value={keyword} onChange={(e) => { reset(); setKeyword(e.target.value); }} placeholder="Ex.: fone bluetooth" maxLength={100} />
             </label>
-            {(SHOPEE_SEARCH_SUGGESTIONS[targetCategory] || []).length > 0 && <div>
-              <p className="text-sm text-slate-600 mb-2">Sugestões para {targetCategory}:</p>
+            {suggestions.length > 0 && <div>
+              <p className="text-sm text-slate-600 mb-2">{keyword.trim() && !generalSearch ? 'Variações do produto pesquisado' : 'Sugestões para ' + targetCategory}:</p>
               <div className="flex flex-wrap gap-2">
-                {SHOPEE_SEARCH_SUGGESTIONS[targetCategory].map((term) => <button key={term} type="button" onClick={() => { reset(); setKeyword(term); }} className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 px-3 py-2 text-sm">{term}</button>)}
+                {suggestions.map((term) => <button key={term} type="button" onClick={() => { reset(); setKeyword(term); }} className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 px-3 py-2 text-sm">{term}</button>)}
               </div>
             </div>}
             <label className="flex items-start gap-3 text-sm">
               <input type="checkbox" checked={filterCategory} onChange={(e) => { reset(); setFilterCategory(e.target.checked); }} className="mt-1" />
               <span><strong>Filtrar produtos pela categoria escolhida</strong><br />Usa o título para reduzir itens fora da categoria. Produtos com títulos pouco claros podem ficar de fora; revise a prévia antes de importar.</span>
             </label>
-            {filterCategory && isGeneralShopeeSearch(keyword, targetCategory) && (SHOPEE_SEARCH_SUGGESTIONS[targetCategory] || []).length > 0 && <label className="flex items-start gap-3 text-sm">
+            {suggestions.length > 0 && <label className="flex items-start gap-3 text-sm">
               <input type="checkbox" checked={completeCategory} onChange={(e) => { reset(); setCompleteCategory(e.target.checked); }} className="mt-1" />
-              <span><strong>Completar lote com buscas da mesma categoria</strong><br />Nas buscas gerais, combina os tipos de produtos sugeridos acima. Buscas específicas usam somente o produto digitado.</span>
+              <span><strong>{generalSearch ? 'Variar os tipos de produtos da categoria' : 'Buscar também variações do mesmo produto'}</strong><br />{generalSearch ? 'Combina as sugestões da categoria para oferecer mais variedade no lote.' : 'Consulta modelos e variações compatíveis com o termo digitado. Desmarque para consultar somente esse termo.'}</span>
             </label>}
           </> : <>
           <label className="block font-semibold">Categoria de destino no site <span className="text-sm font-normal text-slate-500">(opcional)</span>
