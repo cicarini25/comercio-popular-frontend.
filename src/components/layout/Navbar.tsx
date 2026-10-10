@@ -44,6 +44,7 @@ interface NavbarProps {
   onOpenSellerDashboard: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onSearchSubmit: () => void;
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
   onLogout: () => void;
@@ -67,6 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSellerDashboard,
   searchQuery,
   onSearchChange,
+  onSearchSubmit,
   selectedCategory,
   onSelectCategory,
   onLogout,
@@ -188,14 +190,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 <input
                   id="search-input-header"
-                  type="text"
+                  type="search"
                   placeholder={
                     isListening
                       ? '🎙️ Ouvindo... Fale o produto agora...'
-                      : 'Buscar achadinhos, produtos locais, eletrônicos, casa...'
+                      : 'Buscar produtos em todas as categorias...'
                   }
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onSearchSubmit(); e.currentTarget.blur(); } }}
+                  aria-label="Buscar produtos em todas as categorias"
                   className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-neutral-800 placeholder-neutral-400 outline-none"
                 />
 
@@ -261,6 +265,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   id="btn-search-submit"
                   type="button"
                   onClick={() => {
+                    onSearchSubmit();
                     const input = document.getElementById('search-input-header') as HTMLInputElement | null;
                     if (input) input.blur();
                   }}
@@ -751,17 +756,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <CategoryPicker value={selectedCategory} onChange={onSelectCategory} compact />
-            <Search size={16} className="text-neutral-400 ml-3 shrink-0" />
+            <button type="button" onClick={onSearchSubmit} aria-label="Pesquisar produtos" className="ml-2 p-2 text-teal-700 shrink-0 rounded-lg hover:bg-teal-50"><Search size={16} /></button>
             <input
               id="mobile-search-input"
-              type="text"
+              type="search"
               placeholder={
                 isListening
                   ? '🎙️ Ouvindo... Fale agora...'
-                  : 'Buscar achadinhos, produtos...'
+                  : 'Qual produto você procura?'
               }
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onSearchSubmit(); e.currentTarget.blur(); } }}
+                  aria-label="Buscar produtos em todas as categorias"
               className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm outline-none"
             />
             {searchQuery && (
