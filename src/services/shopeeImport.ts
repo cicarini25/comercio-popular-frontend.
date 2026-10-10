@@ -78,9 +78,9 @@ export function validAffiliate(value: string): boolean {
 
 
 const searchText = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-const childTerms = /\b(infantil|infantis|bebe|bebes|crianca|criancas|kids|meninos?|meninas?|juvenil)\b/;
+const childTerms = /\b(infantil|infantis|bebe|bebes|crianca|criancas|kids|meninos?|meninas?|juvenil|[1-9] anos|1[0-6] anos)\b/;
 const clothingTerms = /\b(camisetas?|camisas?|blusas?|moletom|moletons|calcas?|shorts?|bermudas?|saias?|vestidos?|roupas?|jaquetas?|croppeds?|lingeries?|meias?|pijamas?|macacoes?|macaquinho|macaquinhos|bodies|body|bodi|bata|batas|casacos?|cardigans?|sueter|sueteres|regatas?|sutias?|calcinhas?|cuecas?|biquinis?|maios?|legging|leggings)\b/;
-const footwearTerms = /\b(tenis|sandalia|sapato|chinelo|chuteira|bota|botina|calcado|mocassim|sapatilha|sapatenis|coturno|tamanco)\b/;
+const footwearTerms = /\b(tenis|sandalias?|sapatos?|chinelos?|chuteiras?|botas?|botinas?|calcados?|mocassim|mocassins|sapatilhas?|sapatenis|coturnos?|tamancos?)\b/;
 const petTerms = /\b(pets?|gatos?|cachorros?|caes|racao|racoes|coleira|arranhador|aquario|peitoral para cachorro)\b/;
 const furnitureTerms = /\b(sofa|sofas|cadeiras?|poltrona|armario|guarda roupa|roupeiro|estante|escrivaninha|comoda|rack|aparador|criado mudo|balcao|gabinete|sapateira|beliche|berco|cama|colchao|mesas?)\b/;
 const furnitureAccessories = /\b(centro de mesa|mesa posta|mesa de som|mesa digitalizadora|mesa de luz|mesa de corte|cama elastica|cama para pet|toalha|toalhas|capa|capas|forro|lencol|lencois|colcha|edredom|cobre leito|protetor|puxador|dobradica|corredica|rodizio|pezinho|adesivo|caneta|canetas|cachepot|lembrancinha|lembrancinhas|decoracao de festa|enfeite|enfeites|organizador de cabos|organizador para cabos|suporte para monitor|suporte para tv|prateleira.{0,20}(monitor|tv)|porta paliteiro|paliteiro|porta guardanapo|jogo americano|mouse pad|mousepad|ventilador|luminaria|abajur|relogio|tapete|brinquedo|miniatura|boneca|bonecas|casa de boneca|cortador|carimbo|pasta americana|tabua|bandeja|peneira|escorredor|churrasqueira|fogareiro|materiais? para|pecas? para|acessorios? para|kit de montagem)\b/;
@@ -110,7 +110,22 @@ const importCategoryRules: Record<string, RegExp> = {
 };
 
 export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
-  'Eletrodomésticos': ['air fryer', 'liquidificador', 'cafeteira elétrica', 'sanduicheira elétrica', 'aspirador de pó', 'geladeira', 'máquina de lavar'],
+  "Alimentos & Bebidas": ["café","chocolate","azeite","chá","suplemento alimentar"],
+  "Cuidado & Beleza": ["maquiagem","perfume","shampoo","hidratante corporal","esmalte"],
+  "Bike Elétrica e Acessórios": ["bicicleta elétrica","acessório bicicleta elétrica","patinete elétrico"],
+  "Esportes & Lazer": ["halter academia","barraca camping","bola futebol","raquete tênis","equipamento pesca"],
+  "TVs": ["smart tv","televisão","televisor"],
+  "MOTOS & ACESSÓRIOS": ["capacete moto","luva motociclista","acessório moto","retrovisor moto"],
+  "Instrumentos Musicais": ["violão","guitarra","teclado musical","ukulele","violino"],
+  "Aparelhos de Som": ["caixa de som bluetooth","soundbar","amplificador de áudio","rádio portátil"],
+  "Acessórios para celulares": ["capinha celular","carregador celular","película celular","suporte celular","power bank"],
+  "Smartphones": ["smartphone","celular samsung","celular motorola","iphone"],
+  "Notebook": ["notebook","laptop","chromebook"],
+  "Computadores": ["computador desktop","monitor computador","teclado computador","mouse computador","memória ram"],
+  "Tecnologia": ["câmera de segurança","smartwatch","sensor inteligente","drone"],
+  "Casa & Cozinha": ["jogo de panelas","utensílios de cozinha","pote hermético","jogo de pratos","garrafa térmica"],
+  "Utilidades": ["organizador multiuso","carrinho organizador","luminária","varal de roupas","caixa organizadora"],
+  "Eletrodomésticos": ["air fryer","liquidificador","cafeteira elétrica","sanduicheira elétrica","aspirador de pó","geladeira","máquina de lavar"],
   'Moda Feminina': ['roupa feminina', 'vestido feminino', 'blusa feminina', 'conjunto feminino', 'calça feminina'],
   'Moda Masculina': ['camiseta masculina', 'bermuda masculina', 'calça masculina', 'camisa masculina'],
   'Móveis': ['mesa de jantar', 'escrivaninha', 'guarda-roupa', 'sofá', 'cômoda', 'cadeira de escritório'],
@@ -150,6 +165,8 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   if (category === 'Calçados') return footwearTerms.test(text) && !child && !/\b(sacos?|sacola|porta sapatos|organizador|palmilha|cadarco|cadarcos)\b/.test(text);
   if (category === 'Moda Masculina' || category === 'Moda Feminina') {
     if (!(clothingTerms.test(text) || (/\bconjuntos?\b/.test(text) && /\b(masculin[oa]s?|feminin[oa]s?|homem|homens|mulher|mulheres|unissex)\b/.test(text))) || child || pet || /\b(bonecas?|bonecos?|cabide|cabides|organizador|saco para|sacos para|lavar roupa|lavar roupas|roupa de cama|capa para|capas para)\b/.test(text)) return false;
+    if (category === 'Moda Feminina' && /\b(masculin[oa]s?|homem|homens|cuecas?)\b/.test(text) && !/\b(feminin[oa]s?|mulher|mulheres)\b/.test(text)) return false;
+    if (category === 'Moda Masculina' && /\b(feminin[oa]s?|mulher|mulheres)\b/.test(text) && !/\b(masculin[oa]s?|homem|homens)\b/.test(text)) return false;
     if (category === 'Moda Masculina') return /\b(masculin[oa]s?|homem|homens|unissex|cuecas?)\b/.test(text);
     return /\b(feminin[oa]s?|mulher|mulheres|unissex|vestidos?|saias?|croppeds?|lingeries?|sutias?|calcinhas?|biquinis?|maios?)\b/.test(text);
   }
@@ -161,10 +178,21 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
     /\b(playstation|xbox|nintendo|videogame|video game|console|joystick|controle gamer|jogo|gamer)\b/.test(text);
   if (category === 'Utilidades') return !pet && !clothingTerms.test(text) && !footwearTerms.test(text) &&
     (!furnitureTerms.test(text) || furnitureAccessories.test(text) || /\b(organizador|carrinho organizador)\b/.test(text));
+  const completeDeviceCategories = ['Notebook', 'Smartphones', 'TVs', 'Aparelhos de Som', 'Fones & Headphones', 'Instrumentos Musicais'];
+  if (completeDeviceCategories.includes(category)) {
+    // Peças mencionam o aparelho compatível, mas não são o produto principal.
+    if (/\b(pecas?|reposicao|substituicao|reparo|conserto|somente caixa|caixa vazia|miniatura|brinquedo)\b/.test(text)) return false;
+    const deviceParts = /\b(capas?|capinhas?|peliculas?|suportes?|bolsas?|cases?|capas protetoras|carrinhos?|controles? remotos?|cabos?|carregadores?|adaptadores?|baterias?|telas?|displays?|placas?|carcacas?|teclas?|almofadas?|espumas?)\b/;
+    const device = importCategoryRules[category]?.exec(text);
+    if (device && deviceParts.test(text.slice(0, device.index))) return false;
+    if (/\b(capa|capinha|pelicula|suporte|case|bolsa|controle remoto|carregador|adaptador|bateria|tela|display|placa|almofada|espuma)\s+(?:para|de|do|da|p)\b/.test(text)) return false;
+  }
   if (category === 'Smartphones' && /\b(capa|capinha|pelicula|carregador|cabo|suporte|adaptador|peca|tela de reposicao)\b/.test(text)) return false;
   if (category === 'Tecnologia') return /\b(eletronico|smart|camera|relogio|smartwatch|teclado|mouse|adaptador|usb|sensor|led|wifi|bluetooth|carregador|drone)\b/.test(text) && !clothingTerms.test(text);
   const rule = importCategoryRules[category];
-  return rule ? rule.test(text) && !clothingTerms.test(text) && !pet : false;
+  // Reconhece também títulos no plural, como panelas, ferramentas e cosméticos.
+  const singularWords = text.replace(/\b([a-z]{4,})s\b/g, '$1');
+  return rule ? (rule.test(text) || rule.test(singularWords)) && !clothingTerms.test(text) && !pet : false;
 }
 
 export async function searchShopeeOffers(
@@ -188,26 +216,25 @@ export async function searchShopeeOffers(
   const seen = new Set<string>();
   let excluded = 0;
   let examined = 0;
+  const suggestions = SHOPEE_SEARCH_SUGGESTIONS[destinationCategory] || [];
+  const genericTerms = ['produto', 'produtos', 'roupa', 'roupas', 'calcado', 'calcados', 'sapato', 'sapatos', 'moveis', 'eletrodomestico', 'eletrodomesticos', 'acessorio', 'acessorios', 'utilidade', 'utilidades'];
+  const genericSearch = genericTerms.includes(searchText(searchTerm)) || searchText(searchTerm) === searchText(destinationCategory);
   const terms = filterCategory && completeCategory
-    ? [...new Set([searchTerm, ...(SHOPEE_SEARCH_SUGGESTIONS[destinationCategory] || [])])]
+    ? [...new Set(genericSearch ? [...suggestions, searchTerm] : [searchTerm, ...suggestions])]
     : [searchTerm];
   const searchTerms: string[] = [];
   let requests = 0;
+  const exhausted = new Set<string>();
+  const maxRequests = 12;
 
-  // Consulta limitada a 12 chamadas, com IDs únicos entre termos e páginas.
-  for (const term of terms) {
-    if (results.length >= target || requests >= 12) break;
-    searchTerms.push(term);
-    let page = 1;
-    let hasNextPage = true;
-    const maxPages = terms.length > 1 ? 3 : 12;
-    while (results.length < target && hasNextPage && page <= maxPages && requests < 12) {
-      const pageLimit = 50;
-      const query = new URLSearchParams({
-        keyword: term,
-        page: String(page),
-        limit: String(pageLimit)
-      });
+  // Alterna os tipos de produto para uma busca geral não ficar presa a um único tipo.
+  for (let page = 1; page <= maxRequests && results.length < target; page += 1) {
+    if (exhausted.size === terms.length || requests >= maxRequests) break;
+    for (const term of terms) {
+      if (results.length >= target || requests >= maxRequests) break;
+      if (exhausted.has(term)) continue;
+      if (!searchTerms.includes(term)) searchTerms.push(term);
+      const query = new URLSearchParams({ keyword: term, page: String(page), limit: '50' });
       requests += 1;
       const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/search?' + query.toString(), {
         headers: { Authorization: 'Bearer ' + token.trim() }
@@ -216,8 +243,11 @@ export async function searchShopeeOffers(
       if (!response.ok || !result.ok) {
         throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao consultar a API Shopee.');
       }
-
       const products = Array.isArray(result.products) ? result.products : [];
+      const perTermTarget = genericSearch && filterCategory && completeCategory && page === 1
+        ? Math.max(1, Math.ceil(target / Math.max(suggestions.length, 1)))
+        : target;
+      let acceptedForTerm = 0;
       for (const product of products) {
         const id = String(product?.externalId || '');
         if (!id || seen.has(id)) continue;
@@ -228,10 +258,10 @@ export async function searchShopeeOffers(
           continue;
         }
         results.push(product);
-        if (results.length >= target) break;
+        acceptedForTerm += 1;
+        if (results.length >= target || acceptedForTerm >= perTermTarget) break;
       }
-      hasNextPage = Boolean(result.pageInfo?.hasNextPage);
-      page += 1;
+      if (!products.length || !result.pageInfo?.hasNextPage) exhausted.add(term);
     }
   }
 
