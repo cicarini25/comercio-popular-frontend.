@@ -79,7 +79,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800&auto=format&fit=crop&q=80'
     ],
-    category: 'Tecnologia',
+    category: 'ELETRÔNICOS',
     isAchadinho: true,
     stockUnits: 0,
     badge: 'Esgotado',
@@ -107,7 +107,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=800&auto=format&fit=crop&q=80'
     ],
-    category: 'Tecnologia',
+    category: 'ELETRÔNICOS',
     isAchadinho: true,
     stockUnits: 12,
     badge: 'Mais Vendido Amazon',
@@ -161,7 +161,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     images: [
       '/images/smartwatch_esportivo.jpg'
     ],
-    category: 'Tecnologia',
+    category: 'ELETRÔNICOS',
     isAchadinho: true,
     stockUnits: 5,
     badge: 'Preço Histórico',
@@ -465,7 +465,7 @@ export const CATEGORIES = [
   'Eletrodomésticos',
   'ELETRO & ACESSÓRIOS',
   'Móveis',
-  'Tecnologia',
+  'ELETRÔNICOS',
   'RELÓGIOS',
   'Games',
   'Computadores',
