@@ -37,6 +37,9 @@ const canonicalCategories = new Map(
 );
 
 const categoryAliases: Record<string, string> = {
+  'armarinhos': 'ARMARINHOS & TRICÔ',
+  'trico': 'ARMARINHOS & TRICÔ',
+  'armarinhos e trico': 'ARMARINHOS & TRICÔ',
   'tecnologia': 'ELETRÔNICOS',
   'casa construcao': 'Ferramentas',
   'home living': 'Ferramentas',
