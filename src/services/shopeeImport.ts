@@ -893,6 +893,7 @@ export async function searchShopeeOffers(
 
   const target = Math.max(1, Math.min(Number(requested) || 60, 60));
   const results: any[] = [];
+  const remainingMatches: any[] = [];
   const seen = new Set<string>();
   let excluded = 0;
   let examined = 0;
@@ -938,13 +939,20 @@ export async function searchShopeeOffers(
           excluded += 1;
           continue;
         }
+        if (acceptedForTerm >= perTermTarget) {
+          remainingMatches.push(product);
+          continue;
+        }
         results.push(product);
         acceptedForTerm += 1;
-        if (results.length >= target || acceptedForTerm >= perTermTarget) break;
+        if (results.length >= target) break;
       }
       if (!products.length || !result.pageInfo?.hasNextPage) exhausted.add(term);
     }
   }
+
+  // Aproveita ofertas compatíveis já consultadas quando algumas variações têm poucas opções.
+  if (results.length < target) results.push(...remainingMatches.slice(0, target - results.length));
 
   const items: FeedItem[] = [];
   let skipped = 0;
