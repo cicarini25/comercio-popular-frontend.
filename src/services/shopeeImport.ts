@@ -125,7 +125,7 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
   "Smartphones": ["smartphone","celular samsung","celular motorola","iphone"],
   "Notebook": ["notebook","laptop","chromebook"],
   "Computadores": ["computador desktop","monitor computador","teclado computador","mouse computador","memória ram"],
-  "Tecnologia": ["câmera de segurança","smartwatch","sensor inteligente","drone"],
+  "ELETRÔNICOS": ["câmera de segurança","smartwatch","sensor inteligente","drone"],
   "Casa & Cozinha": ["jogo de panelas","utensílios de cozinha","pote hermético","jogo de pratos","garrafa térmica"],
   "Utilidades": ["organizador multiuso","carrinho organizador","luminária","varal de roupas","caixa organizadora"],
   "Eletrodomésticos": ["air fryer","liquidificador","cafeteira elétrica","sanduicheira elétrica","aspirador de pó","geladeira","máquina de lavar"],
@@ -256,7 +256,7 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
     if (/\b(capa|capinha|pelicula|suporte|case|bolsa|controle remoto|carregador|adaptador|bateria|tela|display|placa|almofada|espuma)\s+(?:para|de|do|da|p)\b/.test(text)) return false;
   }
   if (category === 'Smartphones' && /\b(capa|capinha|pelicula|carregador|cabo|suporte|adaptador|peca|tela de reposicao)\b/.test(text)) return false;
-  if (category === 'Tecnologia') return /\b(eletronico|smart|camera|relogio|smartwatch|teclado|mouse|adaptador|usb|sensor|led|wifi|bluetooth|carregador|drone)\b/.test(text) && !clothingTerms.test(text);
+  if (category === 'ELETRÔNICOS') return /\b(eletronico|smart|camera|relogio|smartwatch|teclado|mouse|adaptador|usb|sensor|led|wifi|bluetooth|carregador|drone)\b/.test(text) && !clothingTerms.test(text);
   const rule = importCategoryRules[category];
   // Reconhece também títulos no plural, como panelas, ferramentas e cosméticos.
   const singularWords = text.replace(/\b([a-z]{4,})s\b/g, '$1');
