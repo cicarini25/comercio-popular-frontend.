@@ -37,10 +37,11 @@ const canonicalCategories = new Map(
 );
 
 const categoryAliases: Record<string, string> = {
-  'home living': 'Casa & Construção',
-  'home decor': 'Casa & Construção',
-  'home improvement': 'Casa & Construção',
-  'construction tools': 'Casa & Construção',
+  'casa construcao': 'Ferramentas',
+  'home living': 'Ferramentas',
+  'home decor': 'Ferramentas',
+  'home improvement': 'Ferramentas',
+  'construction tools': 'Ferramentas',
   'sports outdoors': 'Esportes & Lazer',
   'sports recreation': 'Esportes & Lazer',
   'toys': 'Brinquedos',
@@ -135,7 +136,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(panela|frigideira|prato|talher|utensilio de cozinha|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text) ||
       /\b(tacas?|copos?|faqueiros?)\b/.test(text) ||
       /\bpotes? (de |para |p )?(vidro|mantimentos|hermetic)/.test(text)) return 'Casa & Cozinha';
-  if (/(ferramenta|furadeira|parafusadeira|torneira|tinta|material de construcao|aparador de cerca|cerca viva|jardinagem)/.test(text)) return 'Casa & Construção';
+  if (/(ferramenta|furadeira|parafusadeira|torneira|tinta|material de construcao|aparador de cerca|cerca viva|jardinagem)/.test(text)) return 'Ferramentas';
   if (/(tenis|sandalia|sapato|chinelo|chuteira|bota|calcado)/.test(text)) return 'Calçados';
   if (/(electric scooter|scooter eletrica)/.test(text) || /(bicicleta|bike|e bike|ebike|scooter).{0,45}(eletric|bateria|motor)|bateria.{0,35}(bicicleta|bike|scooter)|acessorio.{0,35}(bicicleta|bike eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
   if (/(academia|halter|esteira|bicicleta|camping|esporte|fitness|bola de futebol)/.test(text)) return 'Esportes & Lazer';
@@ -166,7 +167,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const titleDrivenCategories = new Set([
     'Brinquedos', 'Pets', 'Instrumentos Musicais', 'Moda Feminina', 'Moda Masculina', 'Moda Infantil',
     'TVs', 'Notebook', 'Tecnologia', 'Computadores', 'Smartphones', 'Acessórios para celulares',
-    'Fones & Headphones', 'Games', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Casa & Construção',
+    'Fones & Headphones', 'Games', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
     'MOTOS & ACESSÓRIOS', 'Utilidades',
   ]);
