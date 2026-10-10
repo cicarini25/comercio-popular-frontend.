@@ -24,11 +24,11 @@ const curatedCategoryByTitle = new Map<string, string>([
   [normalizeKey("Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial"), 'Utilidades'],
   [normalizeKey("Kit Jogo Pano De Prato Cozinha Copa Cheff Algodão Sortidos"), 'Utilidades'],
   [normalizeKey("Tapete Sala 1,50x1,00 Peludo 4 Cm De Altura Shaggy Promoção"), 'Utilidades'],
-  [normalizeKey("Cabo De Carregamento Rápido Baseus Pd Usb C Para Typec Qc 4.0 Para iPhone 15 / Xiaomi / Huawei / Macbook (100W)"), 'Tecnologia'],
-  [normalizeKey("Inova Carregador Portátil Power Bank Grande 20000mah/10000mAh Turbo 22.5W PD Rápido Com Display Portátil"), 'Tecnologia'],
-  [normalizeKey("Teclado Mecanico Gamer TGT Sherman Compacto, Rainbow, ABNT2, Switch Azul, Preto, TGT-SHTKL-RBW01"), 'Tecnologia'],
-  [normalizeKey("Mouse Para Jogos Sem Fio Leve ATTACK SHARK X11 Com Base De Carregamento RGB Tri-Mode-2.4G/USB-C/BT"), 'Tecnologia'],
-  [normalizeKey("UGREEN USB Bluetooth 5.4 5.3 Adaptador Receptor De Transmissor Sem Fio Dongle Para PC Windows 11 10 8.1 7 Fone De Ouvido"), 'Tecnologia'],
+  [normalizeKey("Cabo De Carregamento Rápido Baseus Pd Usb C Para Typec Qc 4.0 Para iPhone 15 / Xiaomi / Huawei / Macbook (100W)"), 'ELETRÔNICOS'],
+  [normalizeKey("Inova Carregador Portátil Power Bank Grande 20000mah/10000mAh Turbo 22.5W PD Rápido Com Display Portátil"), 'ELETRÔNICOS'],
+  [normalizeKey("Teclado Mecanico Gamer TGT Sherman Compacto, Rainbow, ABNT2, Switch Azul, Preto, TGT-SHTKL-RBW01"), 'ELETRÔNICOS'],
+  [normalizeKey("Mouse Para Jogos Sem Fio Leve ATTACK SHARK X11 Com Base De Carregamento RGB Tri-Mode-2.4G/USB-C/BT"), 'ELETRÔNICOS'],
+  [normalizeKey("UGREEN USB Bluetooth 5.4 5.3 Adaptador Receptor De Transmissor Sem Fio Dongle Para PC Windows 11 10 8.1 7 Fone De Ouvido"), 'ELETRÔNICOS'],
 ]);
 
 const canonicalCategories = new Map(
@@ -37,6 +37,7 @@ const canonicalCategories = new Map(
 );
 
 const categoryAliases: Record<string, string> = {
+  'tecnologia': 'ELETRÔNICOS',
   'casa construcao': 'Ferramentas',
   'home living': 'Ferramentas',
   'home decor': 'Ferramentas',
@@ -59,8 +60,8 @@ const categoryAliases: Record<string, string> = {
   'home appliances': 'Eletrodomésticos',
   'appliances': 'Eletrodomésticos',
   'furniture': 'Móveis',
-  'electronics': 'Tecnologia',
-  'consumer electronics': 'Tecnologia',
+  'electronics': 'ELETRÔNICOS',
+  'consumer electronics': 'ELETRÔNICOS',
   'computers accessories': 'Computadores',
   'computer accessories': 'Computadores',
   'laptops': 'Notebook',
@@ -125,7 +126,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(moda infantil|roupa infantil|roupas infantis|vestido infantil|conjunto infantil|roupa de bebe|roupas de bebe)/.test(text)) return 'Moda Infantil';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(notebook|laptop|chromebook)/.test(text)) return 'Notebook';
-  if (/(camera de seguranca|camera wi fi|camera wifi)/.test(text)) return 'Tecnologia';
+  if (/(camera de seguranca|camera wi fi|camera wifi)/.test(text)) return 'ELETRÔNICOS';
   if (/(computador|desktop|pc gamer|placa mae|placa de video|memoria ram)/.test(text)) return 'Computadores';
   if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
   if (/(capa para celular|capinha|pelicula para celular|carregador de celular|acessorio para celular)/.test(text)) return 'Acessórios para celulares';
@@ -166,7 +167,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const titleCategory = inferFromText(title, '');
   const titleDrivenCategories = new Set([
     'Brinquedos', 'Pets', 'Instrumentos Musicais', 'Moda Feminina', 'Moda Masculina', 'Moda Infantil',
-    'TVs', 'Notebook', 'Tecnologia', 'Computadores', 'Smartphones', 'Acessórios para celulares',
+    'TVs', 'Notebook', 'ELETRÔNICOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
     'Fones & Headphones', 'Games', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
     'MOTOS & ACESSÓRIOS', 'Utilidades',
