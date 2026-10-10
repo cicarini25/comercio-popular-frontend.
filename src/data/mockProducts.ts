@@ -463,6 +463,7 @@ export const CATEGORIES = [
   'Casa & Cozinha',
   'Casa & Construção',
   'Eletrodomésticos',
+  'ELETRO & ACESSÓRIOS',
   'Móveis',
   'Tecnologia',
   'Games',
