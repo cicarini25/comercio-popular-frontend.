@@ -466,6 +466,7 @@ export const CATEGORIES = [
   'ELETRO & ACESSÓRIOS',
   'Móveis',
   'Tecnologia',
+  'RELÓGIOS',
   'Games',
   'Computadores',
   'Notebook',
