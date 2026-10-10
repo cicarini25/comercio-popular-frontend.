@@ -32,6 +32,36 @@ import { Flame, Store, Sparkles, Filter, CheckCircle2, SlidersHorizontal, Rotate
 import confetti from 'canvas-confetti';
 import { notifyWishlistPriceDrop } from './services/notificationService';
 
+
+const normalizeProductSearch = (value: string) => value
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .replace(/\bair\s*fryers?\b/g, 'airfryer')
+  .replace(/\bfritadeiras?\s+(?:eletricas?\s+)?sem\s+oleo\b/g, 'airfryer')
+  .replace(/\b(laptops?|chromebooks?)\b/g, 'notebook')
+  .replace(/\b(televisao|televisoes|televisores?|smart tv)\b/g, 'tv')
+  .replace(/\brefrigeradores?\b/g, 'geladeira')
+  .replace(/\bsmartphones?\b/g, 'celular')
+  .trim();
+
+const productSearchScore = (product: Product, query: string): number => {
+  const q = normalizeProductSearch(query);
+  if (!q) return 0;
+  const title = normalizeProductSearch(product.title);
+  const text = normalizeProductSearch([product.title, product.description, product.category, product.ean || '', product.upc || ''].join(' '));
+  const singular = (word: string) => word.length > 4 ? word.replace(/s$/, '') : word;
+  const words = q.split(' ').filter(word => !['de', 'do', 'da', 'dos', 'das', 'com', 'para', 'e'].includes(word));
+  if (!words.length) return -1;
+  const matchesWord = (field: string, word: string) => field.split(' ').some(candidate => singular(candidate).startsWith(singular(word)));
+  if (!words.every(word => matchesWord(text, word))) return -1;
+  let score = words.every(word => matchesWord(title, word)) ? 100 : 10;
+  if (title.includes(q)) score += 50;
+  if (title.startsWith(q)) score += 30;
+  const firstWordIndex = title.indexOf(words[0]);
+  if (firstWordIndex > 0 && /\b(pecas?|acessorios?|capas?|filtros?|suportes?|reposicao|forros?|papel|silicone|formas?|bandejas?|cestos?|cabos?|adaptadores?|carregadores?)\b/.test(title.slice(0, firstWordIndex))) score -= 80;
+  return score;
+};
+
 const PENDING_AFFILIATE_KEY = 'cp_pending_affiliate_product';
 
 export default function App() {
@@ -481,28 +511,37 @@ export default function App() {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
   };
 
-  // Filtered products for home and category views
+  const hasSearch = searchQuery.trim().length > 0;
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+      setSelectedCategory('Todas as Categorias');
+      if (!searchQuery.trim() || selectedCategory !== 'Todas as Categorias') {
+        setPriceRange([catalogMinPrice, catalogMaxPrice]);
+      }
+      if (activeTab !== 'home') setActiveTab('home');
+    }
+  };
+  const handleSearchSubmit = () => {
+    handleSearchChange(searchQuery.trim());
+    if (searchQuery.trim()) requestAnimationFrame(() =>
+      document.getElementById('catalog-search-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    );
+  };
+
+  // A busca encontra os produtos em todo o catálogo e coloca os nomes mais relevantes primeiro.
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      // A categoria dos produtos da API já foi normalizada no catálogo.
-      const productCategory = p.catalogSource === 'api'
-        ? p.category
-        : resolveProductCategory(p.category, p.title, p.description);
-      const matchesCategory =
-        selectedCategory === 'Todas as Categorias' || productCategory === selectedCategory;
-      const q = searchQuery.toLowerCase();
-      const matchesSearch =
-        searchQuery === '' ||
-        p.title.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        (p.ean && p.ean.toLowerCase().includes(q)) ||
-        (p.upc && p.upc.toLowerCase().includes(q));
-      const matchesPrice =
-        p.price >= priceRange[0] && p.price <= priceRange[1];
-      return matchesCategory && matchesSearch && matchesPrice;
-    });
-  }, [products, selectedCategory, searchQuery, priceRange]);
+    return products.map((product, index) => ({ product, index, score: productSearchScore(product, searchQuery) }))
+      .filter(({ product, score }) => {
+        const productCategory = product.catalogSource === 'api'
+          ? product.category
+          : resolveProductCategory(product.category, product.title, product.description);
+        const matchesCategory = hasSearch || selectedCategory === 'Todas as Categorias' || productCategory === selectedCategory;
+        return matchesCategory && (!hasSearch || score >= 0) && product.price >= priceRange[0] && product.price <= priceRange[1];
+      })
+      .sort((a, b) => hasSearch ? b.score - a.score || a.index - b.index : a.index - b.index)
+      .map(({ product }) => product);
+  }, [products, selectedCategory, searchQuery, hasSearch, priceRange]);
 
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50 selection:bg-teal-100 selection:text-teal-900">
@@ -523,7 +562,8 @@ export default function App() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenSellerDashboard={() => setIsSellerDashboardOpen(true)}
         searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={handleSearchChange}
+        onSearchSubmit={handleSearchSubmit}
         selectedCategory={selectedCategory}
         onSelectCategory={(cat) => {
           setSelectedCategory(cat);
@@ -550,12 +590,12 @@ export default function App() {
         {/* TAB 1: HOME */}
         {activeTab === 'home' && (
           <div className="space-y-8">
-            {selectedCategory !== 'Todas as Categorias' ? (
-              <section className="max-w-7xl mx-auto w-full px-4 py-8 space-y-5" aria-live="polite">
+            {hasSearch || selectedCategory !== 'Todas as Categorias' ? (
+              <section id="catalog-search-results" className="max-w-7xl mx-auto w-full px-4 py-8 space-y-5 scroll-mt-56" aria-live="polite">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-4">
                   <div>
                     <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-display">
-                      {selectedCategory}
+                      {hasSearch ? `Resultados para “${searchQuery.trim()}”` : selectedCategory}
                     </h1>
                     <p className="text-sm text-neutral-500">
                       {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
@@ -563,7 +603,7 @@ export default function App() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setSelectedCategory('Todas as Categorias')}
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('Todas as Categorias'); }}
                     className="self-start sm:self-auto px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-sm font-semibold"
                   >
                     Ver todas as ofertas
@@ -593,8 +633,8 @@ export default function App() {
                       <SlidersHorizontal size={28} />
                     </div>
                     <div>
-                      <h2 className="text-base font-bold text-neutral-800">Ainda não há produtos em {selectedCategory}</h2>
-                      <p className="text-sm text-neutral-500 mt-1">Escolha outra categoria para ver ofertas disponíveis.</p>
+                      <h2 className="text-base font-bold text-neutral-800">{hasSearch ? `Nenhum produto encontrado para “${searchQuery.trim()}”` : `Ainda não há produtos em ${selectedCategory}`}</h2>
+                      <p className="text-sm text-neutral-500 mt-1">{hasSearch ? 'Tente outro nome, marca ou modelo do produto.' : 'Escolha outra categoria para ver ofertas disponíveis.'}</p>
                     </div>
                     <button
                       type="button"
@@ -619,7 +659,7 @@ export default function App() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               onSelectTag={(tag) => {
-                setSearchQuery(tag);
+                handleSearchChange(tag);
               }}
             />
 
@@ -914,7 +954,7 @@ export default function App() {
             setSelectedProduct(product);
           }}
           onManualSearch={(code) => {
-            setSearchQuery(code);
+            handleSearchChange(code);
             setActiveTab('home');
           }}
         />
