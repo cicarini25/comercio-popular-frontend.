@@ -1334,10 +1334,31 @@ export async function getShopeeJob(token: string, jobId: string): Promise<Shopee
 
 
 
-export async function reclassifyShopeeImportCategories(jobPrefix: string, token: string) {
+export type ShopeeCategoryReclassificationResult = {
+  ok: boolean;
+  dryRun?: boolean;
+  jobPrefix: string;
+  category?: string;
+  matchedCount?: number;
+  updatedCount?: number;
+  preview?: Array<{ id: string; title: string; category: string | null }>;
+  utilidades?: number;
+  brinquedos?: number;
+  changed?: Array<{ id: string; title: string; category: string }>;
+};
+
+export async function reclassifyShopeeImportCategories(
+  jobPrefix: string,
+  token: string,
+  targetCategory?: string,
+  dryRun = false
+): Promise<ShopeeCategoryReclassificationResult> {
   const prefix = jobPrefix.trim();
   if (!/^[a-f0-9]{8}$/i.test(prefix)) throw new Error('Informe os 8 primeiros caracteres do ID do lote.');
   if (!token.trim()) throw new Error('Informe o token administrativo do backend.');
+  if (targetCategory !== undefined && !targetCategory.trim()) {
+    throw new Error('Selecione a categoria de destino.');
+  }
 
   const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/reclassify-import-job-categories', {
     method: 'POST',
@@ -1345,20 +1366,17 @@ export async function reclassifyShopeeImportCategories(jobPrefix: string, token:
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + token.trim()
     },
-    body: JSON.stringify({ jobPrefix: prefix })
+    body: JSON.stringify({
+      jobPrefix: prefix,
+      ...(targetCategory ? { targetCategory } : {}),
+      ...(dryRun ? { dryRun: true } : {})
+    })
   });
   const result = await response.json();
   if (!response.ok || !result.ok) {
     throw new Error(result.error || 'Falha ao corrigir as categorias do lote Shopee.');
   }
-  return result as {
-    ok: boolean;
-    jobPrefix: string;
-    updatedCount: number;
-    utilidades: number;
-    brinquedos: number;
-    changed: Array<{ id: string; title: string; category: string }>;
-  };
+  return result as ShopeeCategoryReclassificationResult;
 }
 
 export async function repairShopeeCatalogState(token: string) {
