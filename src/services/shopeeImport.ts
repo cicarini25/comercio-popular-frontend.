@@ -111,42 +111,654 @@ const importCategoryRules: Record<string, RegExp> = {
 };
 
 export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
-  'RELÓGIOS': ['relógio masculino', 'relógio feminino', 'relógio digital', 'smartwatch', 'relógio de parede'],
-  'ELETRO & ACESSÓRIOS': ['fogão', 'geladeira', 'air fryer', 'cafeteira elétrica', 'peças para fogão', 'acessórios para air fryer', 'peças para lavadora'],
-  "Alimentos & Bebidas": ["café","chocolate","azeite","chá","suplemento alimentar"],
-  "Cuidado & Beleza": ["maquiagem","perfume","shampoo","hidratante corporal","esmalte"],
-  "Bike Elétrica e Acessórios": ["bicicleta elétrica","acessório bicicleta elétrica","patinete elétrico"],
-  "Esportes & Lazer": ["halter academia","barraca camping","bola futebol","raquete tênis","equipamento pesca"],
-  "TVs": ["smart tv","televisão","televisor"],
-  "MOTOS & ACESSÓRIOS": ["capacete moto","luva motociclista","acessório moto","retrovisor moto"],
-  "Instrumentos Musicais": ["violão","guitarra","teclado musical","ukulele","violino"],
-  "Aparelhos de Som": ["caixa de som bluetooth","soundbar","amplificador de áudio","rádio portátil"],
-  "Acessórios para celulares": ["capinha celular","carregador celular","película celular","suporte celular","power bank"],
-  "Smartphones": ["smartphone","celular samsung","celular motorola","iphone"],
-  "Notebook": ["notebook","laptop","chromebook"],
-  "Computadores": ["computador desktop","monitor computador","teclado computador","mouse computador","memória ram"],
-  "ELETRÔNICOS": ["câmera de segurança","smartwatch","sensor inteligente","drone"],
-  "Casa & Cozinha": ["jogo de panelas","utensílios de cozinha","pote hermético","jogo de pratos","garrafa térmica"],
-  "Utilidades": ["organizador multiuso","carrinho organizador","luminária","varal de roupas","caixa organizadora"],
-  "Eletrodomésticos": ["air fryer","liquidificador","cafeteira elétrica","sanduicheira elétrica","aspirador de pó","geladeira","máquina de lavar"],
-  'Moda Feminina': ['roupa feminina', 'vestido feminino', 'blusa feminina', 'conjunto feminino', 'calça feminina'],
-  'Moda Masculina': ['camiseta masculina', 'bermuda masculina', 'calça masculina', 'camisa masculina'],
-  'Móveis': ['mesa de jantar', 'escrivaninha', 'guarda-roupa', 'sofá', 'cômoda', 'cadeira de escritório'],
-  'Calçados': ['sapato masculino', 'tênis feminino', 'sandália feminina', 'chinelo masculino'],
-  'Moda Infantil': ['tênis infantil', 'sandália infantil', 'roupa infantil', 'pijama infantil'],
-  'Brinquedos': ['carrinho de brinquedo', 'boneca infantil', 'blocos de montar', 'jogo educativo'],
-  'Pets': ['arranhador para gatos', 'brinquedo para cachorro', 'comedouro pet', 'coleira para cachorro'],
-  'Games': ['console playstation', 'controle xbox', 'jogo nintendo switch'],
-  'Ferramentas': ['furadeira', 'parafusadeira', 'kit ferramentas', 'torneira'],
-  'AUTO & ACESSÓRIOS': ['acessório automotivo', 'radiador carro', 'motor de partida'],
-  'Fones & Headphones': ['fone bluetooth', 'headset gamer', 'fone de ouvido'],
+  "RELÓGIOS": [
+    "relógio masculino",
+    "relógio feminino",
+    "relógio digital",
+    "smartwatch",
+    "relógio de parede",
+    "relógio esportivo",
+    "relógio analógico",
+    "relógio infantil",
+    "relógio de mesa",
+    "despertador",
+    "cronômetro",
+    "relógio de bolso"
+  ],
+  "ELETRO & ACESSÓRIOS": [
+    "fogão",
+    "geladeira",
+    "air fryer",
+    "cafeteira elétrica",
+    "peças para fogão",
+    "acessórios para air fryer",
+    "peças para lavadora",
+    "micro-ondas",
+    "liquidificador",
+    "filtro para aspirador",
+    "chaleira elétrica",
+    "controle para ar condicionado"
+  ],
+  "Alimentos & Bebidas": [
+    "café",
+    "chocolate",
+    "azeite",
+    "chá",
+    "suplemento alimentar",
+    "arroz",
+    "feijão",
+    "mel",
+    "biscoito",
+    "doce",
+    "vinho",
+    "bebida"
+  ],
+  "Cuidado & Beleza": [
+    "maquiagem",
+    "perfume",
+    "shampoo",
+    "hidratante corporal",
+    "esmalte",
+    "protetor solar",
+    "skincare",
+    "creme para cabelo",
+    "secador de cabelo",
+    "escova de cabelo",
+    "kit manicure",
+    "cosmético"
+  ],
+  "Bike Elétrica e Acessórios": [
+    "bicicleta elétrica",
+    "acessório bicicleta elétrica",
+    "patinete elétrico",
+    "bike elétrica dobrável",
+    "scooter elétrica",
+    "bateria bicicleta elétrica",
+    "carregador bicicleta elétrica",
+    "pneu bicicleta elétrica",
+    "freio bicicleta elétrica",
+    "capacete bicicleta",
+    "retrovisor bicicleta",
+    "suporte bicicleta"
+  ],
+  "Esportes & Lazer": [
+    "halter academia",
+    "barraca camping",
+    "bola futebol",
+    "raquete tênis",
+    "equipamento pesca",
+    "esteira fitness",
+    "bicicleta",
+    "bola basquete",
+    "óculos natação",
+    "kit treino academia",
+    "barraca praia",
+    "bola vôlei"
+  ],
+  "TVs": [
+    "smart tv",
+    "televisão",
+    "televisor",
+    "smart tv 32 polegadas",
+    "smart tv 43 polegadas",
+    "smart tv 50 polegadas",
+    "smart tv 55 polegadas",
+    "smart tv 65 polegadas",
+    "smart tv 4k",
+    "smart tv led",
+    "smart tv oled",
+    "smart tv qled"
+  ],
+  "MOTOS & ACESSÓRIOS": [
+    "capacete moto",
+    "luva motociclista",
+    "acessório moto",
+    "retrovisor moto",
+    "capa moto",
+    "baú moto",
+    "suporte celular moto",
+    "pneu moto",
+    "freio moto",
+    "corrente moto",
+    "jaqueta motociclista",
+    "protetor moto"
+  ],
+  "Instrumentos Musicais": [
+    "violão",
+    "guitarra",
+    "teclado musical",
+    "ukulele",
+    "violino",
+    "piano",
+    "cavaquinho",
+    "flauta",
+    "saxofone",
+    "bateria musical",
+    "pedal guitarra",
+    "cordas violão"
+  ],
+  "Aparelhos de Som": [
+    "caixa de som bluetooth",
+    "soundbar",
+    "amplificador de áudio",
+    "rádio portátil",
+    "home theater",
+    "receiver áudio",
+    "microfone",
+    "caixa de som portátil",
+    "alto falante",
+    "aparelho de som",
+    "caixa de som profissional",
+    "rádio digital"
+  ],
+  "Acessórios para celulares": [
+    "capinha celular",
+    "carregador celular",
+    "película celular",
+    "suporte celular",
+    "power bank",
+    "cabo usb celular",
+    "adaptador celular",
+    "lente celular",
+    "bateria celular",
+    "fone celular",
+    "carregador sem fio",
+    "suporte veicular celular"
+  ],
+  "Smartphones": [
+    "smartphone",
+    "celular samsung",
+    "celular motorola",
+    "iphone",
+    "celular xiaomi",
+    "celular redmi",
+    "celular poco",
+    "smartphone 5g",
+    "celular 128gb",
+    "celular 256gb",
+    "celular android",
+    "celular 64gb"
+  ],
+  "Notebook": [
+    "notebook",
+    "laptop",
+    "chromebook",
+    "notebook gamer",
+    "notebook estudos",
+    "notebook trabalho",
+    "notebook i5",
+    "notebook i7",
+    "notebook ryzen",
+    "notebook 8gb",
+    "notebook 16gb",
+    "notebook ssd"
+  ],
+  "Computadores": [
+    "computador desktop",
+    "monitor computador",
+    "teclado computador",
+    "mouse computador",
+    "memória ram",
+    "placa de vídeo",
+    "placa mãe",
+    "processador computador",
+    "ssd",
+    "hd externo",
+    "webcam",
+    "computador gamer"
+  ],
+  "ELETRÔNICOS": [
+    "câmera de segurança",
+    "sensor inteligente",
+    "drone",
+    "adaptador usb",
+    "carregador usb",
+    "câmera wifi",
+    "teclado bluetooth",
+    "mouse bluetooth",
+    "sensor de movimento",
+    "câmera digital",
+    "sensor de porta",
+    "dispositivo eletrônico"
+  ],
+  "Casa & Cozinha": [
+    "jogo de panelas",
+    "utensílios de cozinha",
+    "pote hermético",
+    "jogo de pratos",
+    "garrafa térmica",
+    "frigideira",
+    "faqueiro",
+    "jogo de copos",
+    "taça",
+    "chaleira",
+    "jarra",
+    "cafeteira italiana"
+  ],
+  "Utilidades": [
+    "organizador multiuso",
+    "carrinho organizador",
+    "luminária",
+    "varal de roupas",
+    "caixa organizadora",
+    "abajur",
+    "lixeira",
+    "cesto organizador",
+    "porta objetos",
+    "organizador de gaveta",
+    "cabide",
+    "escova de limpeza"
+  ],
+  "Eletrodomésticos": [
+    "air fryer",
+    "liquidificador",
+    "cafeteira elétrica",
+    "sanduicheira elétrica",
+    "aspirador de pó",
+    "geladeira",
+    "máquina de lavar",
+    "fogão",
+    "micro-ondas",
+    "chaleira elétrica",
+    "batedeira",
+    "ventilador"
+  ],
+  "Moda Feminina": [
+    "roupa feminina",
+    "vestido feminino",
+    "blusa feminina",
+    "conjunto feminino",
+    "calça feminina",
+    "saia feminina",
+    "short feminino",
+    "jaqueta feminina",
+    "moletom feminino",
+    "pijama feminino",
+    "lingerie feminina",
+    "biquíni feminino"
+  ],
+  "Moda Masculina": [
+    "camiseta masculina",
+    "bermuda masculina",
+    "calça masculina",
+    "camisa masculina",
+    "moletom masculino",
+    "jaqueta masculina",
+    "regata masculina",
+    "short masculino",
+    "pijama masculino",
+    "cueca masculina",
+    "casaco masculino",
+    "conjunto masculino"
+  ],
+  "Móveis": [
+    "mesa de jantar",
+    "escrivaninha",
+    "guarda-roupa",
+    "sofá",
+    "cômoda",
+    "cadeira de escritório",
+    "estante",
+    "rack",
+    "cama",
+    "colchão",
+    "sapateira",
+    "aparador"
+  ],
+  "Calçados": [
+    "sapato masculino",
+    "tênis feminino",
+    "sandália feminina",
+    "chinelo masculino",
+    "bota feminina",
+    "sapatilha feminina",
+    "tênis masculino",
+    "sapato feminino",
+    "mocassim masculino",
+    "coturno",
+    "sandália masculina",
+    "tamanco feminino"
+  ],
+  "Moda Infantil": [
+    "tênis infantil",
+    "sandália infantil",
+    "roupa infantil",
+    "pijama infantil",
+    "vestido infantil",
+    "camiseta infantil",
+    "conjunto infantil",
+    "calça infantil",
+    "moletom infantil",
+    "body bebê",
+    "macacão bebê",
+    "manta bebê"
+  ],
+  "Brinquedos": [
+    "carrinho de brinquedo",
+    "boneca infantil",
+    "blocos de montar",
+    "jogo educativo",
+    "pelúcia",
+    "quebra-cabeça infantil",
+    "massinha infantil",
+    "brinquedo de controle remoto",
+    "boneco",
+    "lego",
+    "brinquedo pedagógico",
+    "miniatura"
+  ],
+  "Pets": [
+    "arranhador para gatos",
+    "brinquedo para cachorro",
+    "comedouro pet",
+    "coleira para cachorro",
+    "ração cachorro",
+    "ração gato",
+    "cama pet",
+    "peitoral cachorro",
+    "bebedouro pet",
+    "aquário",
+    "brinquedo gato",
+    "coleira gato"
+  ],
+  "Games": [
+    "console playstation",
+    "controle xbox",
+    "jogo nintendo switch",
+    "console xbox",
+    "console nintendo switch",
+    "jogo playstation",
+    "jogo xbox",
+    "controle playstation",
+    "joystick gamer",
+    "videogame portátil",
+    "controle nintendo switch",
+    "console videogame"
+  ],
+  "Ferramentas": [
+    "furadeira",
+    "parafusadeira",
+    "kit ferramentas",
+    "torneira",
+    "alicate",
+    "martelo",
+    "trena",
+    "serra elétrica",
+    "chave de ferramenta",
+    "broca",
+    "máquina de solda",
+    "nível"
+  ],
+  "AUTO & ACESSÓRIOS": [
+    "acessório automotivo",
+    "radiador carro",
+    "motor de partida",
+    "capa carro",
+    "suporte celular carro",
+    "retrovisor carro",
+    "bomba automotiva",
+    "câmera automotiva",
+    "tapete automotivo",
+    "ventoinha carro",
+    "sensor automotivo",
+    "kit limpeza automotiva"
+  ],
+  "Fones & Headphones": [
+    "fone bluetooth",
+    "headset gamer",
+    "fone de ouvido",
+    "headphone",
+    "fone tws",
+    "fone sem fio",
+    "fone com fio",
+    "headset usb",
+    "fone esportivo",
+    "fone intra auricular",
+    "fone infantil",
+    "headphone bluetooth"
+  ]
 };
-
 
 const GENERIC_SEARCH_TERMS = new Set(['produto', 'produtos', 'roupa', 'roupas', 'calcado', 'calcados', 'moveis', 'eletrodomestico', 'eletrodomesticos', 'acessorio', 'acessorios', 'utilidade', 'utilidades']);
 export function isGeneralShopeeSearch(keyword: string, category: string): boolean {
   const term = searchText(keyword);
   return GENERIC_SEARCH_TERMS.has(term) || term === searchText(category);
+}
+
+
+// As variações mantêm o produto e os qualificadores que o usuário informou.
+const PRODUCT_SEARCH_VARIATIONS: Record<string, string[]> = {
+  "fogão": [
+    "fogão 4 bocas",
+    "fogão 5 bocas",
+    "fogão elétrico",
+    "fogão de mesa",
+    "fogão portátil",
+    "fogão a gás"
+  ],
+  "air fryer": [
+    "air fryer 4 litros",
+    "air fryer 5 litros",
+    "air fryer 6 litros",
+    "air fryer digital",
+    "air fryer oven",
+    "air fryer sem óleo"
+  ],
+  "geladeira": [
+    "geladeira frost free",
+    "geladeira duplex",
+    "geladeira inverter",
+    "geladeira compacta",
+    "geladeira 2 portas"
+  ],
+  "cafeteira": [
+    "cafeteira elétrica",
+    "cafeteira expresso",
+    "cafeteira cápsula",
+    "cafeteira italiana",
+    "cafeteira inox"
+  ],
+  "chaleira": [
+    "chaleira elétrica",
+    "chaleira inox",
+    "chaleira vidro",
+    "chaleira 1 litro",
+    "chaleira 2 litros"
+  ],
+  "liquidificador": [
+    "liquidificador portátil",
+    "liquidificador industrial",
+    "liquidificador inox",
+    "liquidificador 2 litros",
+    "liquidificador 3 litros"
+  ],
+  "aspirador": [
+    "aspirador de pó",
+    "aspirador vertical",
+    "aspirador portátil",
+    "aspirador robô",
+    "aspirador pó e água"
+  ],
+  "máquina de lavar": [
+    "máquina de lavar 10kg",
+    "máquina de lavar 12kg",
+    "máquina de lavar 15kg",
+    "máquina de lavar automática",
+    "máquina de lavar portátil"
+  ],
+  "cômoda": [
+    "cômoda 4 gavetas",
+    "cômoda 5 gavetas",
+    "cômoda 6 gavetas",
+    "cômoda madeira",
+    "cômoda com sapateira"
+  ],
+  "sofá": [
+    "sofá 2 lugares",
+    "sofá 3 lugares",
+    "sofá retrátil",
+    "sofá reclinável",
+    "sofá cama",
+    "sofá de canto"
+  ],
+  "mesa": [
+    "mesa de jantar",
+    "mesa de escritório",
+    "mesa de centro",
+    "mesa dobrável",
+    "mesa lateral",
+    "mesa madeira"
+  ],
+  "cadeira": [
+    "cadeira de escritório",
+    "cadeira gamer",
+    "cadeira jantar",
+    "cadeira dobrável",
+    "cadeira ergonômica"
+  ],
+  "guarda roupa": [
+    "guarda-roupa 2 portas",
+    "guarda-roupa 3 portas",
+    "guarda-roupa 6 portas",
+    "guarda-roupa solteiro",
+    "guarda-roupa casal"
+  ],
+  "notebook": [
+    "notebook gamer",
+    "notebook i5",
+    "notebook i7",
+    "notebook ryzen",
+    "notebook 8gb",
+    "notebook 16gb"
+  ],
+  "celular": [
+    "celular samsung",
+    "celular motorola",
+    "celular xiaomi",
+    "celular 5g",
+    "celular 128gb",
+    "celular 256gb"
+  ],
+  "smartphone": [
+    "smartphone android",
+    "smartphone 5g",
+    "smartphone samsung",
+    "smartphone motorola",
+    "smartphone xiaomi"
+  ],
+  "tv": [
+    "smart tv 32 polegadas",
+    "smart tv 43 polegadas",
+    "smart tv 50 polegadas",
+    "smart tv 55 polegadas",
+    "smart tv 4k"
+  ],
+  "fone": [
+    "fone bluetooth",
+    "fone sem fio",
+    "fone com fio",
+    "fone tws",
+    "fone esportivo",
+    "fone intra auricular"
+  ],
+  "relógio": [
+    "relógio masculino",
+    "relógio feminino",
+    "relógio digital",
+    "relógio esportivo",
+    "relógio de parede",
+    "relógio analógico"
+  ],
+  "smartwatch": [
+    "smartwatch masculino",
+    "smartwatch feminino",
+    "smartwatch esportivo",
+    "smartwatch amoled",
+    "smartwatch bluetooth"
+  ],
+  "barraca": [
+    "barraca camping",
+    "barraca 2 pessoas",
+    "barraca 4 pessoas",
+    "barraca automática",
+    "barraca praia"
+  ],
+  "halter": [
+    "halter 1kg",
+    "halter 2kg",
+    "halter 5kg",
+    "halter 10kg",
+    "halter emborrachado",
+    "halter ajustável"
+  ],
+  "bola": [
+    "bola futebol",
+    "bola basquete",
+    "bola vôlei",
+    "bola futsal",
+    "bola treinamento"
+  ],
+  "raquete": [
+    "raquete tênis",
+    "raquete badminton",
+    "raquete beach tennis",
+    "raquete tênis de mesa"
+  ],
+  "vestido": [
+    "vestido curto",
+    "vestido longo",
+    "vestido midi",
+    "vestido festa",
+    "vestido casual"
+  ],
+  "camiseta": [
+    "camiseta algodão",
+    "camiseta oversized",
+    "camiseta esportiva",
+    "camiseta básica",
+    "camiseta estampada"
+  ],
+  "tênis": [
+    "tênis corrida",
+    "tênis caminhada",
+    "tênis casual",
+    "tênis esportivo",
+    "tênis academia"
+  ],
+  "panela": [
+    "panela inox",
+    "panela antiaderente",
+    "panela pressão",
+    "panela alumínio",
+    "panela cerâmica"
+  ],
+  "furadeira": [
+    "furadeira elétrica",
+    "furadeira impacto",
+    "furadeira bateria",
+    "furadeira profissional"
+  ],
+  "parafusadeira": [
+    "parafusadeira bateria",
+    "parafusadeira elétrica",
+    "parafusadeira impacto",
+    "parafusadeira profissional"
+  ]
+};
+
+export function getShopeeSearchSuggestions(keyword: string, category: string): string[] {
+  const categoryTerms = SHOPEE_SEARCH_SUGGESTIONS[category] || [];
+  if (!keyword.trim() || isGeneralShopeeSearch(keyword, category)) return categoryTerms;
+  const term = searchText(keyword);
+  const aliases: Record<string, string> = { airfryer: 'air fryer', laptop: 'notebook', chromebook: 'notebook', televisao: 'tv', televisor: 'tv', refrigerador: 'geladeira' };
+  const family = Object.keys(PRODUCT_SEARCH_VARIATIONS).find((name) => {
+    const normalized = searchText(name);
+    return term === normalized || term.startsWith(normalized + ' ') || aliases[term] === normalized;
+  });
+  const candidates = [...(family ? PRODUCT_SEARCH_VARIATIONS[family] : []), ...categoryTerms];
+  return [...new Set(candidates)].filter((candidate) =>
+    searchText(candidate) !== term && matchesShopeeSearchIntent(candidate, keyword)
+  ).slice(0, 12);
 }
 
 const searchProductTypes = [
@@ -284,15 +896,16 @@ export async function searchShopeeOffers(
   const seen = new Set<string>();
   let excluded = 0;
   let examined = 0;
-  const suggestions = SHOPEE_SEARCH_SUGGESTIONS[destinationCategory] || [];
+  const suggestions = getShopeeSearchSuggestions(searchTerm, destinationCategory);
   const genericSearch = isGeneralShopeeSearch(searchTerm, destinationCategory);
-  const terms = filterCategory && completeCategory && genericSearch
-    ? [...new Set([...suggestions, searchTerm])]
+  const useVariations = completeCategory && suggestions.length > 0 && (!genericSearch || filterCategory);
+  const terms = useVariations
+    ? [...new Set(genericSearch ? [...suggestions, searchTerm] : [searchTerm, ...suggestions])]
     : [searchTerm];
   const searchTerms: string[] = [];
   let requests = 0;
   const exhausted = new Set<string>();
-  const maxRequests = 12;
+  const maxRequests = 24;
 
   // Alterna os tipos de produto para uma busca geral não ficar presa a um único tipo.
   for (let page = 1; page <= maxRequests && results.length < target; page += 1) {
@@ -311,8 +924,8 @@ export async function searchShopeeOffers(
         throw new Error(result.error || 'Falha HTTP ' + response.status + ' ao consultar a API Shopee.');
       }
       const products = Array.isArray(result.products) ? result.products : [];
-      const perTermTarget = genericSearch && filterCategory && completeCategory && page === 1
-        ? Math.max(1, Math.ceil(target / Math.max(suggestions.length, 1)))
+      const perTermTarget = useVariations && page <= 2
+        ? Math.max(1, Math.ceil(target / Math.min(terms.length, maxRequests)))
         : target;
       let acceptedForTerm = 0;
       for (const product of products) {
