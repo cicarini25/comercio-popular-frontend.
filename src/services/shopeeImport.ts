@@ -91,7 +91,7 @@ const appliancePartTerms = /\b(forro|forros|papel|silicone|panela|panelas|chapa|
 
 const importCategoryRules: Record<string, RegExp> = {
   'Casa & Cozinha': /\b(panela|frigideira|prato|talher|copo|taca|pote|garrafa|chaleira|jarra|faqueiro|utensilio|confeitaria|cozinha|biscoito|paliteiro)\b/,
-  'Casa & Construção': /\b(ferramenta|furadeira|parafusadeira|serra|motosserra|solda|nivel|trena|parafuso|broca|torneira|tinta|pedreiro|construcao|desempenadeira|espatula|alicate|martelo|chave|jardinagem)\b/,
+  'Ferramentas': /\b(ferramenta|furadeira|parafusadeira|serra|motosserra|solda|nivel|trena|parafuso|broca|torneira|tinta|pedreiro|construcao|desempenadeira|espatula|alicate|martelo|chave|jardinagem)\b/,
   'Eletrodomésticos': /\b(geladeira|refrigerador|fogao|microondas|micro ondas|lavadora|lava roupa|air fryer|airfryer|cafeteira|liquidificador|batedeira|aspirador|sanduicheira|ar condicionado|ventilador|espremedor eletrico)\b/,
   'Computadores': /\b(computador|desktop|pc|placa mae|placa de video|memoria ram|processador|monitor|mouse|teclado|ssd|hd externo|webcam)\b/,
   'Notebook': /\b(notebook|laptop|chromebook)\b/,
@@ -135,7 +135,7 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
   'Brinquedos': ['carrinho de brinquedo', 'boneca infantil', 'blocos de montar', 'jogo educativo'],
   'Pets': ['arranhador para gatos', 'brinquedo para cachorro', 'comedouro pet', 'coleira para cachorro'],
   'Games': ['console playstation', 'controle xbox', 'jogo nintendo switch'],
-  'Casa & Construção': ['furadeira', 'parafusadeira', 'kit ferramentas', 'torneira'],
+  'Ferramentas': ['furadeira', 'parafusadeira', 'kit ferramentas', 'torneira'],
   'AUTO & ACESSÓRIOS': ['acessório automotivo', 'radiador carro', 'motor de partida'],
   'Fones & Headphones': ['fone bluetooth', 'headset gamer', 'fone de ouvido'],
 };
