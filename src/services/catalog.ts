@@ -6,7 +6,7 @@ import { CATEGORIES } from '../data/mockProducts';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SUPPORTED_AFFILIATE_PLATFORMS = new Set(['shopee', 'shein']);
 const categories: Record<string, string> = {
-  'Home & Living': 'Casa & Construção',
+  'Home & Living': 'Ferramentas',
   'Sports & Outdoors': 'Esportes & Lazer',
 };
 
@@ -24,9 +24,10 @@ export function mapCatalogProduct(row: any): Product | null {
       .sort((a: any, b: any) => Number(a.price) - Number(b.price))[0]
     : null;
   if (!offer || !UUID.test(row.id) || typeof row.title !== 'string' || !row.title.trim()) return null;
-  const selectedCategory = typeof row.category_override === 'string' &&
-    row.category_override !== 'Todas as Categorias' && CATEGORIES.includes(row.category_override)
-    ? row.category_override : '';
+  const categoryOverride = row.category_override === 'Casa & Construção' ? 'Ferramentas' : row.category_override;
+  const selectedCategory = typeof categoryOverride === 'string' &&
+    categoryOverride !== 'Todas as Categorias' && CATEGORIES.includes(categoryOverride)
+    ? categoryOverride : '';
   const price = Number(offer.price);
   const original = Number(offer.originalPrice);
   const stock = offer.stockUnits == null ? null : Number(offer.stockUnits);
