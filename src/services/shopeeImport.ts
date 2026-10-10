@@ -188,7 +188,10 @@ export function matchesShopeeSearchIntent(title: string, keyword: string): boole
     if (!asksForAccessory) {
       if (accessoryTitleWords.test(text.slice(0, mainProduct.index))) return false;
       const suffix = text.slice(mainProduct.index + mainProduct[0].length).trim();
-      if (new RegExp('^' + accessoryTitleWords.source).test(suffix)) return false;
+      const furnitureWithStorage = /\b(comodas?|armarios?|guarda roupa|roupeiros?|mesas?|escrivaninhas?)\b/.test(mainProduct[0]);
+      // Gavetas fazem parte de cômodas e armários anunciados como móveis completos.
+      if (new RegExp('^' + accessoryTitleWords.source).test(suffix) &&
+          !(furnitureWithStorage && /^gavetas?\b/.test(suffix))) return false;
       if (/\b(para|compativel com|compativel para|reposicao|conserto|reparo|brinquedo|miniatura)\b/.test(text.slice(0, mainProduct.index))) return false;
     }
     qualifiers = term.replace(type, ' ');
