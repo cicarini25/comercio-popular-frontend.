@@ -90,7 +90,7 @@ const applianceTerms = /\b(geladeiras?|refrigeradores?|freezers?|frigobar|fogao|
 const appliancePartTerms = /\b(forro|forros|papel|silicone|panela|panelas|chapa|chapas|tapete|tapetes|pegador|pegadores|pinca|pincas|tigela|tigelas|botao|desengordurante|spray|limpa|limpeza|pecas?|acessorios?|capas?|capinhas?|suportes?|bases?|pedestais?|filtros?|refil|refis|borrachas?|vedacoes?|anel|aneis|mangueiras?|cabos?|adaptadores?|plugues?|tomadas?|resistencias?|termostatos?|sensores?|placas?|motores?|helices?|turbinas?|correias?|rolamentos?|engrenagens?|botoes?|puxadores?|tampas?|copos?|jarras?|laminas?|cestos?|cestas?|bandejas?|formas?|protetores?|adesivos?|rodizios?|pes|peneiras?|sacos?|escovas?|bocais?|dutos?|prateleiras?|gavetas?|dobradicas?|travas?|fusivel|fusiveis|capacitores?|controles?)\b/;
 
 const importCategoryRules: Record<string, RegExp> = {
-  'ARMARINHOS & TRICÔ': /\b(armarinhos?|la|las|novelos?|barbantes?|fios? de malha|fios? de algodao|linhas? (?:de |para )?(?:costura|bordado|croche|trico)|agulhas? (?:de |para )?(?:costura|bordado|croche|trico)|bastidores? de bordado|fitas? de cetim|rendas? (?:de |para )?costura|ziperes?|ziper|botoes? (?:de |para )?costura|elasticos? (?:de |para )?costura)\b/,
+  'ARMARINHOS & TRICÔ': /\b(armarinhos?|la|las|novelos?|barbantes?|fios? de malha|fios? de algodao|linhas? (?:de |para )?(?:costura|bordado|croche|trico)|agulhas? (?:de |para )?(?:costura|bordado|croche|trico)|bastidores? de bordado|fitas? de cetim|rendas? (?:de |para )?costura|ziperes?|ziper|(?:botao|botoes) (?:de |para )?costura|elasticos? (?:de |para )?costura)\b/,
   'RELÓGIOS': /\b(relogios?|smartwatches?|smartwatch|watch|despertadores?|cronometros?)\b/,
   'Casa & Cozinha': /\b(panela|frigideira|prato|talher|copo|taca|pote|garrafa|chaleira|jarra|faqueiro|utensilio|confeitaria|cozinha|biscoito|paliteiro)\b/,
   'Ferramentas': /\b(ferramenta|furadeira|parafusadeira|serra|motosserra|solda|nivel|trena|parafuso|broca|torneira|tinta|pedreiro|construcao|desempenadeira|espatula|alicate|martelo|chave|jardinagem)\b/,
@@ -524,7 +524,8 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
 const GENERIC_SEARCH_TERMS = new Set(['produto', 'produtos', 'roupa', 'roupas', 'calcado', 'calcados', 'moveis', 'eletrodomestico', 'eletrodomesticos', 'acessorio', 'acessorios', 'utilidade', 'utilidades']);
 export function isGeneralShopeeSearch(keyword: string, category: string): boolean {
   const term = searchText(keyword);
-  return GENERIC_SEARCH_TERMS.has(term) || term === searchText(category);
+  return GENERIC_SEARCH_TERMS.has(term) || term === searchText(category) ||
+    (category === 'ARMARINHOS & TRICÔ' && ['armarinho', 'armarinhos', 'trico', 'croche', 'costura'].includes(term));
 }
 
 
