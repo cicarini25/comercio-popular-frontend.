@@ -23,12 +23,14 @@ export default function ShopeeImportAdmin() {
   const [excluded, setExcluded] = useState(0);
   const [examined, setExamined] = useState(0);
   const [filterCategory, setFilterCategory] = useState(true);
+  const [completeCategory, setCompleteCategory] = useState(true);
+  const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const [jobs, setJobs] = useState<JobView[]>([]);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [categoryFixPrefix, setCategoryFixPrefix] = useState('83e72945');
-  const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setExcluded(0); setExamined(0); setJobs([]); setError(''); setSuccess(''); };
+  const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setExcluded(0); setExamined(0); setSearchTerms([]); setJobs([]); setError(''); setSuccess(''); };
 
   async function check() {
     reset();
@@ -36,11 +38,12 @@ export default function ShopeeImportAdmin() {
       let prepared: FeedItem[];
       if (mode === 'api') {
         setBusy('Consultando ofertas na API da Shopee e preparando a prévia…');
-        const result = await searchShopeeOffers(keyword, targetCategory, token, 60, filterCategory);
+        const result = await searchShopeeOffers(keyword, targetCategory, token, 60, filterCategory, completeCategory);
         prepared = result.items;
         setSkipped(result.skipped);
         setExcluded(result.excluded);
         setExamined(result.examined);
+        setSearchTerms(result.searchTerms);
       } else {
         setBusy('Lendo o Feed Shopee e cruzando os Item Ids com os Offer Links…');
         if (!token.trim()) throw new Error('Informe o token administrativo.');
@@ -179,7 +182,7 @@ export default function ShopeeImportAdmin() {
           Importar por CSV
         </button>
       </div>
-      {mode === 'api' && <p className="mt-2 text-sm text-slate-500">{API_NOTE} Serão consultadas até 3 páginas para preparar no máximo 60 produtos. Confira as imagens e retire da prévia qualquer item inadequado.</p>}
+      {mode === 'api' && <p className="mt-2 text-sm text-slate-500">{API_NOTE} A busca procura até 60 produtos compatíveis e pode consultar mais ofertas para completar o lote. A quantidade depende das ofertas disponíveis. Confira as imagens e retire da prévia qualquer item inadequado.</p>}
 
       <form onSubmit={(e) => { e.preventDefault(); void check(); }} className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mt-6">
         <fieldset disabled={!!busy} className="space-y-5 disabled:opacity-60">
@@ -203,6 +206,10 @@ export default function ShopeeImportAdmin() {
               <input type="checkbox" checked={filterCategory} onChange={(e) => { reset(); setFilterCategory(e.target.checked); }} className="mt-1" />
               <span><strong>Filtrar produtos pela categoria escolhida</strong><br />Usa o título para reduzir itens fora da categoria. Produtos com títulos pouco claros podem ficar de fora; revise a prévia antes de importar.</span>
             </label>
+            {filterCategory && (SHOPEE_SEARCH_SUGGESTIONS[targetCategory] || []).length > 0 && <label className="flex items-start gap-3 text-sm">
+              <input type="checkbox" checked={completeCategory} onChange={(e) => { reset(); setCompleteCategory(e.target.checked); }} className="mt-1" />
+              <span><strong>Completar lote com buscas da mesma categoria</strong><br />Quando faltarem produtos, usa também os termos sugeridos acima. Desmarque para pesquisar somente o termo informado.</span>
+            </label>}
           </> : <>
           <label className="block font-semibold">Categoria de destino no site <span className="text-sm font-normal text-slate-500">(opcional)</span>
             <select className={input} value={targetCategory} onChange={(e) => { reset(); setTargetCategory(e.target.value); }}>
@@ -274,7 +281,7 @@ export default function ShopeeImportAdmin() {
       {!!items.length && !jobs.length && <section className="mt-6 bg-white border rounded-2xl p-5">
         <h2 className="text-xl font-bold">Prévia: {total} produtos</h2>
         <p className="text-sm text-slate-600 mt-2">
-          {mode === 'api' ? <>Categoria de destino: <strong>{targetCategory}</strong>. Busca: <strong>{keyword}</strong>. Revise a lista antes de enviar.{examined > 0 && <> Consultadas {examined} ofertas; {excluded} fora da categoria ficaram de fora.</>}{skipped > 0 ? ' ' + skipped + ' oferta(s) incompleta(s) foram ignoradas.' : ''}</> : <>
+          {mode === 'api' ? <>Categoria de destino: <strong>{targetCategory}</strong>. Busca: <strong>{keyword}</strong>. Revise a lista antes de enviar.{examined > 0 && <> Consultadas {examined} ofertas; {excluded} fora da categoria ficaram de fora.</>}{searchTerms.length > 1 && <> Termos consultados: {searchTerms.join(', ')}.</>}{total < 60 && <> Foram encontrados {total} produtos válidos nesta busca; 60 é o limite máximo.</>}{skipped > 0 ? ' ' + skipped + ' oferta(s) incompleta(s) foram ignoradas.' : ''}</> : <>
           {targetCategory && <>Categoria de destino: <strong>{targetCategory}</strong>. </>}O sistema usa o feed quando encontra o Item Id. Para os demais produtos, usa os dados do CSV de links e recupera as imagens. Confira a categoria de cada produto abaixo. Nada foi publicado ainda.
           </>}
         </p>
