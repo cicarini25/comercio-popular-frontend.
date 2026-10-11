@@ -878,15 +878,37 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   return rule ? (rule.test(text) || rule.test(singularWords)) && !clothingTerms.test(text) && !pet : false;
 }
 
+export const BICYCLE_ONLY_SUGGESTIONS = [
+  'bicicleta elétrica', 'bike elétrica dobrável', 'bicicleta elétrica urbana',
+  'bicicleta elétrica aro 20', 'bicicleta elétrica aro 26', 'bicicleta elétrica aro 29',
+  'bicicleta elétrica 350w', 'bicicleta elétrica 400w', 'bicicleta elétrica 500w',
+  'bicicleta elétrica 750w', 'bicicleta elétrica 1000w', 'bicicleta elétrica pedal assistido'
+];
+
+// Exige uma bicicleta completa; mencionar a bicicleta compatível não basta.
+export function matchesCompleteBicycle(title: string): boolean {
+  const text = searchText(title);
+  const bicycle = /\b(bicicletas?|bikes?|e bike|ebike)\b/.exec(text);
+  if (!bicycle || /\b(patinetes?|scooters?|motocicletas?|brinquedos?|miniaturas?|bonecas?)\b/.test(text)) return false;
+  const parts = /\b(pecas?|acessorios?|carregadores?|baterias?|pneus?|camaras?|freios?|pastilhas?|discos?|cabos?|fios?|motores?|controladores?|aceleradores?|correntes?|engrenagens?|pedais?|selins?|bancos?|assentos?|almofadas?|guid[ao]+|guidao|manoplas?|quadros?|garfos?|suspensao|rodas?|aros?|raios?|capas?|bolsas?|cestas?|capacetes?|retrovisores?|suportes?|protetores?|adesivos?|ferramentas?|kits? de conversao)\b/;
+  const prefix = text.slice(0, bicycle.index);
+  if (parts.test(prefix) || /\b(para|compativel|reposicao|reparo)\b/.test(prefix)) return false;
+  const suffix = text.slice(bicycle.index + bicycle[0].length).trim()
+    .replace(/^(?:(?:eletrica|eletrico|dobravel|mountain|urbana|de|para)\s+)+/, '');
+  return !new RegExp('^' + parts.source).test(suffix);
+}
+
 export async function searchShopeeOffers(
   keyword: string,
   category: string,
   token: string,
   requested = 60,
   filterCategory = true,
-  completeCategory = true
+  completeCategory = true,
+  onlyBicycles = false
 ): Promise<ShopeeApiSearchResult> {
-  const searchTerm = keyword.trim();
+  const bicycleOnly = onlyBicycles && category.trim() === 'Bike Elétrica e Acessórios';
+  const searchTerm = keyword.trim() || (bicycleOnly ? 'bicicleta elétrica' : '');
   const destinationCategory = category.trim();
   if (!searchTerm) throw new Error('Informe um termo para buscar produtos na Shopee.');
   if (!destinationCategory || destinationCategory === 'Todas as Categorias') {
@@ -900,7 +922,9 @@ export async function searchShopeeOffers(
   const seen = new Set<string>();
   let excluded = 0;
   let examined = 0;
-  const suggestions = getShopeeSearchSuggestions(searchTerm, destinationCategory);
+  const suggestions = bicycleOnly
+    ? BICYCLE_ONLY_SUGGESTIONS.filter((term) => matchesShopeeSearchIntent(term, searchTerm))
+    : getShopeeSearchSuggestions(searchTerm, destinationCategory);
   const genericSearch = isGeneralShopeeSearch(searchTerm, destinationCategory);
   const useVariations = completeCategory && suggestions.length > 0 && (!genericSearch || filterCategory);
   const terms = useVariations
@@ -937,7 +961,8 @@ export async function searchShopeeOffers(
         if (!id || seen.has(id)) continue;
         seen.add(id);
         examined += 1;
-        if ((filterCategory && !matchesShopeeImportCategory(String(product?.title || ''), destinationCategory)) ||
+        if ((bicycleOnly && !matchesCompleteBicycle(String(product?.title || ''))) ||
+            (filterCategory && !matchesShopeeImportCategory(String(product?.title || ''), destinationCategory)) ||
             (!genericSearch && !matchesShopeeSearchIntent(String(product?.title || ''), searchTerm))) {
           excluded += 1;
           continue;
