@@ -90,6 +90,8 @@ const applianceTerms = /\b(geladeiras?|refrigeradores?|freezers?|frigobar|fogao|
 const appliancePartTerms = /\b(forro|forros|papel|silicone|panela|panelas|chapa|chapas|tapete|tapetes|pegador|pegadores|pinca|pincas|tigela|tigelas|botao|desengordurante|spray|limpa|limpeza|pecas?|acessorios?|capas?|capinhas?|suportes?|bases?|pedestais?|filtros?|refil|refis|borrachas?|vedacoes?|anel|aneis|mangueiras?|cabos?|adaptadores?|plugues?|tomadas?|resistencias?|termostatos?|sensores?|placas?|motores?|helices?|turbinas?|correias?|rolamentos?|engrenagens?|botoes?|puxadores?|tampas?|copos?|jarras?|laminas?|cestos?|cestas?|bandejas?|formas?|protetores?|adesivos?|rodizios?|pes|peneiras?|sacos?|escovas?|bocais?|dutos?|prateleiras?|gavetas?|dobradicas?|travas?|fusivel|fusiveis|capacitores?|controles?)\b/;
 
 const importCategoryRules: Record<string, RegExp> = {
+  'CAMA/MESA/BANHO': /\b(lencois?|lencol|fronhas?|edredons?|edredom|colchas?|cobre leito|cobertores?|cobertor|mantas?|travesseiros?|toalhas?|roupa de cama|jogo de cama|jogo de banho|pano de prato|panos de prato|tapete de banheiro|tapetes de banheiro|roupoes?|roupao)\b/,
+  'MODA VERÃO PRAIA': /\b(biquinis?|biquini|maios?|sungas?|saida de praia|saidas de praia|canga|cangas|roupa de praia|moda praia|vestido de praia|shorts? de praia|bermudas? de praia|chapeu de praia|chapeus de praia|bolsa de praia|bolsas de praia)\b/,
   'ARMARINHOS & TRICÔ': /\b(armarinhos?|la|las|novelos?|barbantes?|fios? de malha|fios? de algodao|linhas? (?:de |para )?(?:costura|bordado|croche|trico)|agulhas? (?:de |para )?(?:costura|bordado|croche|trico)|bastidores? de bordado|fitas? de cetim|rendas? (?:de |para )?costura|ziperes?|ziper|(?:botao|botoes) (?:de |para )?costura|elasticos? (?:de |para )?costura)\b/,
   'RELÓGIOS': /\b(relogios?|smartwatches?|smartwatch|watch|despertadores?|cronometros?)\b/,
   'Casa & Cozinha': /\b(panela|frigideira|prato|talher|copo|taca|pote|garrafa|chaleira|jarra|faqueiro|utensilio|confeitaria|cozinha|biscoito|paliteiro)\b/,
@@ -112,6 +114,8 @@ const importCategoryRules: Record<string, RegExp> = {
 };
 
 export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
+  'CAMA/MESA/BANHO': ['jogo de cama', 'lençol casal', 'lençol queen', 'fronha', 'edredom', 'colcha cobre leito', 'toalha de banho', 'jogo de toalhas', 'toalha de mesa', 'pano de prato', 'tapete de banheiro', 'roupão de banho'],
+  'MODA VERÃO PRAIA': ['biquíni', 'maiô feminino', 'sunga masculina', 'saída de praia', 'canga de praia', 'vestido de praia', 'short praia', 'bermuda de praia', 'chapéu de praia', 'bolsa de praia', 'biquíni plus size', 'maiô infantil'],
   'ARMARINHOS & TRICÔ': ["lã para tricô","fio de algodão para crochê","linha de costura","agulha de tricô","agulha de crochê","agulha de costura","linha de bordado","barbante para crochê","fita de cetim","renda para costura","zíper para costura","botão para costura"],
   "RELÓGIOS": [
     "relógio masculino",
