@@ -804,6 +804,7 @@ const searchProductTypes = [
   /\bmesas?\b/, /\b(sofa|sofas)\b/, /\bcadeiras?\b/, /\bpoltronas?\b/,
   /\b(guarda roupa|roupeiro|armario)\b/, /\bestantes?\b/, /\bescrivaninhas?\b/,
   /\bcomodas?\b/, /\b(colchao|colchoes)\b/, /\bcamas?\b/,
+  /\b(varais?|varal\s+de\s+roupas?)\b/,
   /\bfuradeiras?\b/, /\bparafusadeiras?\b/,
   /\b(camiseta|camisetas|t shirt|t shirts|tshirt|tshirts)\b/,
   /\bcamisas?\b/, /\b(blusa|blusas|blusinha|blusinhas)\b/,
