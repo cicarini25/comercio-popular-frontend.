@@ -895,7 +895,7 @@ export function matchesCompleteBicycle(title: string): boolean {
   if (parts.test(prefix) || /\b(para|compativel|reposicao|reparo)\b/.test(prefix)) return false;
   const suffix = text.slice(bicycle.index + bicycle[0].length).trim()
     .replace(/^(?:(?:eletrica|eletrico|dobravel|mountain|urbana|de|para)\s+)+/, '');
-  if (/^(?:aros?|baterias?|motores?) (?:[0-9]|removivel)\b/.test(suffix)) return true;
+  if (/^(?:aros?|baterias?|motores?) (?:[0-9]|removivel\b)/.test(suffix)) return true;
   return !new RegExp('^' + parts.source).test(suffix);
 }
 
