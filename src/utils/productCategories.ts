@@ -37,6 +37,10 @@ const canonicalCategories = new Map(
 );
 
 const categoryAliases: Record<string, string> = {
+  'cama mesa e banho': 'CAMA/MESA/BANHO',
+  'cama mesa banho': 'CAMA/MESA/BANHO',
+  'moda praia': 'MODA VERÃO PRAIA',
+  'moda verao e praia': 'MODA VERÃO PRAIA',
   'armarinhos': 'ARMARINHOS & TRICÔ',
   'trico': 'ARMARINHOS & TRICÔ',
   'armarinhos e trico': 'ARMARINHOS & TRICÔ',
@@ -173,6 +177,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const raw = typeof category === 'string' ? category.trim() : '';
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
+  if (exact === 'CAMA/MESA/BANHO' || exact === 'MODA VERÃO PRAIA') return exact;
   const titleKey = normalizeKey(title);
   const curatedCategory = curatedCategoryByTitle.get(titleKey);
   if (curatedCategory) return curatedCategory;
