@@ -90,7 +90,7 @@ const applianceTerms = /\b(geladeiras?|refrigeradores?|freezers?|frigobar|fogao|
 const appliancePartTerms = /\b(forro|forros|papel|silicone|panela|panelas|chapa|chapas|tapete|tapetes|pegador|pegadores|pinca|pincas|tigela|tigelas|botao|desengordurante|spray|limpa|limpeza|pecas?|acessorios?|capas?|capinhas?|suportes?|bases?|pedestais?|filtros?|refil|refis|borrachas?|vedacoes?|anel|aneis|mangueiras?|cabos?|adaptadores?|plugues?|tomadas?|resistencias?|termostatos?|sensores?|placas?|motores?|helices?|turbinas?|correias?|rolamentos?|engrenagens?|botoes?|puxadores?|tampas?|copos?|jarras?|laminas?|cestos?|cestas?|bandejas?|formas?|protetores?|adesivos?|rodizios?|pes|peneiras?|sacos?|escovas?|bocais?|dutos?|prateleiras?|gavetas?|dobradicas?|travas?|fusivel|fusiveis|capacitores?|controles?)\b/;
 
 const importCategoryRules: Record<string, RegExp> = {
-  'CAMA/MESA/BANHO': /\b(lencois?|lencol|fronhas?|edredons?|edredom|colchas?|cobre leito|cobertores?|cobertor|mantas?|travesseiros?|toalhas?|roupa de cama|jogo de cama|jogo de banho|pano de prato|panos de prato|tapete de banheiro|tapetes de banheiro|roupoes?|roupao)\b/,
+  'CAMA/MESA/BANHO': /\b(lencol|lencois|fronhas?|edredons?|edredom|colchas?|cobre ?leitos?|cobertores?|cobertor|mantas?|travesseiros?|toalhas?|roupas? de cama|jogos? de cama|jogos? de banho|panos? de prato|tapetes? (?:de |para )?(?:banheiro|banho)|roupoes?|roupao|enxoval de cama|protetor de colchao)\b/,
   'MODA VERÃO PRAIA': /\b(biquinis?|biquini|maios?|sungas?|saida de praia|saidas de praia|canga|cangas|roupa de praia|moda praia|vestido de praia|shorts? de praia|bermudas? de praia|chapeu de praia|chapeus de praia|bolsa de praia|bolsas de praia)\b/,
   'ARMARINHOS & TRICÔ': /\b(armarinhos?|la|las|novelos?|barbantes?|fios? de malha|fios? de algodao|linhas? (?:de |para )?(?:costura|bordado|croche|trico)|agulhas? (?:de |para )?(?:costura|bordado|croche|trico)|bastidores? de bordado|fitas? de cetim|rendas? (?:de |para )?costura|ziperes?|ziper|(?:botao|botoes) (?:de |para )?costura|elasticos? (?:de |para )?costura)\b/,
   'RELÓGIOS': /\b(relogios?|smartwatches?|smartwatch|watch|despertadores?|cronometros?)\b/,
@@ -529,6 +529,17 @@ export function isGeneralShopeeSearch(keyword: string, category: string): boolea
 
 // As variações mantêm o produto e os qualificadores que o usuário informou.
 const PRODUCT_SEARCH_VARIATIONS: Record<string, string[]> = {
+  "vestido de praia": ["vestido praia longo", "vestido praia curto", "vestido praia crochê", "vestido saída de praia", "saída de praia vestido"],
+  "saída de praia": ["saída praia longa", "saída praia curta", "saída praia crochê", "saída praia tule", "vestido saída de praia"],
+  "toalha de mesa": ["toalha mesa retangular", "toalha mesa redonda", "toalha mesa quadrada", "toalha mesa impermeável"],
+  "toalha de banho": ["toalha banho algodão", "toalha banho gigante", "jogo toalhas banho", "toalha banho felpuda"],
+  "jogo de cama": ["jogo cama casal", "jogo cama queen", "jogo cama solteiro", "jogo cama king"],
+  "lençol queen": ["lençol queen com elástico", "lençol queen algodão", "lençol queen percal", "kit lençóis queen"],
+  "lençol": ["lençol casal", "lençol queen", "lençol king", "lençol solteiro", "lençol com elástico"],
+  "fronha": ["fronha algodão", "fronha cetim", "kit fronhas"],
+  "edredom": ["edredom casal", "edredom queen", "edredom king", "edredom solteiro"],
+  "colcha": ["colcha casal", "colcha queen", "colcha king", "colcha cobre leito"],
+
   "fogão": [
     "fogão 4 bocas",
     "fogão 5 bocas",
@@ -752,7 +763,7 @@ export function getShopeeSearchSuggestions(keyword: string, category: string): s
   if (!keyword.trim() || isGeneralShopeeSearch(keyword, category)) return categoryTerms;
   const term = searchText(keyword);
   const aliases: Record<string, string> = { airfryer: 'air fryer', laptop: 'notebook', chromebook: 'notebook', televisao: 'tv', televisor: 'tv', refrigerador: 'geladeira' };
-  const family = Object.keys(PRODUCT_SEARCH_VARIATIONS).find((name) => {
+  const family = Object.keys(PRODUCT_SEARCH_VARIATIONS).sort((a, b) => searchText(b).length - searchText(a).length).find((name) => {
     const normalized = searchText(name);
     return term === normalized || term.startsWith(normalized + ' ') || aliases[term] === normalized;
   });
@@ -763,6 +774,12 @@ export function getShopeeSearchSuggestions(keyword: string, category: string): s
 }
 
 const searchProductTypes = [
+  /\b(vestidos?|saidas?)\b(?=.{0,65}\b(praia|piscina|beach)\b)/,
+  /\b(lencol|lencois)\b/, /\bfronhas?\b/, /\b(edredom|edredons)\b/,
+  /\b(colchas?|cobre ?leitos?)\b/, /\b(cobertor|cobertores)\b/, /\btravesseiros?\b/,
+  /\b(toalhas?|panos? de prato|roupao|roupoes)\b/,
+  /\b(biquinis?|bikinis?)\b/, /\bmaios?\b/, /\bsungas?\b/, /\bcangas?\b/,
+
   /\b(fogao|fogoes)\b/, /\bcooktop\b/, /\b(geladeiras?|refrigeradores?)\b/,
   /\bfreezers?\b/, /\bfrigobar\b/, /\b(microondas|micro ondas)\b/,
   /\b(air fryer|airfryer|fritadeira eletrica)\b/, /\bcafeteiras?\b/,
@@ -811,7 +828,10 @@ export function matchesShopeeSearchIntent(title: string, keyword: string): boole
     }
     qualifiers = term.replace(type, ' ');
   }
-  const singular = (word: string) => word.length > 4 ? word.replace(/s$/, '') : word;
+  const singular = (word: string) => {
+    const aliases: Record<string, string> = { lencois: 'lencol', edredons: 'edredom', cobertores: 'cobertor', roupoes: 'roupao', chapeus: 'chapeu', bikini: 'biquini', bikinis: 'biquini' };
+    return aliases[word] || (word.length > 4 ? word.replace(/s$/, '') : word);
+  };
   const titleWords = text.split(' ').map(singular);
   const queryWords = qualifiers.split(' ').filter((word) => word && !['de','do','da','dos','das','para','com','e','a','o','em','um','uma','p'].includes(word)).map(singular);
   return queryWords.every((word) => titleWords.includes(word));
@@ -822,6 +842,16 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   const text = searchText(title);
   const child = childTerms.test(text);
   const pet = petTerms.test(text);
+  if (category === 'MODA VERÃO PRAIA') {
+    if (pet || /\b(bonecas?|bonecos?|brinquedos?|tecidos? para|moldes? para|costura|guarda sol|cadeira de praia|barraca|protetor solar)\b/.test(text)) return false;
+    if (/\b(biquinis?|bikinis?|maios?|sungas?|cangas?)\b/.test(text)) return true;
+    const beachContext = /\b(praia|piscina|beach|swimwear|balneario)\b/.test(text);
+    return beachContext && /\b(vestidos?|saidas?|shorts?|bermudas?|chapeus?|chapeu|bolsas?|roupas?|conjuntos?)\b/.test(text);
+  }
+  if (category === 'CAMA/MESA/BANHO') {
+    if (pet || /\b(bonecas?|bonecos?|brinquedos?|miniaturas?|tecidos? para|moldes? para)\b/.test(text)) return false;
+    return importCategoryRules[category].test(text);
+  }
   if (category === 'Móveis') {
     const startsWithFurniture = /^(?:(?:kit|conjunto|combo|par|pares|pecas|de|com|[0-9]+)\s+){0,8}(mesa|mesas|sofa|sofas|cadeira|cadeiras|poltrona|armario|guarda roupa|roupeiro|estante|escrivaninha|comoda|rack|aparador|criado mudo|balcao|gabinete|sapateira|beliche|berco|cama|colchao|livreiro|nicho)\b/.test(text);
     return startsWithFurniture && !furnitureAccessories.test(text) && !pet;
