@@ -1,9 +1,10 @@
 import React, {useRef} from 'react';
-import {Grid2X2, Package, CookingPot, Hammer, Refrigerator, Armchair, Cpu, Watch, Gamepad2, Monitor, Laptop, Smartphone, Cable, Speaker, Headphones, Music, PawPrint, Car, Shirt, Baby, ToyBrick, Tv, Footprints, Sparkles, Coffee, Scissors, ChevronDown} from 'lucide-react';
+import {Grid2X2, Package, CookingPot, BedDouble, Sun, Hammer, Refrigerator, Armchair, Cpu, Watch, Gamepad2, Monitor, Laptop, Smartphone, Cable, Speaker, Headphones, Music, PawPrint, Car, Shirt, Baby, ToyBrick, Tv, Footprints, Sparkles, Coffee, Scissors, ChevronDown} from 'lucide-react';
 import {CATEGORIES} from '../../data/mockProducts';
 const icons:Record<string,React.ElementType>={
-'Todas as Categorias':Grid2X2,'Utilidades':Package,'Casa & Cozinha':CookingPot,'Ferramentas':Hammer,'Eletrodomésticos':Refrigerator,'ELETRO & ACESSÓRIOS':Cable,'Móveis':Armchair,'ELETRÔNICOS':Cpu,'RELÓGIOS':Watch,'ARMARINHOS & TRICÔ':Scissors,'Games':Gamepad2,'Computadores':Monitor,'Notebook':Laptop,'Smartphones':Smartphone,'Acessórios para celulares':Cable,'Aparelhos de Som':Speaker,'Fones & Headphones':Headphones,'Instrumentos Musicais':Music,'AUTO & ACESSÓRIOS':Car,'MOTOS & ACESSÓRIOS':Car,'Pets':PawPrint,'Moda Masculina':Shirt,'Moda Feminina':Shirt,'Moda Infantil':Baby,'Brinquedos':ToyBrick,'TVs':Tv,'Calçados Masculino':Footprints,'Calçados Femininos':Footprints,'Cuidado & Beleza':Sparkles,'Alimentos & Bebidas':Coffee};
+'Todas as Categorias':Grid2X2,'Utilidades':Package,'Casa & Cozinha':CookingPot,'CAMA/MESA/BANHO':BedDouble,'MODA VERÃO PRAIA':Sun,'Ferramentas':Hammer,'Eletrodomésticos':Refrigerator,'ELETRO & ACESSÓRIOS':Cable,'Móveis':Armchair,'ELETRÔNICOS':Cpu,'RELÓGIOS':Watch,'ARMARINHOS & TRICÔ':Scissors,'Games':Gamepad2,'Computadores':Monitor,'Notebook':Laptop,'Smartphones':Smartphone,'Acessórios para celulares':Cable,'Aparelhos de Som':Speaker,'Fones & Headphones':Headphones,'Instrumentos Musicais':Music,'AUTO & ACESSÓRIOS':Car,'MOTOS & ACESSÓRIOS':Car,'Pets':PawPrint,'Moda Masculina':Shirt,'Moda Feminina':Shirt,'Moda Infantil':Baby,'Brinquedos':ToyBrick,'TVs':Tv,'Calçados Masculino':Footprints,'Calçados Femininos':Footprints,'Cuidado & Beleza':Sparkles,'Alimentos & Bebidas':Coffee};
 const categoryColors: Record<string, [string, string]> = {
+ 'CAMA/MESA/BANHO':['#0e7490','#cffafe'], 'MODA VERÃO PRAIA':['#c2410c','#ffedd5'],
  'ARMARINHOS & TRICÔ':['#be185d','#fce7f3'],
  'Todas as Categorias':['#0f766e','#ccfbf1'], 'Utilidades':['#b45309','#fef3c7'],
  'Casa & Cozinha':['#c2410c','#ffedd5'], 'Ferramentas':['#a16207','#fef9c3'],
