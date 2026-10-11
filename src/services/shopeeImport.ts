@@ -44,7 +44,8 @@ export async function* csvRows(file: Blob): AsyncGenerator<string[]> {
       const chunk = decoder.decode(value, { stream: !done });
       for (const c of chunk) {
         if (first) { first = false; if (c === '\uFEFF') continue; }
-        if (skipLF) { skipLF = false; if (c === '\n') continue; }
+        if (skipLF) { skipLF = false; if (c === '
+') continue; }
         if (quoted) {
           if (!quotePending) {
             if (c === '"') quotePending = true; else field += c;
@@ -52,11 +53,13 @@ export async function* csvRows(file: Blob): AsyncGenerator<string[]> {
           }
           if (c === '"') { field += '"'; quotePending = false; continue; }
           quoted = false; quotePending = false;
-          if (c !== ',' && c !== '\r' && c !== '\n') throw new Error('CSV inválido após aspas.');
+          if (c !== ',' && c !== '\r' && c !== '
+') throw new Error('CSV inválido após aspas.');
         }
         if (c === '"' && field === '') quoted = true;
         else if (c === ',') { row.push(field); field = ''; }
-        else if (c === '\r' || c === '\n') {
+        else if (c === '\r' || c === '
+') {
           row.push(field); if (row.some(Boolean)) yield row;
           row = []; field = ''; skipLF = c === '\r';
         } else field += c;
@@ -904,8 +907,11 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   if (category === 'Games') return !clothingTerms.test(text) && !pet &&
     !/\b(headset|headphone|fone|carrinho|miniatura|festa|papel de parede|caneca)\b/.test(text) &&
     /\b(playstation|xbox|nintendo|videogame|video game|console|joystick|controle gamer|jogo|gamer)\b/.test(text);
-  if (category === 'Utilidades') return !pet && !clothingTerms.test(text) && !footwearTerms.test(text) &&
-    (!furnitureTerms.test(text) || furnitureAccessories.test(text) || /\b(organizador|carrinho organizador)\b/.test(text));
+  if (category === 'Utilidades') {
+    const clothesline = /\b(varais?|varal\s+de\s+roupas?)\b/.test(text);
+    return !pet && (!clothingTerms.test(text) || clothesline) && !footwearTerms.test(text) &&
+      (!furnitureTerms.test(text) || furnitureAccessories.test(text) || /\b(organizador|carrinho organizador)\b/.test(text));
+  }
   const completeDeviceCategories = ['Notebook', 'Smartphones', 'TVs', 'Aparelhos de Som', 'Fones & Headphones', 'Instrumentos Musicais'];
   if (completeDeviceCategories.includes(category)) {
     // Peças mencionam o aparelho compatível, mas não são o produto principal.
@@ -1111,7 +1117,8 @@ export async function readAffiliateLinks(linksFile: File | null, manual = '') {
     }
   }
 
-  for (const line of manual.split(/\r?\n/).filter((s) => s.trim())) {
+  for (const line of manual.split(/\r?
+/).filter((s) => s.trim())) {
     const parts = line.trim().split(/[\s;,]+/);
     if (parts.length !== 2) throw new Error('Use uma linha por produto: ID e link separados por espaço.');
     add(parts[0], parts[1]);
