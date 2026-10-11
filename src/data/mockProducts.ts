@@ -338,7 +338,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=800&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1562273138-f46be4ebdf33?w=800&auto=format&fit=crop&q=80'
     ],
-    category: 'Calçados',
+    category: 'Calçados Masculino',
     isAchadinho: false,
     stockUnits: 14,
     badge: 'Saúde & Conforto',
@@ -484,7 +484,8 @@ export const CATEGORIES = [
   'ARMARINHOS & TRICÔ',
   'Brinquedos',
   'TVs',
-  'Calçados',
+  'Calçados Masculino',
+  'Calçados Femininos',
   'Esportes & Lazer',
   'Bike Elétrica e Acessórios',
   'Cuidado & Beleza',
