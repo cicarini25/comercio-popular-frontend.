@@ -2,7 +2,7 @@ import React, {useRef} from 'react';
 import {Grid2X2, Package, CookingPot, Hammer, Refrigerator, Armchair, Cpu, Watch, Gamepad2, Monitor, Laptop, Smartphone, Cable, Speaker, Headphones, Music, PawPrint, Car, Shirt, Baby, ToyBrick, Tv, Footprints, Sparkles, Coffee, Scissors, ChevronDown} from 'lucide-react';
 import {CATEGORIES} from '../../data/mockProducts';
 const icons:Record<string,React.ElementType>={
-'Todas as Categorias':Grid2X2,'Utilidades':Package,'Casa & Cozinha':CookingPot,'Ferramentas':Hammer,'Eletrodomésticos':Refrigerator,'ELETRO & ACESSÓRIOS':Cable,'Móveis':Armchair,'ELETRÔNICOS':Cpu,'RELÓGIOS':Watch,'ARMARINHOS & TRICÔ':Scissors,'Games':Gamepad2,'Computadores':Monitor,'Notebook':Laptop,'Smartphones':Smartphone,'Acessórios para celulares':Cable,'Aparelhos de Som':Speaker,'Fones & Headphones':Headphones,'Instrumentos Musicais':Music,'AUTO & ACESSÓRIOS':Car,'MOTOS & ACESSÓRIOS':Car,'Pets':PawPrint,'Moda Masculina':Shirt,'Moda Feminina':Shirt,'Moda Infantil':Baby,'Brinquedos':ToyBrick,'TVs':Tv,'Calçados':Footprints,'Cuidado & Beleza':Sparkles,'Alimentos & Bebidas':Coffee};
+'Todas as Categorias':Grid2X2,'Utilidades':Package,'Casa & Cozinha':CookingPot,'Ferramentas':Hammer,'Eletrodomésticos':Refrigerator,'ELETRO & ACESSÓRIOS':Cable,'Móveis':Armchair,'ELETRÔNICOS':Cpu,'RELÓGIOS':Watch,'ARMARINHOS & TRICÔ':Scissors,'Games':Gamepad2,'Computadores':Monitor,'Notebook':Laptop,'Smartphones':Smartphone,'Acessórios para celulares':Cable,'Aparelhos de Som':Speaker,'Fones & Headphones':Headphones,'Instrumentos Musicais':Music,'AUTO & ACESSÓRIOS':Car,'MOTOS & ACESSÓRIOS':Car,'Pets':PawPrint,'Moda Masculina':Shirt,'Moda Feminina':Shirt,'Moda Infantil':Baby,'Brinquedos':ToyBrick,'TVs':Tv,'Calçados Masculino':Footprints,'Calçados Femininos':Footprints,'Cuidado & Beleza':Sparkles,'Alimentos & Bebidas':Coffee};
 const categoryColors: Record<string, [string, string]> = {
  'ARMARINHOS & TRICÔ':['#be185d','#fce7f3'],
  'Todas as Categorias':['#0f766e','#ccfbf1'], 'Utilidades':['#b45309','#fef3c7'],
@@ -15,7 +15,7 @@ const categoryColors: Record<string, [string, string]> = {
  'AUTO & ACESSÓRIOS':['#0369a1','#e0f2fe'], 'MOTOS & ACESSÓRIOS':['#b91c1c','#fee2e2'], 'Pets':['#92400e','#fef3c7'], 'Moda Masculina':['#1d4ed8','#dbeafe'],
  'Moda Feminina':['#be185d','#fce7f3'], 'Moda Infantil':['#c2410c','#ffedd5'],
  'Brinquedos':['#a16207','#fef9c3'], 'TVs':['#4338ca','#e0e7ff'],
- 'Calçados':['#047857','#d1fae5'], 'Cuidado & Beleza':['#a21caf','#fae8ff'],
+ 'Calçados Masculino':['#047857','#d1fae5'], 'Calçados Femininos':['#be185d','#fce7f3'], 'Cuidado & Beleza':['#a21caf','#fae8ff'],
  'Alimentos & Bebidas':['#4d7c0f','#ecfccb']
 };
 export function CategoryIcon({category}:{category:string}){
