@@ -461,6 +461,8 @@ export const CATEGORIES = [
   'Todas as Categorias',
   'Utilidades',
   'Casa & Cozinha',
+  'CAMA/MESA/BANHO',
+  'MODA VERÃO PRAIA',
   'Ferramentas',
   'Eletrodomésticos',
   'ELETRO & ACESSÓRIOS',
