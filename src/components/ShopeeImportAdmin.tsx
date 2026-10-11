@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, analyzeShopeeImportJobs, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, type FeedItem, type ShopeeJobStatus, type ShopeeCategoryReclassificationResult, type ShopeeAutoCategoryReview } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, analyzeShopeeImportJobs, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, BICYCLE_ONLY_SUGGESTIONS, matchesShopeeSearchIntent, type FeedItem, type ShopeeJobStatus, type ShopeeCategoryReclassificationResult, type ShopeeAutoCategoryReview } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
 import { resolveProductCategory } from '../utils/productCategories';
 
@@ -22,6 +22,7 @@ export default function ShopeeImportAdmin() {
   const [skipped, setSkipped] = useState(0);
   const [excluded, setExcluded] = useState(0);
   const [examined, setExamined] = useState(0);
+  const [onlyBicycles, setOnlyBicycles] = useState(false);
   const [filterCategory, setFilterCategory] = useState(true);
   const [completeCategory, setCompleteCategory] = useState(true);
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
@@ -42,7 +43,7 @@ export default function ShopeeImportAdmin() {
       let prepared: FeedItem[];
       if (mode === 'api') {
         setBusy('Consultando ofertas na API da Shopee e preparando a prévia…');
-        const result = await searchShopeeOffers(keyword, targetCategory, token, 60, filterCategory, completeCategory);
+        const result = await searchShopeeOffers(keyword, targetCategory, token, 60, filterCategory, completeCategory, onlyBicycles);
         prepared = result.items;
         setSkipped(result.skipped);
         setExcluded(result.excluded);
@@ -239,7 +240,10 @@ export default function ShopeeImportAdmin() {
     }
   }
 
-  const suggestions = getShopeeSearchSuggestions(keyword, targetCategory);
+  const bicycleOnly = onlyBicycles && targetCategory === 'Bike Elétrica e Acessórios';
+  const suggestions = bicycleOnly
+    ? BICYCLE_ONLY_SUGGESTIONS.filter((term) => !keyword.trim() || matchesShopeeSearchIntent(term, keyword))
+    : getShopeeSearchSuggestions(keyword, targetCategory);
   const generalSearch = isGeneralShopeeSearch(keyword, targetCategory);
   const input = 'block w-full rounded-xl border border-slate-300 bg-white p-3 mt-2 text-sm';
   const completedCount = jobs.reduce((sum, job) => sum + job.imported_count + job.updated_count, 0);
@@ -265,7 +269,7 @@ export default function ShopeeImportAdmin() {
         <fieldset disabled={!!busy} className="space-y-5 disabled:opacity-60">
           {mode === 'api' ? <>
             <label className="block font-semibold">1. Categoria de destino no site
-              <select className={input} required value={targetCategory} onChange={(e) => { reset(); setTargetCategory(e.target.value); }}>
+              <select className={input} required value={targetCategory} onChange={(e) => { reset(); setTargetCategory(e.target.value); setOnlyBicycles(false); }}>
                 <option value="">Selecione a categoria do site</option>
                 {CATEGORIES.filter((category) => category !== 'Todas as Categorias').map((category) => <option key={category} value={category}>{category}</option>)}
               </select>
@@ -279,6 +283,10 @@ export default function ShopeeImportAdmin() {
                 {suggestions.map((term) => <button key={term} type="button" onClick={() => { reset(); setKeyword(term); }} className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 px-3 py-2 text-sm">{term}</button>)}
               </div>
             </div>}
+            {targetCategory === 'Bike Elétrica e Acessórios' && <label className="flex items-start gap-3 text-sm">
+              <input type="checkbox" checked={onlyBicycles} onChange={(e) => { reset(); setOnlyBicycles(e.target.checked); if (e.target.checked) setKeyword('bicicleta elétrica'); }} className="mt-1" />
+              <span><strong>Apenas bicicletas</strong><br />Busca bicicletas completas. Exclui peças, acessórios, patinetes e scooters.</span>
+            </label>}
             <label className="flex items-start gap-3 text-sm">
               <input type="checkbox" checked={filterCategory} onChange={(e) => { reset(); setFilterCategory(e.target.checked); }} className="mt-1" />
               <span><strong>Filtrar produtos pela categoria escolhida</strong><br />Usa o título para reduzir itens fora da categoria. Produtos com títulos pouco claros podem ficar de fora; revise a prévia antes de importar.</span>
