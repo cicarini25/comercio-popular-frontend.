@@ -407,19 +407,13 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
     "sapateira",
     "aparador"
   ],
-  "Calçados": [
-    "sapato masculino",
-    "tênis feminino",
-    "sandália feminina",
-    "chinelo masculino",
-    "bota feminina",
-    "sapatilha feminina",
-    "tênis masculino",
-    "sapato feminino",
-    "mocassim masculino",
-    "coturno",
-    "sandália masculina",
-    "tamanco feminino"
+  "Calçados Masculino": [
+    "sapato masculino", "tênis masculino", "chinelo masculino", "bota masculina",
+    "mocassim masculino", "coturno masculino", "sandália masculina", "sapatênis masculino"
+  ],
+  "Calçados Femininos": [
+    "tênis feminino", "sandália feminina", "bota feminina", "sapatilha feminina",
+    "sapato feminino", "tamanco feminino", "chinelo feminino", "scarpin feminino"
   ],
   "Moda Infantil": [
     "tênis infantil",
@@ -845,7 +839,13 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   }
   if (category === 'Pets') return pet;
   if (category === 'Moda Infantil') return child && (clothingTerms.test(text) || footwearTerms.test(text) || /\b(manta|cobertor|babador)\b/.test(text)) && !pet;
-  if (category === 'Calçados') return footwearTerms.test(text) && !child && !/\b(sacos?|sacola|porta sapatos|organizador|palmilha|cadarco|cadarcos)\b/.test(text);
+  if (category === 'Calçados Masculino' || category === 'Calçados Femininos') {
+    if (!footwearTerms.test(text) || child || /\b(sacos?|sacola|porta sapatos|organizador|palmilha|cadarco|cadarcos)\b/.test(text)) return false;
+    const feminine = /\b(feminin[oa]s?|mulheres?|women|womens|scarpin|slingback)\b/.test(text);
+    const masculine = /\b(masculin[oa]s?|homem|homens|men|mens)\b/.test(text);
+    const unisex = /\b(unissex|unisex)\b/.test(text) || (feminine && masculine);
+    return category === 'Calçados Femininos' ? (feminine || unisex) : (!feminine || masculine || unisex);
+  }
   if (category === 'Moda Masculina' || category === 'Moda Feminina') {
     if (!(clothingTerms.test(text) || (/\bconjuntos?\b/.test(text) && /\b(masculin[oa]s?|feminin[oa]s?|homem|homens|mulher|mulheres|unissex)\b/.test(text))) || child || pet || /\b(bonecas?|bonecos?|cabide|cabides|organizador|saco para|sacos para|lavar roupa|lavar roupas|roupa de cama|capa para|capas para)\b/.test(text)) return false;
     if (category === 'Moda Feminina' && /\b(masculin[oa]s?|homem|homens|cuecas?)\b/.test(text) && !/\b(feminin[oa]s?|mulher|mulheres)\b/.test(text)) return false;
