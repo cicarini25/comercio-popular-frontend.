@@ -101,8 +101,15 @@ const categoryAliases: Record<string, string> = {
   'children clothing': 'Moda Infantil',
   'baby clothing': 'Moda Infantil',
   'kids fashion': 'Moda Infantil',
-  'shoes': 'Calçados',
-  'footwear': 'Calçados',
+  'calcados': 'Calçados Masculino',
+  'calcados masculinos': 'Calçados Masculino',
+  'calcados femininos': 'Calçados Femininos',
+  'men shoes': 'Calçados Masculino',
+  'mens shoes': 'Calçados Masculino',
+  'women shoes': 'Calçados Femininos',
+  'womens shoes': 'Calçados Femininos',
+  'shoes': 'Calçados Masculino',
+  'footwear': 'Calçados Masculino',
   'sports leisure': 'Esportes & Lazer',
   'beauty': 'Cuidado & Beleza',
   'beauty personal care': 'Cuidado & Beleza',
@@ -141,7 +148,12 @@ const inferFromText = (title: string, description: string): string | undefined =
       /\b(tacas?|copos?|faqueiros?)\b/.test(text) ||
       /\bpotes? (de |para |p )?(vidro|mantimentos|hermetic)/.test(text)) return 'Casa & Cozinha';
   if (/(ferramenta|furadeira|parafusadeira|torneira|tinta|material de construcao|aparador de cerca|cerca viva|jardinagem)/.test(text)) return 'Ferramentas';
-  if (/(tenis|sandalia|sapato|chinelo|chuteira|bota|calcado)/.test(text)) return 'Calçados';
+  if (/\b(tenis|sandalias?|sapatos?|chinelos?|chuteiras?|botas?|botinas?|calcados?|mocassim|mocassins|sapatilhas?|sapatenis|coturnos?|tamancos?|scarpin)\b/.test(text)) {
+    if (/\b(infantil|infantis|bebe|crianca|kids|meninas?|meninos?)\b/.test(text)) return 'Moda Infantil';
+    const feminine = /\b(feminin[oa]s?|mulheres?|women|womens|scarpin|slingback)\b/.test(text);
+    const masculine = /\b(masculin[oa]s?|homem|homens|men|mens|unissex|unisex)\b/.test(text);
+    return feminine && !masculine ? 'Calçados Femininos' : 'Calçados Masculino';
+  }
   if (/(electric scooter|scooter eletrica)/.test(text) || /(bicicleta|bike|e bike|ebike|scooter).{0,45}(eletric|bateria|motor)|bateria.{0,35}(bicicleta|bike|scooter)|acessorio.{0,35}(bicicleta|bike eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
   if (/(academia|halter|esteira|bicicleta|camping|esporte|fitness|bola de futebol)/.test(text)) return 'Esportes & Lazer';
   if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza|monitor de pressao|aparelho de pressao|manicure|unhas?|esmalte|gel uv|pinceis)/.test(text)) return 'Cuidado & Beleza';
@@ -172,13 +184,13 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     'Brinquedos', 'Pets', 'Instrumentos Musicais', 'Moda Feminina', 'Moda Masculina', 'Moda Infantil',
     'TVs', 'Notebook', 'ELETRÔNICOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
     'Fones & Headphones', 'Games', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
-    'Calçados', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
+    'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
     'MOTOS & ACESSÓRIOS', 'Utilidades',
   ]);
   if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
   const inferred = inferFromText(title, description);
-  const specificCategories = new Set(['Brinquedos', 'Calçados', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios', 'Móveis']);
+  const specificCategories = new Set(['Brinquedos', 'Calçados Masculino', 'Calçados Femininos', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios', 'Móveis']);
   if (inferred && (specificCategories.has(inferred) || !exact)) return inferred;
   if (exact) return exact;
 
