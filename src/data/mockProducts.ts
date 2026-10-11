@@ -483,6 +483,8 @@ export const CATEGORIES = [
   'Moda Masculina',
   'Moda Feminina',
   'Moda Infantil',
+  'MODA INFANTIL FEMININA',
+  'MODA INFANTIL MASCULINA',
   'ARMARINHOS & TRICÔ',
   'Brinquedos',
   'TVs',
