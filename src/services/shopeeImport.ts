@@ -114,6 +114,9 @@ const importCategoryRules: Record<string, RegExp> = {
 };
 
 export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
+  'MODA INFANTIL FEMININA': ['vestido infantil menina', 'conjunto infantil feminino', 'blusa infantil feminina', 'calça infantil menina', 'legging infantil feminina', 'short infantil feminino', 'saia infantil menina', 'pijama infantil menina', 'casaco infantil feminino', 'body bebê menina', 'sandália infantil menina', 'tênis infantil feminino'],
+  'MODA INFANTIL MASCULINA': ['camiseta infantil menino', 'conjunto infantil masculino', 'bermuda infantil menino', 'calça infantil masculina', 'short infantil masculino', 'pijama infantil menino', 'moletom infantil masculino', 'jaqueta infantil menino', 'body bebê menino', 'camisa infantil masculina', 'tênis infantil masculino', 'sandália infantil menino'],
+
   'CAMA/MESA/BANHO': ['jogo de cama', 'lençol casal', 'lençol queen', 'fronha', 'edredom', 'colcha cobre leito', 'toalha de banho', 'jogo de toalhas', 'toalha de mesa', 'pano de prato', 'tapete de banheiro', 'roupão de banho'],
   'MODA VERÃO PRAIA': ['biquíni', 'maiô feminino', 'sunga masculina', 'saída de praia', 'canga de praia', 'vestido de praia', 'short praia', 'bermuda de praia', 'chapéu de praia', 'bolsa de praia', 'biquíni plus size', 'maiô infantil'],
   'ARMARINHOS & TRICÔ': ["lã para tricô","fio de algodão para crochê","linha de costura","agulha de tricô","agulha de crochê","agulha de costura","linha de bordado","barbante para crochê","fita de cetim","renda para costura","zíper para costura","botão para costura"],
@@ -872,6 +875,14 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
     return true;
   }
   if (category === 'Pets') return pet;
+  if (category === 'MODA INFANTIL FEMININA' || category === 'MODA INFANTIL MASCULINA') {
+    if (!child || pet || !(clothingTerms.test(text) || footwearTerms.test(text)) ||
+        /\b(bonecas?|bonecos?|brinquedos?|cabides?|organizadores?|sacos? para|capas? para)\b/.test(text)) return false;
+    const feminine = /\b(feminin[oa]s?|meninas?|garotas?|girls?)\b/.test(text);
+    const masculine = /\b(masculin[oa]s?|meninos?|garotos?|boys?)\b/.test(text);
+    const unisex = /\b(unissex|unisex)\b/.test(text);
+    return category === 'MODA INFANTIL FEMININA' ? (feminine || unisex) && !masculine : (masculine || unisex) && !feminine;
+  }
   if (category === 'Moda Infantil') return child && (clothingTerms.test(text) || footwearTerms.test(text) || /\b(manta|cobertor|babador)\b/.test(text)) && !pet;
   if (category === 'Calçados Masculino' || category === 'Calçados Femininos') {
     if (!footwearTerms.test(text) || child || /\b(sacos?|sacola|porta sapatos|organizador|palmilha|cadarco|cadarcos)\b/.test(text)) return false;
