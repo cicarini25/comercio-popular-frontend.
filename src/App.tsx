@@ -76,16 +76,17 @@ export default function App() {
     setCatalogLoading(true);
     setCatalogError('');
     const loadCatalog = async () => {
-      let offset = 0;
       const completeCatalog = new Map<string, Product>();
       try {
+        let offset = 0;
         let hasMore = true;
         while (hasMore && !controller.signal.aborted) {
-          const page = await fetchAffiliateCatalog(offset, controller.signal);
+          const offsets = [offset, offset + 100];
+          const pages = await Promise.all(offsets.map((pageOffset) => fetchAffiliateCatalog(pageOffset, controller.signal)));
           if (controller.signal.aborted) return;
-          page.products.forEach(product => completeCatalog.set(product.id, product));
-          hasMore = page.hasMore;
-          offset += 100;
+          pages.forEach((page) => page.products.forEach(product => completeCatalog.set(product.id, product)));
+          hasMore = pages.some((page) => page.hasMore);
+          offset += 200;
         }
         if (!controller.signal.aborted) setProducts([...completeCatalog.values()]);
       } catch (error) {
