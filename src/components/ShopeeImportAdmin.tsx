@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, analyzeShopeeImportJobs, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, BICYCLE_ONLY_SUGGESTIONS, matchesShopeeSearchIntent, type FeedItem, type ShopeeJobStatus, type ShopeeCategoryReclassificationResult, type ShopeeAutoCategoryReview } from '../services/shopeeImport';
+import { prepareFeed, resolveShopeeImageUrls, enqueueShopeeBulk, getShopeeJob, repairShopeeCatalogState, reclassifyShopeeImportCategories, analyzeShopeeImportJobs, analyzeMisplacedComputerProducts, analyzeMisplacedElectroAccessories, searchShopeeOffers, getShopeeSearchSuggestions, isGeneralShopeeSearch, BICYCLE_ONLY_SUGGESTIONS, matchesShopeeSearchIntent, type FeedItem, type ShopeeJobStatus, type ShopeeCategoryReclassificationResult, type ShopeeAutoCategoryReview } from '../services/shopeeImport';
 import { CATEGORIES } from '../data/mockProducts';
 import { resolveProductCategory } from '../utils/productCategories';
 
@@ -35,6 +35,8 @@ export default function ShopeeImportAdmin() {
   const [categoryBatchPreview, setCategoryBatchPreview] = useState<ShopeeCategoryReclassificationResult | null>(null);
   const [autoCategoryPrefixes, setAutoCategoryPrefixes] = useState('3ca15e9a, 61971574');
   const [autoCategoryReview, setAutoCategoryReview] = useState<ShopeeAutoCategoryReview | null>(null);
+  const [computerMisplacementReview, setComputerMisplacementReview] = useState<Awaited<ReturnType<typeof analyzeMisplacedComputerProducts>> | null>(null);
+  const [electroMisplacementReview, setElectroMisplacementReview] = useState<Awaited<ReturnType<typeof analyzeMisplacedElectroAccessories>> | null>(null);
   const reset = () => { setItems([]); setPreview([]); setTotal(0); setSkipped(0); setExcluded(0); setExamined(0); setSearchTerms([]); setJobs([]); setError(''); setSuccess(''); };
 
   async function check() {
@@ -192,6 +194,44 @@ export default function ShopeeImportAdmin() {
     } finally {
       setBusy('');
     }
+  }
+
+  async function reviewMisplacedComputerProducts() {
+    setError(''); setSuccess(''); setComputerMisplacementReview(null);
+    setBusy('Analisando AUTO & ACESSÓRIOS e Pets em busca de produtos de computadores…');
+    try { setComputerMisplacementReview(await analyzeMisplacedComputerProducts(token, ['AUTO & ACESSÓRIOS', 'Pets'], true)); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível analisar os produtos incorretos.'); }
+    finally { setBusy(''); }
+  }
+
+  async function applyMisplacedComputerProducts() {
+    if (!computerMisplacementReview) return;
+    setError(''); setSuccess(''); setBusy('Transferindo produtos para Computadores…');
+    try {
+      const result = await analyzeMisplacedComputerProducts(token, computerMisplacementReview.sourceCategories, false);
+      setComputerMisplacementReview(result);
+      setSuccess(result.updatedCount + ' produto(s) transferido(s) para Computadores. Os demais permaneceram nas categorias de origem.');
+    } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível transferir os produtos de computador.'); }
+    finally { setBusy(''); }
+  }
+
+  async function reviewMisplacedElectroAccessories() {
+    setError(''); setSuccess(''); setElectroMisplacementReview(null);
+    setBusy('Analisando acessórios de fogão em Motos & Acessórios…');
+    try { setElectroMisplacementReview(await analyzeMisplacedElectroAccessories(token, true)); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível analisar os acessórios incorretos.'); }
+    finally { setBusy(''); }
+  }
+
+  async function applyMisplacedElectroAccessories() {
+    if (!electroMisplacementReview) return;
+    setError(''); setSuccess(''); setBusy('Transferindo acessórios para ELETRO & ACESSÓRIOS…');
+    try {
+      const result = await analyzeMisplacedElectroAccessories(token, false);
+      setElectroMisplacementReview(result);
+      setSuccess(result.updatedCount + ' acessório(s) transferido(s) para ELETRO & ACESSÓRIOS.');
+    } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível transferir os acessórios.'); }
+    finally { setBusy(''); }
   }
 
   async function previewImportedCategories() {
@@ -404,6 +444,34 @@ export default function ShopeeImportAdmin() {
             )}
           </div>
         )}
+      </section>
+
+      <section className="mt-6 bg-white rounded-2xl border border-slate-200 p-5">
+        <h2 className="text-xl font-bold">Corrigir produtos em categorias incorretas</h2>
+        <p className="mt-2 text-sm text-slate-600">Analise produtos de AUTO &amp; ACESSÓRIOS e Pets e mova somente os anúncios claramente relacionados a computadores.</p>
+        <button className="mt-4 rounded-xl bg-teal-700 text-white px-5 py-3 font-semibold disabled:opacity-50" type="button" disabled={!!busy || !token.trim()} onClick={() => void reviewMisplacedComputerProducts()}>Analisar AUTO &amp; ACESSÓRIOS e Pets</button>
+        {computerMisplacementReview && <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <h3 className="font-bold">Resultado: {computerMisplacementReview.totalProducts} produto(s)</h3>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">{Object.entries(computerMisplacementReview.categoryCounts).map(([category, count]) => <div key={category} className="rounded-lg border bg-white px-3 py-2 text-sm flex justify-between"><span>{category}</span><strong>{count}</strong></div>)}</div>
+          <details className="mt-4"><summary className="cursor-pointer font-semibold text-sm">Conferir produtos sugeridos ({computerMisplacementReview.plannedChanges})</summary>
+            <div className="mt-3 max-h-96 overflow-auto space-y-2">{computerMisplacementReview.products.filter((product) => product.willChange).map((product) => <div key={product.productId} className="rounded-lg border bg-white px-3 py-2 text-sm"><div className="font-medium">{product.title}</div><div className="mt-1 text-slate-600">Atual: {product.currentCategory} → <strong>{product.suggestedCategory}</strong></div></div>)}</div>
+          </details>
+          {computerMisplacementReview.dryRun && <button className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold disabled:opacity-50" type="button" disabled={!!busy || !token.trim() || computerMisplacementReview.plannedChanges === 0} onClick={() => void applyMisplacedComputerProducts()}>Transferir para Computadores</button>}
+        </div>}
+      </section>
+
+      <section className="mt-6 bg-white rounded-2xl border border-slate-200 p-5">
+        <h2 className="text-xl font-bold">Corrigir acessórios em Motos &amp; Acessórios</h2>
+        <p className="mt-2 text-sm text-slate-600">Analisa anúncios de espalhadores, queimadores, tampinhas e peças de fogão que estejam em Motos &amp; Acessórios.</p>
+        <button className="mt-4 rounded-xl bg-teal-700 text-white px-5 py-3 font-semibold disabled:opacity-50" type="button" disabled={!!busy || !token.trim()} onClick={() => void reviewMisplacedElectroAccessories()}>Analisar acessórios de Motos &amp; Acessórios</button>
+        {electroMisplacementReview && <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <h3 className="font-bold">Resultado: {electroMisplacementReview.totalProducts} produto(s)</h3>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">{Object.entries(electroMisplacementReview.categoryCounts).map(([category, count]) => <div key={category} className="rounded-lg border bg-white px-3 py-2 text-sm flex justify-between"><span>{category}</span><strong>{count}</strong></div>)}</div>
+          <details className="mt-4"><summary className="cursor-pointer font-semibold text-sm">Conferir acessórios sugeridos ({electroMisplacementReview.plannedChanges})</summary>
+            <div className="mt-3 max-h-96 overflow-auto space-y-2">{electroMisplacementReview.products.filter((product) => product.willChange).map((product) => <div key={product.productId} className="rounded-lg border bg-white px-3 py-2 text-sm"><div className="font-medium">{product.title}</div><div className="mt-1 text-slate-600">Atual: {product.currentCategory} → <strong>{product.suggestedCategory}</strong></div></div>)}</div>
+          </details>
+          {electroMisplacementReview.dryRun && <button className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold disabled:opacity-50" type="button" disabled={!!busy || !token.trim() || electroMisplacementReview.plannedChanges === 0} onClick={() => void applyMisplacedElectroAccessories()}>Transferir para ELETRO &amp; ACESSÓRIOS</button>}
+        </div>}
       </section>
 
       <section className="mt-6 bg-white rounded-2xl border border-slate-200 p-5">
