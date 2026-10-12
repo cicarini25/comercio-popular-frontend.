@@ -1592,6 +1592,34 @@ export async function analyzeMisplacedElectroAccessories(
   return result as ShopeeMisplacedElectroReview;
 }
 
+
+export type ShopeeMisplacedPetReview = {
+  ok: boolean;
+  dryRun: boolean;
+  sourceCategory: 'Computadores';
+  targetCategory: 'Pets';
+  totalProducts: number;
+  categoryCounts: Record<string, number>;
+  plannedChanges: number;
+  updatedCount: number;
+  products: Array<{ productId: string; title: string; currentCategory: string; suggestedCategory: string; matchedBy: string; jobId: string; willChange: boolean }>;
+};
+
+export async function analyzeMisplacedPetProducts(
+  token: string,
+  dryRun = true
+): Promise<ShopeeMisplacedPetReview> {
+  if (!token.trim()) throw new Error('Informe o token administrativo no painel do site.');
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/reclassify-misplaced-pet-products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token.trim() },
+    body: JSON.stringify({ dryRun })
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) throw new Error(result.error || 'Não foi possível analisar os produtos de pets.');
+  return result as ShopeeMisplacedPetReview;
+}
+
 export type ShopeeBatchCategoryTransferResult = {
   ok: boolean;
   dryRun: boolean;
