@@ -96,6 +96,7 @@ const importCategoryRules: Record<string, RegExp> = {
   'RELÓGIOS': /\b(relogios?|smartwatches?|smartwatch|watch|despertadores?|cronometros?)\b/,
   'Casa & Cozinha': /\b(panela|frigideira|prato|talher|copo|taca|pote|garrafa|chaleira|jarra|faqueiro|utensilio|confeitaria|cozinha|biscoito|paliteiro)\b/,
   'Ferramentas': /\b(ferramenta|furadeira|parafusadeira|serra|motosserra|solda|nivel|trena|parafuso|broca|torneira|tinta|pedreiro|construcao|desempenadeira|espatula|alicate|martelo|chave|jardinagem)\b/,
+  'MÁQUINAS & IMPRESSÃO': /\b(impressora|impressoras|multifuncional|multifuncionais|impressao|impressão|impressora termica|etiquetadora|rotuladora|plotter|sublimacao|sublimação|prensa termica|prensa térmica|maquina de corte|máquina de corte|cortadora|encadernadora|laminadora|plastificadora|bordadeira|maquina de bordado|máquina de bordado|costura industrial)\b/,
   'Eletrodomésticos': /\b(geladeira|refrigerador|fogao|microondas|micro ondas|lavadora|lava roupa|air fryer|airfryer|cafeteira|liquidificador|batedeira|aspirador|sanduicheira|ar condicionado|ventilador|espremedor eletrico)\b/,
   'Computadores': /\b(computador|desktop|pc|placa mae|placa de video|memoria ram|processador|monitor|mouse|teclado|ssd|hd externo|webcam)\b/,
   'Notebook': /\b(notebook|laptop|chromebook)\b/,
@@ -478,6 +479,7 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
     "controle nintendo switch",
     "console videogame"
   ],
+  'MÁQUINAS & IMPRESSÃO': ['impressora', 'impressora multifuncional', 'impressora térmica', 'impressora de etiquetas', 'plotter', 'prensa térmica', 'máquina de corte', 'cortadora', 'encadernadora', 'laminadora', 'plastificadora', 'máquina de bordado'],
   "Ferramentas": [
     "furadeira",
     "parafusadeira",
