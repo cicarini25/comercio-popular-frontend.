@@ -1522,6 +1522,45 @@ export async function analyzeShopeeImportJobs(
 }
 
 
+
+export type ShopeeMisplacedElectroReview = {
+  ok: boolean;
+  dryRun: boolean;
+  sourceCategory: 'MOTOS & ACESSÓRIOS';
+  targetCategory: 'ELETRO & ACESSÓRIOS';
+  totalProducts: number;
+  categoryCounts: Record<string, number>;
+  plannedChanges: number;
+  updatedCount: number;
+  products: Array<{
+    productId: string;
+    title: string;
+    currentCategory: string;
+    suggestedCategory: string;
+    matchedBy: string;
+    jobId: string;
+    willChange: boolean;
+  }>;
+};
+
+export async function analyzeMisplacedElectroAccessories(
+  token: string,
+  dryRun = true
+): Promise<ShopeeMisplacedElectroReview> {
+  if (!token.trim()) throw new Error('Informe o token administrativo no painel do site.');
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/reclassify-misplaced-electro-accessories', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token.trim()
+    },
+    body: JSON.stringify({ dryRun })
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) throw new Error(result.error || 'Não foi possível analisar os acessórios incorretos.');
+  return result as ShopeeMisplacedElectroReview;
+}
+
 export type ShopeeBatchCategoryTransferResult = {
   ok: boolean;
   dryRun: boolean;
