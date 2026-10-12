@@ -1523,6 +1523,35 @@ export async function analyzeShopeeImportJobs(
 
 
 
+
+export type ShopeeMisplacedComputerReview = {
+  ok: boolean;
+  dryRun: boolean;
+  sourceCategories: string[];
+  targetCategory: 'Computadores';
+  totalProducts: number;
+  categoryCounts: Record<string, number>;
+  plannedChanges: number;
+  updatedCount: number;
+  products: Array<{ productId: string; title: string; currentCategory: string; suggestedCategory: string; matchedBy: string; jobId: string; willChange: boolean }>;
+};
+
+export async function analyzeMisplacedComputerProducts(
+  token: string,
+  sourceCategories = ['AUTO & ACESSÓRIOS', 'Pets'],
+  dryRun = true
+): Promise<ShopeeMisplacedComputerReview> {
+  if (!token.trim()) throw new Error('Informe o token administrativo no painel do site.');
+  const response = await fetch(apiBaseUrl() + '/api/integrations/shopee/reclassify-misplaced-computer-products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token.trim() },
+    body: JSON.stringify({ sourceCategories, dryRun })
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) throw new Error(result.error || 'Não foi possível analisar os produtos incorretos.');
+  return result as ShopeeMisplacedComputerReview;
+}
+
 export type ShopeeMisplacedElectroReview = {
   ok: boolean;
   dryRun: boolean;
