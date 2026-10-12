@@ -464,6 +464,7 @@ export const CATEGORIES = [
   'CAMA/MESA/BANHO',
   'MODA VERÃO PRAIA',
   'Ferramentas',
+  'MÁQUINAS & IMPRESSÃO',
   'Eletrodomésticos',
   'ELETRO & ACESSÓRIOS',
   'Móveis',
