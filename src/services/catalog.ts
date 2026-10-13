@@ -24,7 +24,7 @@ export function mapCatalogProduct(row: any): Product | null {
       .sort((a: any, b: any) => Number(a.price) - Number(b.price))[0]
     : null;
   if (!offer || !UUID.test(row.id) || typeof row.title !== 'string' || !row.title.trim()) return null;
-  const legacyCategoryNames: Record<string, string> = { 'Casa & Construção': 'Ferramentas', 'Tecnologia': 'ELETRÔNICOS' };
+  const legacyCategoryNames: Record<string, string> = { 'Casa & Construção': 'Ferramentas', 'Tecnologia': 'ELETRÔNICOS', 'Moda Infantil': 'CALÇADOS INFANTIS M/F' };
   const categoryOverride = legacyCategoryNames[row.category_override] || row.category_override;
   const selectedCategory = typeof categoryOverride === 'string' &&
     categoryOverride !== 'Todas as Categorias' && CATEGORIES.includes(categoryOverride)
