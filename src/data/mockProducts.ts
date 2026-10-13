@@ -483,7 +483,7 @@ export const CATEGORIES = [
   'Pets',
   'Moda Masculina',
   'Moda Feminina',
-  'Moda Infantil',
+  'CALÇADOS INFANTIS M/F',
   'MODA INFANTIL FEMININA',
   'MODA INFANTIL MASCULINA',
   'ARMARINHOS & TRICÔ',
