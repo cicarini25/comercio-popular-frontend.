@@ -129,6 +129,8 @@ const categoryAliases: Record<string, string> = {
 
 const inferFromText = (title: string, description: string): string | undefined => {
   const text = normalizeKey(title + ' ' + description);
+  if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira).{0,40}(infantil|menino|menina|bebe|crianca|kids)/.test(text) || /(infantil|menino|menina|bebe|crianca|kids).{0,40}(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira)/.test(text)) return 'CALÇADOS INFANTIS M/F';
 
   if (/(coala home|odorizante|aromatizante|difusor de aromas|home spray|antimofo|evita mofo|desumidificador|limpeza|limpador)/.test(text)) return 'Utilidades';
   if (/(relogio despertador|despertador|relogio de mesa)/.test(text)) return 'Utilidades';
