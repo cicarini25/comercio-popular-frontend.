@@ -29,6 +29,10 @@ export function mapCatalogProduct(row: any): Product | null {
   const selectedCategory = typeof categoryOverride === 'string' &&
     categoryOverride !== 'Todas as Categorias' && CATEGORIES.includes(categoryOverride)
     ? categoryOverride : '';
+  const inferredCategory = resolveProductCategory(categories[row.category] || row.category, row.title, row.description || '');
+  const effectiveCategory = selectedCategory === 'ARMARINHOS & TRICÔ' && inferredCategory === 'Moda Feminina'
+    ? inferredCategory
+    : selectedCategory || inferredCategory;
   const price = Number(offer.price);
   const original = Number(offer.originalPrice);
   const stock = offer.stockUnits == null ? null : Number(offer.stockUnits);
@@ -41,7 +45,7 @@ export function mapCatalogProduct(row: any): Product | null {
     platform: offer.platform.code as Product['platform'],
     affiliateUrl: `${API_BASE_URL}/api/catalog/offers/${offer.id}/go`,
     affiliateOfferId: offer.id,
-    images: [image], category: selectedCategory || resolveProductCategory(categories[row.category] || row.category, row.title, row.description || ''),
+    images: [image], category: effectiveCategory,
     rating: 0, reviewCount: 0, reviews: [], isAchadinho: true,
     stockUnits: stock != null && Number.isInteger(stock) && stock >= 0 ? stock : null,
     isVerified: false, isFastShipping: offer.isFastShipping === true,
