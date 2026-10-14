@@ -190,9 +190,9 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   // O título do produto é o melhor sinal para corrigir categorias genéricas erradas do feed.
   const titleCategory = inferFromText(title, '');
   const titleDrivenCategories = new Set([
-    'Brinquedos', 'Pets', 'Instrumentos Musicais', 'Moda Feminina', 'Moda Masculina', 'CALÇADOS INFANTIS M/F',
+    'Brinquedos', 'Pets', 'Instrumentos Musicais', 'ARMARINHOS & TRICÔ', 'Moda Feminina', 'Moda Masculina', 'CALÇADOS INFANTIS M/F',
     'TVs', 'Notebook', 'ELETRÔNICOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
-    'Fones & Headphones', 'Games', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
+    'Fones & Headphones', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
     'MOTOS & ACESSÓRIOS', 'Utilidades',
   ]);
