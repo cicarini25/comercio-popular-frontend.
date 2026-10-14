@@ -92,7 +92,7 @@ export async function resolveAffiliateRedirect(product: Product): Promise<string
 }
 
 export async function fetchAffiliateCatalog(offset = 0, signal?: AbortSignal) {
-  const response = await fetch(`${API_BASE_URL}/api/catalog/products?limit=100&offset=${offset}`, {
+  const response = await fetch(`${API_BASE_URL}/api/catalog/products?limit=24&offset=${offset}`, {
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000),
     cache: 'no-store',
   });
