@@ -129,8 +129,9 @@ const categoryAliases: Record<string, string> = {
 
 const inferFromText = (title: string, description: string): string | undefined => {
   const text = normalizeKey(title + ' ' + description);
-  if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira).{0,40}(infantil|menino|menina|bebe|crianca|kids)/.test(text) || /(infantil|menino|menina|bebe|crianca|kids).{0,40}(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira)/.test(text)) return 'CALÇADOS INFANTIS M/F';
+  if (/(gravadora|gravacao|cortadora|rolo rotativo|sculpfun|artilume|acmer|mecolour|lightburn).{0,45}laser|laser.{0,45}(gravadora|gravacao|cortadora|rolo rotativo)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
 
   if (/(coala home|odorizante|aromatizante|difusor de aromas|home spray|antimofo|evita mofo|desumidificador|limpeza|limpador)/.test(text)) return 'Utilidades';
   if (/(relogio despertador|despertador|relogio de mesa)/.test(text)) return 'Utilidades';
@@ -194,7 +195,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     'TVs', 'Notebook', 'ELETRÔNICOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
     'Fones & Headphones', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
-    'MOTOS & ACESSÓRIOS', 'Utilidades',
+    'MÁQUINAS & IMPRESSORAS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
   ]);
   if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
