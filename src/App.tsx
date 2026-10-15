@@ -72,6 +72,7 @@ export default function App() {
   const [catalogRetry, setCatalogRetry] = useState(0);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [categoryError, setCategoryError] = useState('');
+  const [categoryRetry, setCategoryRetry] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -171,7 +172,7 @@ export default function App() {
       if (!controller.signal.aborted) setCategoryLoading(false);
     });
     return () => controller.abort();
-  }, [selectedCategory]);
+  }, [selectedCategory, categoryRetry]);
   // Dynamic price bounds of full catalog and Price Range Filter State
   const catalogMinPrice = useMemo(() => {
     if (products.length === 0) return 0;
@@ -633,7 +634,7 @@ export default function App() {
                 </div>
                 {(catalogLoading || categoryLoading) && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
                 {(catalogError || categoryError) && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
-                  <p>{catalogError || categoryError}</p><button className="underline font-bold" onClick={() => selectedCategory === 'Todas as Categorias' ? setCatalogRetry(n => n + 1) : setSelectedCategory(selectedCategory)}>Tentar novamente</button>
+                  <p>{catalogError || categoryError}</p><button className="underline font-bold" onClick={() => selectedCategory === 'Todas as Categorias' ? setCatalogRetry(n => n + 1) : setCategoryRetry(n => n + 1)}>Tentar novamente</button>
                 </div>}
                 {filteredProducts.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
