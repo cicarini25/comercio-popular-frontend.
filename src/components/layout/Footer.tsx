@@ -32,16 +32,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, onOpenSellerSection
               <p className="text-neutral-400 text-xs mt-0.5">
                 Pagamentos pelo Mercado Pago com confirmação segura.
               </p>
-              <div className="mt-2 flex flex-wrap items-center gap-1.5" aria-label="Formas de pagamento aceitas">
-                <span className="inline-flex h-6 items-center rounded-md bg-white px-1.5 text-[10px] font-black tracking-tight text-[#147bd1]">PIX</span>
-                <span className="inline-flex h-6 items-center rounded-md bg-white px-1.5 text-[10px] font-black italic tracking-tight text-[#1a1f71]">VISA</span>
-                <span className="inline-flex h-6 items-center gap-0.5 rounded-md bg-white px-1.5 text-[9px] font-bold text-[#252525]">
-                  <span className="h-3 w-3 rounded-full bg-[#eb001b]" aria-hidden="true" />
-                  <span className="-ml-1 h-3 w-3 rounded-full bg-[#f79e1b]" aria-hidden="true" />
-                  <span className="ml-0.5">mastercard</span>
-                </span>
-                <span className="inline-flex h-6 items-center rounded-md bg-white px-1.5 text-[10px] font-black italic tracking-tight text-[#00a4e0]">elo</span>
-              </div>
+              <img
+                src="/images/payment-card-brands.jpg"
+                alt="Bandeiras aceitas: Visa, Mastercard, Maestro, Elo, American Express, Hipercard, Diners Club e Pix"
+                className="mt-2 h-auto w-full max-w-[250px] rounded-lg bg-white object-contain"
+              />
             </div>
           </div>
 
