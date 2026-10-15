@@ -125,7 +125,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <ShieldCheck size={15} className="text-teal-600 shrink-0" />
               <div>
                 <span className="text-[10px] text-neutral-400 font-bold uppercase block">Segurança KYC</span>
-                <span className="font-semibold text-teal-700">Biometria Facial Aprovada</span>
+                <span className={`font-semibold ${user.isVerifiedFace ? 'text-teal-700' : 'text-amber-700'}`}>
+                  {user.isVerifiedFace ? 'Biometria Facial Aprovada' : 'Biometria Facial Pendente'}
+                </span>
               </div>
             </div>
           </div>
