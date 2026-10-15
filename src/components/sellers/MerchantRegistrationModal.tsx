@@ -3,6 +3,7 @@ import { CheckCircle2, Eye, EyeOff, X } from 'lucide-react';
 import { SellerPlan, User } from '../../types';
 import { api, MerchantApplicationPayload } from '../../services/api';
 import merchantLogo from '../../assets/logo-comercio-popular-verde.png';
+import { Logo } from '../common/Logo';
 
 interface MerchantRegistrationModalProps {
   isOpen: boolean;
@@ -89,7 +90,18 @@ export const MerchantRegistrationModal: React.FC<MerchantRegistrationModalProps>
       <section role="dialog" aria-modal="true" aria-label="Cadastro de comerciante" className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl bg-white shadow-2xl sm:max-h-[calc(100vh-3rem)]">
         <header className="flex items-start justify-between gap-4 bg-teal-950 px-6 py-5 text-white sm:px-8">
           <div className="flex items-center gap-4">
-            <img src={merchantLogo} alt="Comércio Popular" className="h-16 w-16 rounded-2xl bg-white object-contain p-1" />
+            <div className="relative flex h-16 min-w-16 items-center justify-center rounded-2xl bg-white p-1">
+              <img
+                src={merchantLogo}
+                alt="Comércio Popular"
+                className="h-full w-full rounded-xl object-contain"
+                onError={(event) => {
+                  event.currentTarget.classList.add('hidden');
+                  event.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <Logo size="sm" showSubtitle={false} className="hidden scale-90" />
+            </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-teal-200">Cadastro de comerciante</p>
               <h2 className="mt-1 text-xl font-extrabold">{plan.name}</h2>
