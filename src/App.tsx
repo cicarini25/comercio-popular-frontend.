@@ -466,6 +466,12 @@ export default function App() {
   const handleAddToCart = (product: Product, quantity = 1) => {
     if (product.platform !== "parceiro") { setAffiliateProduct(product); return; }
     setCartItems((prev) => {
+      const sellerId = product.seller?.id;
+      const currentSellerIds = new Set(prev.map((item) => item.product.seller?.id).filter(Boolean));
+      if (sellerId && currentSellerIds.size > 0 && !currentSellerIds.has(sellerId)) {
+        alert('Finalize ou remova os itens atuais antes de comprar de outro vendedor. Cada pedido usa um vendedor por vez.');
+        return prev;
+      }
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
         return prev.map((item) =>
