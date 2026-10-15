@@ -1,4 +1,4 @@
-import { fetchAffiliateCatalog, resolveAffiliateRedirect } from './services/catalog';
+import { CATALOG_PAGE_SIZE, fetchAffiliateCatalog, resolveAffiliateRedirect } from './services/catalog';
 import { CatalogProductDetail } from './components/products/CatalogProductDetail';
 import { mapApiUser } from './services/api';
 import { useAuth } from './context/AuthContext';
@@ -81,12 +81,12 @@ export default function App() {
         let offset = 0;
         let hasMore = true;
         while (hasMore && !controller.signal.aborted) {
-          const offsets = [offset, offset + 100];
+          const offsets = [offset, offset + CATALOG_PAGE_SIZE];
           const pages = await Promise.all(offsets.map((pageOffset) => fetchAffiliateCatalog(pageOffset, controller.signal)));
           if (controller.signal.aborted) return;
           pages.forEach((page) => page.products.forEach(product => completeCatalog.set(product.id, product)));
           hasMore = pages.some((page) => page.hasMore);
-          offset += 200;
+          offset += CATALOG_PAGE_SIZE * 2;
         }
         if (!controller.signal.aborted) setProducts([...completeCatalog.values()]);
       } catch (error) {
