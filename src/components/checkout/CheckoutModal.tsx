@@ -1,24 +1,8 @@
 import React, { useState } from 'react';
-import {
-  X,
-  CreditCard,
-  QrCode,
-  FileText,
-  ShieldCheck,
-  CheckCircle2,
-  Copy,
-  Check,
-  ArrowRight,
-  Truck,
-  Lock,
-  Clock,
-  Sparkles,
-  AlertCircle
-} from 'lucide-react';
+import { Lock, ShoppingBag, X } from 'lucide-react';
 import { CartItem, Order, User } from '../../types';
-import { formatCurrency, maskCPF, maskCEP, generatePixPayload } from '../../utils/formatters';
-import { api, CreateOrderPayload } from '../../services/api';
-import confetti from 'canvas-confetti';
+import { formatCurrency } from '../../utils/formatters';
+import { api } from '../../services/api';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -29,8 +13,6 @@ interface CheckoutModalProps {
   onRequireAuth: () => void;
 }
 
-type PaymentMethod = 'pix' | 'credit_card' | 'boleto';
-
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   isOpen,
   onClose,
@@ -39,70 +21,104 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onPaymentComplete,
   onRequireAuth
 }) => {
-  const [step, setStep] = useState<'shipping' | 'payment' | 'processing' | 'success'>('shipping');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
-
-  // Shipping form
-  const [name, setName] = useState(user?.name || '');
-  const [cpf, setCpf] = useState(user?.cpf || '');
-  const [cep, setCep] = useState(user?.address?.cep || '01310-100');
-  const [street, setStreet] = useState(user?.address?.street || 'Avenida Paulista');
-  const [number, setNumber] = useState(user?.address?.number || '1578');
-  const [complement, setComplement] = useState('');
-  const [neighborhood, setNeighborhood] = useState(user?.address?.neighborhood || 'Bela Vista');
-  const [city, setCity] = useState(user?.address?.city || 'São Paulo');
-  const [state, setState] = useState(user?.address?.state || 'SP');
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState<'econ' | 'express'>('econ');
-
-  // Credit Card Form
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardHolder, setCardHolder] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvv, setCardCvv] = useState('');
-  const [installments, setInstallments] = useState(1);
-
-  // PIX state
-  const [copiedPix, setCopiedPix] = useState(false);
-  const [pixTimeLeft, setPixTimeLeft] = useState(900); // 15 min
-
-  // Created order state
-  const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
 
-  // Subtotal & Shipping calculation
   const subtotal = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
-  const shippingFee = selectedShippingMethod === 'econ' ? 14.90 : 26.50;
+  const shippingFee = 14.90;
   const total = subtotal + shippingFee;
 
-  // Split calculation
-  const sellerReceives = subtotal; // 0% fee on partner plan as per brief
-  const platformGatewayCost = (subtotal * 0.01).toFixed(2); // low transparent fee
-
-  const orderId = 'CP-' + Math.floor(100000 + Math.random() * 900000);
-  const pixCode = generatePixPayload(total, orderId);
-
-  // Handle shipping validation
-  const handleProceedToPayment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !cpf || !street || !number || !city || !state) {
-      alert('Por favor, preencha todos os campos obrigatórios do endereço.');
+  // Mercado Pago Checkout Pro hosts the card, debit, Pix and boleto screens.
+  const handleFinalizePayment = async () => {
+    if (!user) {
+      onRequireAuth();
       return;
     }
-    setStep('payment');
-  };
 
-  // Payments remain unavailable until server-side price and webhook validation are fixed.
-  const handleFinalizePayment = async () => {
-    setOrderError('Pagamentos temporariamente indisponíveis. Nenhuma cobrança foi realizada.');
-  };
+    const sellerIds = [...new Set(items.map((item) => item.product.seller?.id).filter(Boolean))];
+    if (sellerIds.length !== 1 || items.some((item) => !item.product.seller?.id)) {
+      setOrderError('Cada pedido deve conter produtos de um único vendedor.');
+      return;
+    }
 
-  const handleCopyPix = () => {
-    navigator.clipboard.writeText(pixCode);
-    setCopiedPix(true);
-    setTimeout(() => setCopiedPix(false), 2500);
+    setIsProcessing(true);
+    setOrderError(null);
+    try {
+      const response = await api.createOrder({
+        items: items.map((item) => ({
+          productId: item.product.id,
+          title: item.product.title,
+          unitPrice: Number(item.product.price),
+          quantity: item.quantity,
+          sellerId: item.product.seller!.id
+        })),
+        shippingFee
+      });
+
+      if (!response.checkoutUrl) {
+        throw new Error('O Mercado Pago não retornou o endereço do checkout.');
+      }
+
+      const pendingOrder: Order = {
+        id: response.orderId,
+        date: new Date().toISOString(),
+        items,
+        subtotal,
+        shippingTotal: shippingFee,
+        total,
+        paymentMethod: 'mercado_pago',
+        paymentStatus: 'pending'
+      };
+      onPaymentComplete(pendingOrder);
+      onClose();
+      window.location.assign(response.checkoutUrl);
+    } catch (error: any) {
+      setOrderError(error?.message || 'Não foi possível iniciar o pagamento. Tente novamente.');
+      setIsProcessing(false);
+    }
   };
 
   if (!isOpen || items.length === 0) return null;
 
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"><section role="dialog" aria-modal="true" aria-label="Pagamento indisponível" className="max-w-md rounded-2xl bg-white p-6 shadow-xl"><h2 className="text-xl font-bold">Pagamentos em preparação</h2><p className="my-4">Estamos concluindo a integração de pagamentos. Nenhuma cobrança foi realizada. Seus produtos continuam na sacola.</p><button onClick={onClose} className="rounded-xl bg-teal-700 px-4 py-3 text-white">Voltar à loja</button></section></div>;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <section role="dialog" aria-modal="true" aria-label="Checkout Mercado Pago" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-teal-700">Pagamento seguro</p>
+            <h2 className="mt-1 text-xl font-bold text-slate-900">Finalizar pedido</h2>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Fechar" className="rounded-full p-2 text-slate-500 hover:bg-slate-100">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="my-5 rounded-xl bg-slate-50 p-4">
+          <div className="flex items-center gap-3">
+            <ShoppingBag className="text-teal-700" size={22} />
+            <div>
+              <p className="font-semibold text-slate-900">{items.length} item(ns) no pedido</p>
+              <p className="text-sm text-slate-600">Vendido por um único parceiro</p>
+            </div>
+          </div>
+          <div className="mt-3 flex justify-between border-t border-slate-200 pt-3 font-bold text-slate-900">
+            <span>Total</span>
+            <span>{formatCurrency(total)}</span>
+          </div>
+        </div>
+
+        <p className="text-sm leading-6 text-slate-600">
+          Você será levado ao Mercado Pago para escolher cartão de crédito, débito, Pix ou boleto. Os dados do cartão não passam pelo nosso site.
+        </p>
+
+        {orderError && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{orderError}</p>}
+
+        <button type="button" disabled={isProcessing} onClick={handleFinalizePayment} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 font-semibold text-white disabled:cursor-wait disabled:opacity-60">
+          <Lock size={17} />
+          {isProcessing ? 'Abrindo Mercado Pago...' : 'Continuar para pagamento'}
+        </button>
+      </section>
+    </div>
+  );
 };
+
