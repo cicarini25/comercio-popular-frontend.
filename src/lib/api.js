@@ -23,5 +23,7 @@ export const api = {
   tiktokExchange: code => request('/auth/tiktok/exchange', { method: 'POST', body: JSON.stringify({ code }) }),
   tiktokComplete: payload => request('/auth/tiktok/complete', { method: 'POST', body: JSON.stringify(payload) }),
   acceptLegal: legalToken => request('/auth/legal/accept', { method: 'POST', body: JSON.stringify({ legalToken, accepted: true }) }),
+  requestSmsCode: () => request('/auth/sms/request', { method: 'POST' }),
+  verifySmsCode: code => request('/auth/sms/verify', { method: 'POST', body: JSON.stringify({ code }) }),
   me: () => request('/auth/me')
 };
