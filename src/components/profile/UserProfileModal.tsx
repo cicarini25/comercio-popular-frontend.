@@ -184,7 +184,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <span className="font-semibold text-amber-700">Telefone pendente</span>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {!smsSent ? <button type="button" disabled={smsBusy} onClick={requestSmsCode} className="rounded-lg bg-teal-700 px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-60">{smsBusy ? 'Enviando...' : 'Enviar código SMS'}</button> : <>
-                      <input value={smsCode} onChange={(event) => setSmsCode(event.target.value.replace(/\\D/g, '').slice(0, 6))} inputMode="numeric" maxLength={6} placeholder="6 dígitos" aria-label="Código SMS" className="w-24 rounded-lg border border-neutral-300 px-2 py-1.5 text-xs" />
+                      <input value={smsCode} onChange={(event) => setSmsCode(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" maxLength={6} placeholder="6 dígitos" aria-label="Código SMS" className="w-24 rounded-lg border border-neutral-300 px-2 py-1.5 text-xs" />
                       <button type="button" disabled={smsBusy || smsCode.length !== 6} onClick={verifySmsCode} className="rounded-lg bg-teal-700 px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-60">{smsBusy ? 'Validando...' : 'Validar'}</button>
                     </>}
                   </div>
