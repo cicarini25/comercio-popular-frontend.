@@ -5,6 +5,7 @@ import { CATEGORIES } from '../data/mockProducts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SUPPORTED_AFFILIATE_PLATFORMS = new Set(['shopee', 'shein']);
+export const CATALOG_PAGE_SIZE = 60;
 const categories: Record<string, string> = {
   'Home & Living': 'Ferramentas',
   'Sports & Outdoors': 'Esportes & Lazer',
@@ -92,7 +93,7 @@ export async function resolveAffiliateRedirect(product: Product): Promise<string
 }
 
 export async function fetchAffiliateCatalog(offset = 0, signal?: AbortSignal) {
-  const response = await fetch(`${API_BASE_URL}/api/catalog/products?limit=60&offset=${offset}`, {
+  const response = await fetch(`${API_BASE_URL}/api/catalog/products?limit=${CATALOG_PAGE_SIZE}&offset=${offset}`, {
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000),
     cache: 'no-store',
   });
@@ -101,6 +102,6 @@ export async function fetchAffiliateCatalog(offset = 0, signal?: AbortSignal) {
   if (!Array.isArray(data.products)) throw new Error('O catálogo retornou uma resposta inválida.');
   return {
     products: data.products.map(mapCatalogProduct).filter((p: Product | null): p is Product => p !== null),
-    hasMore: data.products.length === 100,
+    hasMore: data.products.length === CATALOG_PAGE_SIZE,
   };
 }
