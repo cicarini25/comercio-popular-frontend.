@@ -50,6 +50,25 @@ export interface CreateOrderResponse {
   checkoutUrl?: string;
 }
 
+export interface MerchantApplicationPayload {
+  plan: string;
+  entityType: 'PF' | 'PJ';
+  storeName: string;
+  legalName: string;
+  businessActivity: string;
+  street: string;
+  addressNumber: string;
+  neighborhood: string;
+  cep: string;
+  city: string;
+  state: string;
+  phone: string;
+  email: string;
+  documentNumber: string;
+  website?: string;
+  password: string;
+}
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
   const headers: Record<string, string> = {
@@ -122,6 +141,13 @@ export const api = {
 
   async createOrder(payload: CreateOrderPayload): Promise<CreateOrderResponse> {
     return request<CreateOrderResponse>('/api/orders', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  async submitMerchantApplication(payload: MerchantApplicationPayload): Promise<{ application: any; message: string }> {
+    return request<{ application: any; message: string }>('/api/merchant-applications', {
       method: 'POST',
       body: JSON.stringify(payload)
     });

@@ -11,6 +11,7 @@ import { HeroBanner } from './components/home/HeroBanner';
 import { AchadinhosSection } from './components/achadinhos/AchadinhosSection';
 import { SellerSection } from './components/sellers/SellerSection';
 import { SellerDashboard } from './components/sellers/SellerDashboard';
+import { MerchantRegistrationModal } from './components/sellers/MerchantRegistrationModal';
 import { ProductCard } from './components/products/ProductCard';
 import { ProductDetailModal } from './components/products/ProductDetailModal';
 import { AffiliateModal } from './components/products/AffiliateModal';
@@ -198,6 +199,7 @@ export default function App() {
   const isCartOpen = location.pathname === '/sacola';
   const setIsCartOpen = (open: boolean) => navigate(open ? '/sacola' : '/');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [merchantPlan, setMerchantPlan] = useState<SellerPlan | null>(null);
   const isSellerDashboardOpen = location.pathname === '/vendedor';
   const setIsSellerDashboardOpen = (open: boolean) => navigate(open ? '/vendedor' : '/lojas');
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
@@ -524,12 +526,7 @@ export default function App() {
 
   // Seller plan subscription
   const handleSubscribePlan = (plan: SellerPlan) => {
-    if (!user) {
-      setIsAuthOpen(true);
-      return;
-    }
-    setIsSellerDashboardOpen(true);
-    confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+    setMerchantPlan(plan);
   };
 
   const handleAddNewProduct = (newProd: Product) => {
@@ -953,6 +950,13 @@ export default function App() {
           onRequireAuth={() => setIsAuthOpen(true)}
         />
       )}
+
+      <MerchantRegistrationModal
+        isOpen={merchantPlan !== null}
+        plan={merchantPlan}
+        user={user}
+        onClose={() => setMerchantPlan(null)}
+      />
 
       {/* Two-layer Auth Modal (KYC Facial Biometrics + SMS) */}
       {isAuthOpen && (

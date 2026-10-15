@@ -507,7 +507,7 @@ export const SellerSection: React.FC<SellerSectionProps> = ({
                   }`}
                 >
                   <Zap size={14} />
-                  <span>Assinar {plan.name}</span>
+                  <span>Cadastrar loja</span>
                 </button>
               </div>
             ))}
