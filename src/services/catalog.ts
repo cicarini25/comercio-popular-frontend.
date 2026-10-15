@@ -92,8 +92,8 @@ export async function resolveAffiliateRedirect(product: Product): Promise<string
   return destination.href;
 }
 
-export async function fetchAffiliateCatalog(offset = 0, signal?: AbortSignal) {
-  const response = await fetch(`${API_BASE_URL}/api/catalog/products?limit=${CATALOG_PAGE_SIZE}&offset=${offset}`, {
+export async function fetchAffiliateCatalog(offset = 0, signal?: AbortSignal, category?: string) {
+  const response = await fetch(`${API_BASE_URL}/api/catalog/products?limit=${CATALOG_PAGE_SIZE}&offset=${offset}${category && category !== 'Todas as Categorias' ? `&category=${encodeURIComponent(category)}` : ''}`, {
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000),
     cache: 'no-store',
   });
