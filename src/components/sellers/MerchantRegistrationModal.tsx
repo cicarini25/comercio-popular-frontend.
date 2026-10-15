@@ -88,7 +88,7 @@ export const MerchantRegistrationModal: React.FC<MerchantRegistrationModalProps>
       <section role="dialog" aria-modal="true" aria-label="Cadastro de comerciante" className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl bg-white shadow-2xl sm:max-h-[calc(100vh-3rem)]">
         <header className="flex items-start justify-between gap-4 bg-teal-950 px-6 py-5 text-white sm:px-8">
           <div className="flex items-center gap-4">
-            <img src="/images/logo-comercio-popular-verde.png" alt="Comércio Popular" className="h-16 w-16 rounded-2xl bg-white object-contain p-1" />
+            <img src="/logo-comercio-popular-verde.png" alt="Comércio Popular" className="h-16 w-16 rounded-2xl bg-white object-contain p-1" />
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-teal-200">Cadastro de comerciante</p>
               <h2 className="mt-1 text-xl font-extrabold">{plan.name}</h2>
