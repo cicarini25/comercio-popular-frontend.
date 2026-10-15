@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   X,
   User as UserIcon,
@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { User, Product } from '../../types';
 import { ProfileNotificationCard } from './ProfileNotificationCard';
+import { api } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -36,6 +38,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onLogout
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const { updateUser } = useAuth();
+  const [smsCode, setSmsCode] = useState('');
+  const [smsBusy, setSmsBusy] = useState(false);
+  const [smsSent, setSmsSent] = useState(false);
+  const [smsMessage, setSmsMessage] = useState('');
+  const [smsError, setSmsError] = useState('');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -49,6 +57,43 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  const requestSmsCode = async () => {
+    setSmsBusy(true);
+    setSmsError('');
+    setSmsMessage('');
+    try {
+      const response = await api.requestSmsCode();
+      if (response.verified) {
+        updateUser({ ...user, is_verified_sms: true });
+        setSmsMessage('Telefone já verificado.');
+      } else {
+        setSmsSent(true);
+        setSmsMessage(`Código enviado para ${response.phone}.`);
+      }
+    } catch (error) {
+      setSmsError(error instanceof Error ? error.message : 'Não foi possível enviar o código.');
+    } finally {
+      setSmsBusy(false);
+    }
+  };
+
+  const verifySmsCode = async () => {
+    setSmsBusy(true);
+    setSmsError('');
+    setSmsMessage('');
+    try {
+      const response = await api.verifySmsCode(smsCode);
+      updateUser(response.user);
+      setSmsSent(false);
+      setSmsCode('');
+      setSmsMessage('Telefone verificado com sucesso.');
+    } catch (error) {
+      setSmsError(error instanceof Error ? error.message : 'Código inválido.');
+    } finally {
+      setSmsBusy(false);
+    }
+  };
 
   return (
     <div
@@ -128,6 +173,24 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <span className={`font-semibold ${user.isVerifiedFace ? 'text-teal-700' : 'text-amber-700'}`}>
                   {user.isVerifiedFace ? 'Biometria Facial Aprovada' : 'Biometria Facial Pendente'}
                 </span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2 text-neutral-700">
+              <Smartphone size={15} className="text-teal-600 shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[10px] text-neutral-400 font-bold uppercase block">Segurança por SMS</span>
+                {user.isVerifiedSMS ? <span className="font-semibold text-teal-700">Telefone verificado</span> : <>
+                  <span className="font-semibold text-amber-700">Telefone pendente</span>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {!smsSent ? <button type="button" disabled={smsBusy} onClick={requestSmsCode} className="rounded-lg bg-teal-700 px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-60">{smsBusy ? 'Enviando...' : 'Enviar código SMS'}</button> : <>
+                      <input value={smsCode} onChange={(event) => setSmsCode(event.target.value.replace(/\\D/g, '').slice(0, 6))} inputMode="numeric" maxLength={6} placeholder="6 dígitos" aria-label="Código SMS" className="w-24 rounded-lg border border-neutral-300 px-2 py-1.5 text-xs" />
+                      <button type="button" disabled={smsBusy || smsCode.length !== 6} onClick={verifySmsCode} className="rounded-lg bg-teal-700 px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-60">{smsBusy ? 'Validando...' : 'Validar'}</button>
+                    </>}
+                  </div>
+                  {smsMessage && <p className="mt-1 text-[11px] text-teal-700">{smsMessage}</p>}
+                  {smsError && <p role="alert" className="mt-1 text-[11px] text-rose-700">{smsError}</p>}
+                </>}
               </div>
             </div>
           </div>
