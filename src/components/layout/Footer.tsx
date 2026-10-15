@@ -30,8 +30,18 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, onOpenSellerSection
             <div>
               <h5 className="font-bold text-white text-sm">Pix e Cartão em até 12x</h5>
               <p className="text-neutral-400 text-xs mt-0.5">
-                Pagamentos integrados com split automático e confirmação imediata.
+                Pagamentos pelo Mercado Pago com confirmação segura.
               </p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5" aria-label="Formas de pagamento aceitas">
+                <span className="inline-flex h-6 items-center rounded-md bg-white px-1.5 text-[10px] font-black tracking-tight text-[#147bd1]">PIX</span>
+                <span className="inline-flex h-6 items-center rounded-md bg-white px-1.5 text-[10px] font-black italic tracking-tight text-[#1a1f71]">VISA</span>
+                <span className="inline-flex h-6 items-center gap-0.5 rounded-md bg-white px-1.5 text-[9px] font-bold text-[#252525]">
+                  <span className="h-3 w-3 rounded-full bg-[#eb001b]" aria-hidden="true" />
+                  <span className="-ml-1 h-3 w-3 rounded-full bg-[#f79e1b]" aria-hidden="true" />
+                  <span className="ml-0.5">mastercard</span>
+                </span>
+                <span className="inline-flex h-6 items-center rounded-md bg-white px-1.5 text-[10px] font-black italic tracking-tight text-[#00a4e0]">elo</span>
+              </div>
             </div>
           </div>
 
@@ -221,3 +231,4 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, onOpenSellerSection
     </footer>
   );
 };
+
