@@ -102,6 +102,13 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }
 
+  function updateUser(userData) {
+    const normalized = normalizeUser(userData);
+    if (!normalized) throw new Error('Dados de usuário inválidos.');
+    setUser(normalized);
+    return normalized;
+  }
+
   function logout() {
     generation.current += 1;
     localStorage.removeItem('cp_token');
@@ -120,6 +127,7 @@ export function AuthProvider({ children }) {
       completeTikTokSignup,
       acceptSocialLegal,
       loginWithToken,
+      updateUser,
       logout,
     }}>
       {children}
