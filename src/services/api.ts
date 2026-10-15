@@ -69,6 +69,15 @@ export interface MerchantApplicationPayload {
   password: string;
 }
 
+export interface SellerProductPayload {
+  title: string;
+  description: string;
+  price: number;
+  stockUnits: number;
+  category: string;
+  imageUrl?: string;
+}
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
   const headers: Record<string, string> = {
@@ -159,6 +168,28 @@ export const api = {
 
   async getOrders(): Promise<{ orders: any[] }> {
     return request<{ orders: any[] }>('/api/orders', { method: 'GET' });
+  },
+
+  async getSellerDashboard(): Promise<{ seller: any; stats: any; products: any[]; orders: any[] }> {
+    return request<{ seller: any; stats: any; products: any[]; orders: any[] }>('/api/seller/dashboard', { method: 'GET' });
+  },
+
+  async createSellerProduct(payload: SellerProductPayload): Promise<{ product: any }> {
+    return request<{ product: any }>('/api/seller/products', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async updateSellerProduct(productId: string, payload: SellerProductPayload & { status?: 'ativo' | 'pausado' }): Promise<{ product: any }> {
+    return request<{ product: any }>(`/api/seller/products/${encodeURIComponent(productId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async deleteSellerProduct(productId: string): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>(`/api/seller/products/${encodeURIComponent(productId)}`, { method: 'DELETE' });
   }
 };
 
