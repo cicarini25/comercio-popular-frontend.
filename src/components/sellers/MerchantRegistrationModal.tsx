@@ -38,6 +38,7 @@ export const MerchantRegistrationModal: React.FC<MerchantRegistrationModalProps>
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [existingApplication, setExistingApplication] = useState<any>(null);
 
   useEffect(() => {
     if (!isOpen || !plan) return;
@@ -53,6 +54,10 @@ export const MerchantRegistrationModal: React.FC<MerchantRegistrationModalProps>
     setConfirmPassword('');
     setError('');
     setSubmitted(false);
+    setExistingApplication(null);
+    if (user) {
+      api.getMerchantApplications().then(({ applications }) => setExistingApplication(applications[0] || null)).catch(() => setExistingApplication(null));
+    }
   }, [isOpen, plan, user]);
 
   if (!isOpen || !plan) return null;
@@ -105,6 +110,21 @@ export const MerchantRegistrationModal: React.FC<MerchantRegistrationModalProps>
             <div className="rounded-2xl border border-teal-100 bg-teal-50 p-4 text-sm text-teal-950">
               <strong>Plano selecionado:</strong> {plan.name} — {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(plan.price)}/{plan.period}
             </div>
+
+            {existingApplication?.status === 'approved_waiting_payment' && existingApplication.payment_url && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+                <p className="font-extrabold">Cadastro aprovado. Falta confirmar a assinatura.</p>
+                <p className="mt-1">Use o link abaixo para pagar o plano. O selo será liberado após a confirmação do Mercado Pago.</p>
+                <a href={existingApplication.payment_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-xl bg-teal-700 px-4 py-2.5 font-bold text-white hover:bg-teal-800">Pagar plano aprovado</a>
+              </div>
+            )}
+
+            {existingApplication?.status === 'paid' && (
+              <div className="rounded-2xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-950">
+                <p className="font-extrabold">Assinatura confirmada</p>
+                <p className="mt-1">A loja está ativa com o selo Comerciante Parceiro Verificado.</p>
+              </div>
+            )}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-semibold text-neutral-800">Tipo de cadastro

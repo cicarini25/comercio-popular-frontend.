@@ -153,6 +153,10 @@ export const api = {
     });
   },
 
+  async getMerchantApplications(): Promise<{ applications: any[] }> {
+    return request<{ applications: any[] }>('/api/merchant-applications/me', { method: 'GET' });
+  },
+
   async getOrders(): Promise<{ orders: any[] }> {
     return request<{ orders: any[] }>('/api/orders', { method: 'GET' });
   }
