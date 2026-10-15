@@ -120,8 +120,11 @@ export const api = {
     return request<{ user: any }>('/api/auth/me', { method: 'GET' });
   },
 
-  async createOrder(_payload: CreateOrderPayload): Promise<CreateOrderResponse> {
-    throw new Error('Pagamentos temporariamente indisponíveis. Nenhuma cobrança foi realizada.');
+  async createOrder(payload: CreateOrderPayload): Promise<CreateOrderResponse> {
+    return request<CreateOrderResponse>('/api/orders', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
   },
 
   async getOrders(): Promise<{ orders: any[] }> {
@@ -145,3 +148,4 @@ export function mapApiUser(user: any): User {
     avatar: user.avatar || ''
   };
 }
+
