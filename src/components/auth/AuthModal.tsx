@@ -38,6 +38,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   const [socialPending, setSocialPending] = useState<SocialPending | null>(null);
   const [legalPending, setLegalPending] = useState<LegalPending | null>(null);
   const [legalAccepted, setLegalAccepted] = useState(false);
+  const [smsPending, setSmsPending] = useState(false);
+  const [smsCode, setSmsCode] = useState('');
+  const [smsPhone, setSmsPhone] = useState('');
   const pendingRequest = useRef(false);
   const didProcessTikTok = useRef(false);
   const [stage, setStage] = useState(1);
@@ -57,7 +60,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     setSocialPending(null);
     setLegalPending(null);
     setLegalAccepted(false);
+    setSmsPending(false);
+    setSmsCode('');
+    setSmsPhone('');
     setPassword('');
+  };
+
+  const finishPasswordAuth = async (response: any) => {
+    if (response.smsVerificationRequired) {
+      const sms = await api.requestSmsCode();
+      setSmsPending(true);
+      setSmsCode('');
+      setSmsPhone(sms.phone || 'seu telefone');
+      return;
+    }
+    onSuccess(mapApiUser(response.user));
+  };
+
+  const submitSms = async () => {
+    if (!smsPending || smsCode.length !== 6 || pendingRequest.current) return;
+    pendingRequest.current = true;
+    setBusy(true);
+    setError('');
+    try {
+      const response = await api.verifySmsCode(smsCode);
+      complete(response.user);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Não foi possível validar o código SMS.');
+    } finally {
+      pendingRequest.current = false;
+      setBusy(false);
+    }
   };
 
   useEffect(() => {
@@ -70,6 +103,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       setSocialPending(null);
       setLegalPending(null);
       setLegalAccepted(false);
+      setSmsPending(false);
+      setSmsCode('');
+      setSmsPhone('');
       didProcessTikTok.current = false;
     }
   }, [isOpen, initialMode]);
@@ -249,7 +285,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       const response = mode === 'signup'
         ? await signup({ name: name.trim(), email: email.trim(), password, cpf: cpf.replace(/\D/g, ''), phone: phone.replace(/\D/g, '') })
         : await login({ email: email.trim(), password });
-      onSuccess(mapApiUser(response.user));
+      await finishPasswordAuth(response);
       setPassword('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível concluir. Tente novamente.');
@@ -265,7 +301,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
     <section role="dialog" aria-modal="true" aria-labelledby="auth-title" className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl">
       <header className="flex items-center justify-between border-b border-neutral-100 p-5"><Logo /><button type="button" aria-label="Fechar autenticação" disabled={busy} onClick={onClose}><X /></button></header>
-      {legalPending ? <div className="space-y-5 p-6">
+      {smsPending ? <div className="space-y-5 p-6">
+        <h2 id="auth-title" className="text-center text-xl font-bold">Confirme seu telefone</h2>
+        <p className="text-sm leading-6 text-neutral-700">Enviamos um código de 6 números para {smsPhone}. Ele expira em 5 minutos.</p>
+        <input autoFocus inputMode="numeric" maxLength={6} value={smsCode} onChange={(event) => setSmsCode(event.target.value.replace(/\D/g, '').slice(0, 6))} aria-label="Código recebido por SMS" placeholder="000000" className="w-full rounded-xl border border-neutral-300 p-3 text-center text-2xl tracking-[0.4em] outline-none focus:border-teal-700" />
+        {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
+        <button type="button" disabled={busy || smsCode.length !== 6} onClick={submitSms} className="w-full rounded-xl bg-teal-700 p-3 font-semibold text-white disabled:opacity-60">{busy ? 'Validando...' : 'Confirmar telefone'}</button>
+        <button type="button" disabled={busy} onClick={() => { setSmsPending(false); setSmsCode(''); setError(''); }} className="w-full rounded-xl border border-neutral-200 p-3">Voltar</button>
+      </div> : legalPending ? <div className="space-y-5 p-6">
         <h2 id="auth-title" className="text-center text-xl font-bold">Antes de entrar no Comércio Popular</h2>
         <p className="text-sm leading-6 text-neutral-700">Seu login pelo {providerLabel} foi confirmado. Para concluir o acesso, confirme que você leu e aceita as regras do Comércio Popular.</p>
         <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">
@@ -323,3 +366,4 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     </section>
   </div>;
 };
+
