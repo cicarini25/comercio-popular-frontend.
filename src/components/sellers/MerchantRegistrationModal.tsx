@@ -84,8 +84,8 @@ export const MerchantRegistrationModal: React.FC<MerchantRegistrationModalProps>
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/60 p-4">
-      <section role="dialog" aria-modal="true" aria-label="Cadastro de comerciante" className="my-6 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+    <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:p-6">
+      <section role="dialog" aria-modal="true" aria-label="Cadastro de comerciante" className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl bg-white shadow-2xl sm:max-h-[calc(100vh-3rem)]">
         <header className="flex items-start justify-between gap-4 bg-teal-950 px-6 py-5 text-white sm:px-8">
           <div className="flex items-center gap-4">
             <img src="/images/logo-comercio-popular-verde.png" alt="Comércio Popular" className="h-16 w-16 rounded-2xl bg-white object-contain p-1" />
