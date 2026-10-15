@@ -66,7 +66,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         subtotal,
         shippingTotal: shippingFee,
         total,
-        paymentMethod: 'pix',
+        paymentMethod: 'mercado_pago',
         paymentStatus: 'pending'
       };
       onPaymentComplete(pendingOrder);

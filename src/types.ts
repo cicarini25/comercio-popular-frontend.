@@ -121,7 +121,7 @@ export interface Order {
   subtotal: number;
   shippingTotal: number;
   total: number;
-  paymentMethod: 'pix' | 'credit_card' | 'boleto';
+  paymentMethod: 'pix' | 'credit_card' | 'boleto' | 'mercado_pago';
   paymentStatus: 'pending' | 'paid' | 'preparing' | 'shipped' | 'delivered';
   pixCode?: string;
   pixQrCodeUrl?: string;
@@ -160,3 +160,4 @@ export interface StockNotificationRequest {
   createdAt: string;
   status: 'pending' | 'notified';
 }
+
