@@ -155,8 +155,10 @@ const inferFromText = (title: string, description: string): string | undefined =
   // Acessórios de fogão pertencem à categoria de eletro e acessórios.
   if (/(espalhador|tampinha|boca[s]? de fogao|sorvete[s]? fogao|protetor fogao|queimador|kit completo.{0,35}fogao|acessorio[s]? de fogao)/.test(text)) return 'ELETRO & ACESSÓRIOS';
 
-  // Os itens mostrados como eletrodomésticos são utilidades domésticas.
-  if (/(frigideira.{0,35}ceramica|ceramica.{0,35}frigideira|panela.{0,35}ceramica|ceramica.{0,35}panela|prato.{0,35}ceramica|bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Utilidades';
+  // Frigideiras, panelas, espremedores e utensílios pertencem a Casa & Cozinha.
+  if (/(frigideira|panela|espremedor manual|espremedor de frutas|utensilio de cozinha|prato|talher|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
+  // Torneiras com sensor e itens domésticos semelhantes permanecem em Utilidades.
+  if (/(bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Utilidades';
 
   if (/(coala home|odorizante|aromatizante|difusor de aromas|home spray|antimofo|evita mofo|desumidificador|limpeza|limpador)/.test(text)) return 'Utilidades';
   if (/(relogio despertador|despertador|relogio de mesa)/.test(text)) return 'Utilidades';
