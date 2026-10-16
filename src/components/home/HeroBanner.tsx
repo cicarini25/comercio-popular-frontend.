@@ -7,9 +7,46 @@ import {
   ArrowRight,
   ExternalLink,
   QrCode,
-  Tag
+  Tag,
+  MapPin,
+  CreditCard,
+  ShoppingBag
 } from 'lucide-react';
-import { ImageCarousel } from '../common/ImageCarousel';
+import { DEFAULT_SLIDES, ImageCarousel } from '../common/ImageCarousel';
+
+const LocalMerchantBanner: React.FC = () => {
+  const steps = [
+    { icon: Store, title: 'Cadastre seu negócio', text: 'Crie seu espaço no Comércio Popular.' },
+    { icon: ShoppingBag, title: 'Mostre seus produtos', text: 'Divulgue o que você faz na sua cidade.' },
+    { icon: CreditCard, title: 'Receba com segurança', text: 'Pix e cartão com pagamento integrado.' },
+    { icon: MapPin, title: 'Venda para sua região', text: 'Encontre clientes perto de você.' }
+  ];
+
+  return (
+    <div className="h-full w-full bg-gradient-to-br from-orange-500 via-coral-600 to-red-600 p-4 sm:p-5">
+      <div className="flex h-full flex-col rounded-2xl bg-[#fff8f3] p-4 text-neutral-900 shadow-xl sm:p-5">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-700 text-white shadow-sm"><Store size={19} /></div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-wider text-teal-800">Comércio Popular</p>
+            <p className="text-[9px] font-semibold text-neutral-500">Seu trabalho mais perto dos clientes</p>
+          </div>
+        </div>
+        <h3 className="mt-3 text-lg font-black leading-tight text-teal-950 sm:text-xl">Divulgue seu negócio na sua cidade</h3>
+        <p className="mt-1 text-[10px] leading-relaxed text-neutral-600 sm:text-xs">Uma vitrine local para pequenos comerciantes, artesãos e prestadores de serviço.</p>
+        <div className="mt-3 grid flex-1 grid-cols-1 gap-2">
+          {steps.map(({ icon: Icon, title, text }, index) => (
+            <div key={title} className="flex min-h-0 items-center gap-2 rounded-xl bg-white/80 px-2.5 py-1.5 shadow-sm ring-1 ring-orange-100">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white"><Icon size={14} /></div>
+              <div className="min-w-0"><p className="text-[10px] font-extrabold leading-tight text-teal-950"><span className="mr-1 text-orange-600">{index + 1}.</span>{title}</p><p className="truncate text-[9px] text-neutral-500">{text}</p></div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 rounded-xl bg-teal-800 px-3 py-2 text-center text-[10px] font-extrabold text-white">Comece a apresentar seu trabalho hoje</div>
+      </div>
+    </div>
+  );
+};
 
 interface HeroBannerProps {
   onExploreAchadinhos: () => void;
@@ -88,6 +125,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                 className="w-full max-w-md lg:max-w-lg xl:max-w-xl mx-auto"
                 imageScale="scale-105"
                 parallaxFactor={0.22}
+                slides={[{ id: 'local-merchants', imageSrc: '', alt: 'Como divulgar seu negócio local no Comércio Popular', content: <LocalMerchantBanner /> }, ...DEFAULT_SLIDES]}
               />
             </div>
           </div>
@@ -120,3 +158,4 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
     </div>
   );
 };
+
