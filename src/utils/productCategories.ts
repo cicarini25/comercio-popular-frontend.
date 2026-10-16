@@ -129,6 +129,7 @@ const categoryAliases: Record<string, string> = {
 
 const inferFromText = (title: string, description: string): string | undefined => {
   const text = normalizeKey(title + ' ' + description);
+  if (/(croche|crochetar|tric[oô]|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira).{0,40}(infantil|menino|menina|bebe|crianca|kids)/.test(text) || /(infantil|menino|menina|bebe|crianca|kids).{0,40}(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira)/.test(text)) return 'CALÇADOS INFANTIS M/F';
   if (/(gravadora|gravacao|cortadora|rolo rotativo|sculpfun|artilume|acmer|mecolour|lightburn).{0,45}laser|laser.{0,45}(gravadora|gravacao|cortadora|rolo rotativo)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
