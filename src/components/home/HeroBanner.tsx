@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface HeroBannerProps {
   onExploreAchadinhos: () => void;
@@ -11,10 +11,26 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onExploreSellers: _onExploreSellers,
   onSelectTag: _onSelectTag
 }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const restartVideo = () => {
+      video.currentTime = 0;
+      void video.play().catch(() => undefined);
+    };
+
+    video.addEventListener('ended', restartVideo);
+    return () => video.removeEventListener('ended', restartVideo);
+  }, []);
+
   return (
     <section id="hero-banner" className="relative px-4 pt-6 pb-4 sm:px-6">
       <div className="mx-auto w-full max-w-7xl overflow-hidden rounded-3xl bg-teal-950 shadow-xl">
         <video
+          ref={videoRef}
           src="/videos/promo-comercio-popular.mp4"
           autoPlay
           muted
