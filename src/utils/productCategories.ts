@@ -129,6 +129,29 @@ const categoryAliases: Record<string, string> = {
 
 const inferFromText = (title: string, description: string): string | undefined => {
   const text = normalizeKey(title + ' ' + description);
+
+  // Regras prioritárias: elas corrigem categorias genéricas que chegam do feed.
+  // A ordem é intencional: acessórios e peças específicas vencem a categoria
+  // ampla atribuída pela plataforma.
+  if (/(croche|crochetar|trico|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
+  if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
+  if (/(pelicula|capa|capinha|suporte para (celular|smartphone|tablet)|carregador de celular|acessorio para celular|case para celular)/.test(text)) return 'Acessórios para celulares';
+  if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
+  if (/(smartwatch|smart watch|relogio inteligente|galaxy watch|apple watch)/.test(text)) return 'RELÓGIOS';
+  if (/(honda|motociclet|moto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis)/.test(text)) return 'MOTOS & ACESSÓRIOS';
+  if (/(carro|automotivo|veiculo|autopeca|acessorio automotivo|tapete automotivo|suporte veicular|camera veicular)/.test(text)) return 'AUTO & ACESSÓRIOS';
+  if (/(ferramenta|furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
+  if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
+  if (/(espalhador|tampinha|boca[s]? de fogao|sorvete[s]? fogao|protetor fogao|queimador|kit completo.{0,35}fogao|acessorio[s]? de fogao)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+  if (/(frigideira|panela|espremedor manual|espremedor de frutas|utensilio de cozinha|prato|talher|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
+  if (/(bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Utilidades';
+  if (/(camisa|camiseta|regata|shorts?|bermuda|calca|blusa|saia|vestido|roupa|jaqueta|cropped|lingerie)/.test(text)) {
+    if (/(infantil|bebe|crianca|kids)/.test(text)) return 'CALÇADOS INFANTIS M/F';
+    if (/(feminin|mulher|women)/.test(text)) return 'Moda Feminina';
+    return 'Moda Masculina';
+  }
+
   if (/(croche|crochetar|tric[oô]|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira).{0,40}(infantil|menino|menina|bebe|crianca|kids)/.test(text) || /(infantil|menino|menina|bebe|crianca|kids).{0,40}(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira)/.test(text)) return 'CALÇADOS INFANTIS M/F';
@@ -219,10 +242,10 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const titleCategory = inferFromText(title, '');
   const titleDrivenCategories = new Set([
     'Brinquedos', 'Pets', 'Instrumentos Musicais', 'ARMARINHOS & TRICÔ', 'Moda Feminina', 'Moda Masculina', 'CALÇADOS INFANTIS M/F',
-    'TVs', 'Notebook', 'ELETRÔNICOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
+    'TVs', 'Notebook', 'ELETRÔNICOS', 'RELÓGIOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
     'Fones & Headphones', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
-    'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
+    'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'AUTO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
   ]);
   if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
