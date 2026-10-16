@@ -145,6 +145,9 @@ const inferFromText = (title: string, description: string): string | undefined =
   // pedal, tênis ou sapato para descrever o produto.
   if (/(honda|motociclet|moto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis).{0,90}(calcado|tenis|sapato|pedal|protetor)?/.test(text)) return 'MOTOS & ACESSÓRIOS';
 
+  // Ferramentas manuais e elétricas não devem ficar junto de impressoras.
+  if (/(ferramenta|furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
+
   // Impressoras, scanners e multifuncionais ficam em máquinas & impressoras;
   // furadeiras, serras e chaves continuam em ferramentas.
   if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
