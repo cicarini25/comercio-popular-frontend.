@@ -3,7 +3,7 @@ import { CatalogProductDetail } from './components/products/CatalogProductDetail
 import { mapApiUser } from './services/api';
 import { useAuth } from './context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { PWAInstallButton } from './components/common/PWAInstallButton';
@@ -65,17 +65,12 @@ const productSearchScore = (product: Product, query: string): number => {
 };
 
 const PENDING_AFFILIATE_KEY = 'cp_pending_affiliate_product';
-const PRODUCTS_PER_VIEW = 24;
-
 export default function App() {
   // Products catalog
   const [products, setProducts] = useState<Product[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState('');
   const [catalogRetry, setCatalogRetry] = useState(0);
-  const [catalogHasMore, setCatalogHasMore] = useState(false);
-  const [catalogOffset, setCatalogOffset] = useState(0);
-  const [catalogLoadingMore, setCatalogLoadingMore] = useState(false);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [categoryError, setCategoryError] = useState('');
   const [categoryRetry, setCategoryRetry] = useState(0);
@@ -87,12 +82,20 @@ export default function App() {
     const loadCatalog = async () => {
       const completeCatalog = new Map<string, Product>();
       try {
-        const page = await fetchAffiliateCatalog(0, controller.signal);
-        if (controller.signal.aborted) return;
-        page.products.forEach(product => completeCatalog.set(product.id, product));
-        setProducts([...completeCatalog.values()]);
-        setCatalogOffset(CATALOG_PAGE_SIZE);
-        setCatalogHasMore(page.hasMore);
+        let offset = 0;
+        let hasMore = true;
+        while (hasMore && !controller.signal.aborted) {
+          // Duas páginas em paralelo reduzem o tempo de abertura sem limitar o catálogo.
+          const pages = await Promise.all([
+            fetchAffiliateCatalog(offset, controller.signal),
+            fetchAffiliateCatalog(offset + CATALOG_PAGE_SIZE, controller.signal),
+          ]);
+          if (controller.signal.aborted) return;
+          pages.forEach(page => page.products.forEach(product => completeCatalog.set(product.id, product)));
+          hasMore = pages.some(page => page.hasMore);
+          offset += CATALOG_PAGE_SIZE * 2;
+        }
+        if (!controller.signal.aborted) setProducts([...completeCatalog.values()]);
       } catch (error) {
         if (!controller.signal.aborted) {
           setCatalogError(error instanceof Error ? error.message : 'Não foi possível carregar a vitrine.');
@@ -104,21 +107,6 @@ export default function App() {
     void loadCatalog();
     return () => controller.abort();
   }, [catalogRetry]);
-
-  const loadMoreCatalog = useCallback(async () => {
-    if (catalogLoadingMore || !catalogHasMore) return;
-    setCatalogLoadingMore(true);
-    try {
-      const page = await fetchAffiliateCatalog(catalogOffset);
-      setProducts(previous => [...new Map([...previous, ...page.products].map(product => [product.id, product])).values()]);
-      setCatalogOffset(previous => previous + CATALOG_PAGE_SIZE);
-      setCatalogHasMore(page.hasMore);
-    } catch (error) {
-      setCatalogError(error instanceof Error ? error.message : 'Não foi possível carregar mais produtos.');
-    } finally {
-      setCatalogLoadingMore(false);
-    }
-  }, [catalogLoadingMore, catalogHasMore, catalogOffset]);
 
   const { user: sessionUser, loading, logout } = useAuth();
   const user: User | null = sessionUser ? mapApiUser(sessionUser) : null;
@@ -170,25 +158,11 @@ export default function App() {
   // Navigation & Filters
   const [selectedCategory, setSelectedCategory] = useState('Todas as Categorias');
   const [searchQuery, setSearchQuery] = useState('');
-  const [productDisplayLimit, setProductDisplayLimit] = useState(PRODUCTS_PER_VIEW);
-
+  // O catálogo completo já é carregado acima. A troca de aba/categoria filtra
+  // os mesmos produtos, evitando misturar uma página parcial com outra.
   useEffect(() => {
-    if (selectedCategory === 'Todas as Categorias') {
-      setCategoryLoading(false);
-      setCategoryError('');
-      return;
-    }
-    const controller = new AbortController();
-    setCategoryLoading(true);
+    setCategoryLoading(false);
     setCategoryError('');
-    fetchAffiliateCatalog(0, controller.signal, selectedCategory).then(({ products: incoming }) => {
-      setProducts(previous => [...new Map([...previous, ...incoming].map(product => [product.id, product])).values()]);
-    }).catch(error => {
-      if (!controller.signal.aborted) setCategoryError(error instanceof Error ? error.message : 'Não foi possível carregar esta categoria.');
-    }).finally(() => {
-      if (!controller.signal.aborted) setCategoryLoading(false);
-    });
-    return () => controller.abort();
   }, [selectedCategory, categoryRetry]);
   // Dynamic price bounds of full catalog and Price Range Filter State
   const catalogMinPrice = useMemo(() => {
@@ -202,10 +176,6 @@ export default function App() {
   }, [products]);
 
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 300]);
-
-  useEffect(() => {
-    setProductDisplayLimit(PRODUCTS_PER_VIEW);
-  }, [searchQuery, selectedCategory, priceRange]);
 
   useEffect(() => {
     setPriceRange([catalogMinPrice, catalogMaxPrice]);
@@ -589,19 +559,6 @@ export default function App() {
       .sort((a, b) => hasSearch ? b.score - a.score || a.index - b.index : a.index - b.index)
       .map(({ product }) => product);
   }, [products, selectedCategory, searchQuery, hasSearch, priceRange]);
-  const visibleFilteredProducts = useMemo(
-    () => filteredProducts.slice(0, productDisplayLimit),
-    [filteredProducts, productDisplayLimit]
-  );
-
-  const showMoreProducts = () => {
-    if (visibleFilteredProducts.length < filteredProducts.length) {
-      setProductDisplayLimit((current) => current + PRODUCTS_PER_VIEW);
-      return;
-    }
-    void loadMoreCatalog();
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50 selection:bg-teal-100 selection:text-teal-900">
       {/* Mobile PWA Install Announcement Banner */}
@@ -674,7 +631,7 @@ export default function App() {
                 </div>}
                 {filteredProducts.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                    {visibleFilteredProducts.map((p) => (
+                    {filteredProducts.map((p) => (
                       <ProductCard
                         key={p.id}
                         product={p}
@@ -704,13 +661,6 @@ export default function App() {
                     </button>
                   </div>
                 ) : null}
-                {(visibleFilteredProducts.length < filteredProducts.length || catalogHasMore) && (
-                  <div className="flex justify-center pt-2">
-                    <button type="button" onClick={showMoreProducts} disabled={catalogLoadingMore} className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-teal-800 disabled:cursor-wait disabled:opacity-60">
-                      {catalogLoadingMore ? 'Carregando produtos…' : visibleFilteredProducts.length < filteredProducts.length ? 'Mostrar mais produtos' : 'Carregar mais produtos'}
-                    </button>
-                  </div>
-                )}
               </section>
             ) : (
               <>
@@ -804,7 +754,7 @@ export default function App() {
               {/* Grid or Empty State */}
               {filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                  {visibleFilteredProducts.map((p) => (
+                  {filteredProducts.map((p) => (
                     <ProductCard
                       key={p.id}
                       product={p}
@@ -839,13 +789,6 @@ export default function App() {
                   </button>
                 </div>
               ) : null}
-              {(visibleFilteredProducts.length < filteredProducts.length || catalogHasMore) && (
-                <div className="flex justify-center pt-2">
-                  <button type="button" onClick={showMoreProducts} disabled={catalogLoadingMore} className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-teal-800 disabled:cursor-wait disabled:opacity-60">
-                    {catalogLoadingMore ? 'Carregando produtos…' : visibleFilteredProducts.length < filteredProducts.length ? 'Mostrar mais produtos' : 'Carregar mais produtos'}
-                  </button>
-                </div>
-              )}
               </div>
             </section>
               </>
