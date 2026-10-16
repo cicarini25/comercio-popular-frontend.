@@ -133,7 +133,10 @@ const inferFromText = (title: string, description: string): string | undefined =
   // Regras prioritárias: elas corrigem categorias genéricas que chegam do feed.
   // A ordem é intencional: acessórios e peças específicas vencem a categoria
   // ampla atribuída pela plataforma.
-  if (/(croche|crochetar|trico|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
+  if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
+  if (/(brinqued|boneca|boneco|lego|pelucia|quebra cabeca|massinha|playset|carrinho infantil|jogo infantil|tabuleiro infantil|fantasia infantil)/.test(text)) return 'Brinquedos';
   if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(pelicula|capa|capinha|suporte para (celular|smartphone|tablet)|carregador de celular|acessorio para celular|case para celular)/.test(text)) return 'Acessórios para celulares';
@@ -144,6 +147,8 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(ferramenta|furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
   if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
   if (/(espalhador|tampinha|boca[s]? de fogao|sorvete[s]? fogao|protetor fogao|queimador|kit completo.{0,35}fogao|acessorio[s]? de fogao)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+  // Peças, módulos e reposição de lavadoras e micro-ondas são acessórios de eletro.
+  if (/(peca|modulo|sensor|agitador|micro chave|protetor de polia|banda|cinta|atuador|tirante|reparo|reposicao).{0,80}(lavadora|lavar|maquina de lavar|micro ondas|microondas|brastemp|consul)|\b(lavadora|maquina de lavar|micro ondas|microondas).{0,80}(peca|modulo|sensor|agitador|micro chave|protetor|banda|cinta|atuador|tirante|reparo|reposicao)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(frigideira|panela|espremedor manual|espremedor de frutas|utensilio de cozinha|prato|talher|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
   if (/(bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Utilidades';
   if (/(camisa|camiseta|regata|shorts?|bermuda|calca|blusa|saia|vestido|roupa|jaqueta|cropped|lingerie)/.test(text)) {
@@ -152,7 +157,7 @@ const inferFromText = (title: string, description: string): string | undefined =
     return 'Moda Masculina';
   }
 
-  if (/(croche|crochetar|tric[oô]|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(croche|crochetar|\btric[oô]\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira).{0,40}(infantil|menino|menina|bebe|crianca|kids)/.test(text) || /(infantil|menino|menina|bebe|crianca|kids).{0,40}(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira)/.test(text)) return 'CALÇADOS INFANTIS M/F';
   if (/(gravadora|gravacao|cortadora|rolo rotativo|sculpfun|artilume|acmer|mecolour|lightburn).{0,45}laser|laser.{0,45}(gravadora|gravacao|cortadora|rolo rotativo)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
