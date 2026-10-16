@@ -53,6 +53,11 @@ export const AchadinhosSection: React.FC<AchadinhosSectionProps> = ({
   const [priceFilter, setPriceFilter] = useState<'all' | 'under30' | 'under50' | 'under100'>('all');
   const [platformFilter, setPlatformFilter] = useState<string>('all');
   const [minDiscount, setMinDiscount] = useState<number>(0);
+  const [visibleCount, setVisibleCount] = useState(100);
+
+  useEffect(() => {
+    setVisibleCount(100);
+  }, [priceFilter, platformFilter, minDiscount]);
   // Filtered achadinhos
   const achadinhos = products.filter((p) => {
     if (!p.isAchadinho) return false;
@@ -63,6 +68,7 @@ export const AchadinhosSection: React.FC<AchadinhosSectionProps> = ({
     if (minDiscount > 0 && (p.discountPercentage || 0) < minDiscount) return false;
     return true;
   });
+  const visibleAchadinhos = achadinhos.slice(0, visibleCount);
 
   return (
     <section id="achadinhos-section" className="py-8">
@@ -159,7 +165,7 @@ export const AchadinhosSection: React.FC<AchadinhosSectionProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-            {achadinhos.map((product) => (
+            {visibleAchadinhos.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -170,6 +176,13 @@ export const AchadinhosSection: React.FC<AchadinhosSectionProps> = ({
                 onDirectAffiliateClick={onAffiliateClick}
               />
             ))}
+            {visibleAchadinhos.length < achadinhos.length && (
+              <div className="col-span-full flex justify-center pt-2">
+                <button type="button" onClick={() => setVisibleCount((current) => current + 100)} className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800">
+                  Mostrar mais achadinhos ({visibleAchadinhos.length} de {achadinhos.length})
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
