@@ -166,6 +166,17 @@ export const api = {
     return request<{ applications: any[] }>('/api/merchant-applications/me', { method: 'GET' });
   },
 
+  async getAdminMerchantApplications(): Promise<{ applications: any[] }> {
+    return request<{ applications: any[] }>('/api/merchant-applications/admin', { method: 'GET' });
+  },
+
+  async reviewMerchantApplication(applicationId: string, status: 'approved' | 'rejected', reviewNotes = ''): Promise<{ status: string; paymentUrl?: string; message: string }> {
+    return request<{ status: string; paymentUrl?: string; message: string }>(`/api/merchant-applications/${encodeURIComponent(applicationId)}/review`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, reviewNotes }),
+    });
+  },
+
   async getOrders(): Promise<{ orders: any[] }> {
     return request<{ orders: any[] }>('/api/orders', { method: 'GET' });
   },
@@ -190,6 +201,13 @@ export const api = {
 
   async deleteSellerProduct(productId: string): Promise<{ ok: boolean }> {
     return request<{ ok: boolean }>(`/api/seller/products/${encodeURIComponent(productId)}`, { method: 'DELETE' });
+  },
+
+  async updateSellerOrder(orderId: string, status: string, trackingCode = ''): Promise<{ order: any }> {
+    return request<{ order: any }>(`/api/seller/orders/${encodeURIComponent(orderId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, trackingCode }),
+    });
   }
 };
 

@@ -12,6 +12,7 @@ import { AchadinhosSection } from './components/achadinhos/AchadinhosSection';
 import { SellerSection } from './components/sellers/SellerSection';
 import { SellerDashboard } from './components/sellers/SellerDashboard';
 import { MerchantRegistrationModal } from './components/sellers/MerchantRegistrationModal';
+import { MerchantApplicationsAdmin } from './components/admin/MerchantApplicationsAdmin';
 import { ProductCard } from './components/products/ProductCard';
 import { ProductDetailModal } from './components/products/ProductDetailModal';
 import { AffiliateModal } from './components/products/AffiliateModal';
@@ -194,13 +195,14 @@ export default function App() {
   // Modals
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [affiliateProduct, setAffiliateProduct] = useState<Product | null>(null);
-  const isAuthOpen = !loading && (['/login', '/cadastro'].includes(location.pathname) || (!user && ['/conta', '/vendedor'].includes(location.pathname)));
+  const isAuthOpen = !loading && (['/login', '/cadastro'].includes(location.pathname) || (!user && ['/conta', '/vendedor', '/admin/comerciantes'].includes(location.pathname)));
   const setIsAuthOpen = (open: boolean) => navigate(open ? '/login' : '/');
   const isCartOpen = location.pathname === '/sacola';
   const setIsCartOpen = (open: boolean) => navigate(open ? '/sacola' : '/');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [merchantPlan, setMerchantPlan] = useState<SellerPlan | null>(null);
   const isSellerDashboardOpen = location.pathname === '/vendedor';
+  const isAdminReviewOpen = location.pathname === '/admin/comerciantes';
   const setIsSellerDashboardOpen = (open: boolean) => navigate(open ? '/vendedor' : '/lojas');
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
 
@@ -958,6 +960,11 @@ export default function App() {
         onClose={() => setMerchantPlan(null)}
       />
 
+      <MerchantApplicationsAdmin
+        isOpen={isAdminReviewOpen && Boolean(user)}
+        onClose={() => navigate('/')}
+      />
+
       {/* Two-layer Auth Modal (KYC Facial Biometrics + SMS) */}
       {isAuthOpen && (
         <AuthModal
@@ -972,7 +979,7 @@ export default function App() {
             ? 'Entre ou crie sua conta para liberar esta oferta e continuar para a loja parceira.'
             : undefined}
           onSuccess={() => {
-            if (!['/conta', '/vendedor'].includes(location.pathname)) navigate('/');
+            if (!['/conta', '/vendedor', '/admin/comerciantes'].includes(location.pathname)) navigate('/');
           }}
         />
       )}
