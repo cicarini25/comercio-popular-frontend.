@@ -48,6 +48,24 @@ const LocalMerchantBanner: React.FC = () => {
   );
 };
 
+const HeroVideoBanner: React.FC = () => (
+  <div className="relative h-full w-full overflow-hidden bg-teal-950">
+    <video
+      src="/videos/promo-comercio-popular.mp4"
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      className="h-full w-full object-cover"
+      aria-label="Vídeo promocional do Comércio Popular"
+    />
+    <div className="pointer-events-none absolute inset-x-3 bottom-3 flex justify-center">
+      <span className="rounded-full bg-black/65 px-3 py-1 text-[10px] font-bold text-white backdrop-blur-sm">Comércio Popular</span>
+    </div>
+  </div>
+);
+
 interface HeroBannerProps {
   onExploreAchadinhos: () => void;
   onExploreSellers: () => void;
@@ -125,7 +143,11 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                 className="w-full max-w-md lg:max-w-lg xl:max-w-xl mx-auto"
                 imageScale="scale-105"
                 parallaxFactor={0.22}
-                slides={[{ id: 'local-merchants', imageSrc: '', alt: 'Como divulgar seu negócio local no Comércio Popular', content: <LocalMerchantBanner /> }, ...DEFAULT_SLIDES]}
+                slides={[
+                  { id: 'promo-video', imageSrc: '', alt: 'Vídeo promocional do Comércio Popular', content: <HeroVideoBanner /> },
+                  { id: 'local-merchants', imageSrc: '', alt: 'Como divulgar seu negócio local no Comércio Popular', content: <LocalMerchantBanner /> },
+                  ...DEFAULT_SLIDES
+                ]}
               />
             </div>
           </div>
@@ -158,4 +180,5 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
     </div>
   );
 };
+
 
