@@ -18,6 +18,7 @@ export interface CarouselSlide {
   objectPosition?: string;
   linkText?: string;
   linkAction?: () => void;
+  content?: React.ReactNode;
 }
 
 export interface ImageCarouselProps {
@@ -31,7 +32,7 @@ export interface ImageCarouselProps {
   onSlideClick?: (slide: CarouselSlide, index: number) => void;
 }
 
-const DEFAULT_SLIDES: CarouselSlide[] = [
+export const DEFAULT_SLIDES: CarouselSlide[] = [
   {
     id: 1,
     imageSrc: bannerComercioPopular,
@@ -238,20 +239,33 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                 }`}
                 style={{ transitionDuration: `${transitionDuration}ms` }}
               >
-                {/* Slide Image with Zoom & Subtle Drag Parallax Effect */}
-                <img
-                  src={slide.imageSrc}
-                  alt={slide.alt}
-                  referrerPolicy="no-referrer"
-                  loading={idx === 0 ? 'eager' : 'lazy'}
-                  style={{
-                    transform: `scale(1.03) translateX(${parallaxOffset}px)`,
-                    transition: isDragging ? 'none' : `transform ${transitionDuration}ms ease-in-out`
-                  }}
-                  className={`w-full h-full object-cover pointer-events-none will-change-transform ${
-                    imageClassName || ''
-                  } ${slide.objectPosition || 'object-center'}`}
-                />
+                {/* Slide Image or code-native banner with zoom and subtle drag parallax */}
+                {slide.content ? (
+                  <div
+                    aria-label={slide.alt}
+                    style={{
+                      transform: `scale(1.03) translateX(${parallaxOffset}px)`,
+                      transition: isDragging ? 'none' : `transform ${transitionDuration}ms ease-in-out`
+                    }}
+                    className="w-full h-full pointer-events-none will-change-transform"
+                  >
+                    {slide.content}
+                  </div>
+                ) : (
+                  <img
+                    src={slide.imageSrc}
+                    alt={slide.alt}
+                    referrerPolicy="no-referrer"
+                    loading={idx === 0 ? 'eager' : 'lazy'}
+                    style={{
+                      transform: `scale(1.03) translateX(${parallaxOffset}px)`,
+                      transition: isDragging ? 'none' : `transform ${transitionDuration}ms ease-in-out`
+                    }}
+                    className={`w-full h-full object-cover pointer-events-none will-change-transform ${
+                      imageClassName || ''
+                    } ${slide.objectPosition || 'object-center'}`}
+                  />
+                )}
 
                 {/* Subtle soft opacity overlay during slide change */}
                 <div
@@ -337,3 +351,4 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
     </div>
   );
 };
+
