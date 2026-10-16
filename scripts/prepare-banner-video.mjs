@@ -17,4 +17,5 @@ if (parts.length === 0) {
 const encodedVideo = parts.map((file) => fs.readFileSync(path.join(partsDir, file), 'utf8').trim()).join('');
 const video = Buffer.from(encodedVideo, 'base64');
 fs.writeFileSync(outputPath, video);
+fs.rmSync(partsDir, { recursive: true, force: true });
 console.log(`Vídeo do banner preparado: ${video.length} bytes`);
