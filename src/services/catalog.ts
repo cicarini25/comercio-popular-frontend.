@@ -5,7 +5,9 @@ import { CATEGORIES } from '../data/mockProducts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SUPPORTED_AFFILIATE_PLATFORMS = new Set(['shopee', 'shein']);
-export const CATALOG_PAGE_SIZE = 24;
+// O catálogo usa páginas de 100 itens (limite público da API) e o App percorre
+// todas as páginas para que nenhuma aba fique com produtos faltando.
+export const CATALOG_PAGE_SIZE = 100;
 const categories: Record<string, string> = {
   'Home & Living': 'Ferramentas',
   'Sports & Outdoors': 'Esportes & Lazer',
@@ -31,7 +33,10 @@ export function mapCatalogProduct(row: any): Product | null {
     categoryOverride !== 'Todas as Categorias' && CATEGORIES.includes(categoryOverride)
     ? categoryOverride : '';
   const inferredCategory = resolveProductCategory(categories[row.category] || row.category, row.title, row.description || '');
-  const effectiveCategory = selectedCategory === 'ARMARINHOS & TRICÔ' && inferredCategory === 'Moda Feminina'
+  // A categoria inferida pelo título corrige classificações genéricas do feed
+  // (por exemplo, painel de TV, acessórios de fogão e peças de moto). O
+  // override só é usado quando o produto não traz nenhum sinal classificável.
+  const effectiveCategory = inferredCategory && inferredCategory !== 'Outros'
     ? inferredCategory
     : selectedCategory || inferredCategory;
   const price = Number(offer.price);
