@@ -5,7 +5,7 @@ import { CATEGORIES } from '../data/mockProducts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SUPPORTED_AFFILIATE_PLATFORMS = new Set(['shopee', 'shein']);
-export const CATALOG_PAGE_SIZE = 60;
+export const CATALOG_PAGE_SIZE = 24;
 const categories: Record<string, string> = {
   'Home & Living': 'Ferramentas',
   'Sports & Outdoors': 'Esportes & Lazer',
@@ -95,7 +95,7 @@ export async function resolveAffiliateRedirect(product: Product): Promise<string
 export async function fetchAffiliateCatalog(offset = 0, signal?: AbortSignal, category?: string) {
   const response = await fetch(`${API_BASE_URL}/api/catalog/products?limit=${CATALOG_PAGE_SIZE}&offset=${offset}${category && category !== 'Todas as Categorias' ? `&category=${encodeURIComponent(category)}` : ''}`, {
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000),
-    cache: 'no-store',
+    cache: 'default',
   });
   if (!response.ok) throw new Error('Não foi possível carregar a vitrine. Tente novamente.');
   const data = await response.json();
@@ -105,3 +105,4 @@ export async function fetchAffiliateCatalog(offset = 0, signal?: AbortSignal, ca
     hasMore: data.products.length === CATALOG_PAGE_SIZE,
   };
 }
+
