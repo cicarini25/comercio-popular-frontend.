@@ -65,6 +65,7 @@ const productSearchScore = (product: Product, query: string): number => {
 };
 
 const PENDING_AFFILIATE_KEY = 'cp_pending_affiliate_product';
+const PRODUCTS_PER_VIEW = 100;
 export default function App() {
   // Products catalog
   const [products, setProducts] = useState<Product[]>([]);
@@ -81,6 +82,7 @@ export default function App() {
     setCatalogError('');
     const loadCatalog = async () => {
       const completeCatalog = new Map<string, Product>();
+      let firstBatch = true;
       try {
         let offset = 0;
         let hasMore = true;
@@ -92,6 +94,13 @@ export default function App() {
           ]);
           if (controller.signal.aborted) return;
           pages.forEach(page => page.products.forEach(product => completeCatalog.set(product.id, product)));
+          // Disponibiliza a primeira leva imediatamente. As páginas seguintes
+          // entram em segundo plano, sem deixar a vitrine vazia durante a carga.
+          setProducts([...completeCatalog.values()]);
+          if (firstBatch) {
+            firstBatch = false;
+            setCatalogLoading(false);
+          }
           hasMore = pages.some(page => page.hasMore);
           offset += CATALOG_PAGE_SIZE * 2;
         }
@@ -158,6 +167,7 @@ export default function App() {
   // Navigation & Filters
   const [selectedCategory, setSelectedCategory] = useState('Todas as Categorias');
   const [searchQuery, setSearchQuery] = useState('');
+  const [productDisplayLimit, setProductDisplayLimit] = useState(PRODUCTS_PER_VIEW);
   // O catálogo completo já é carregado acima. A troca de aba/categoria filtra
   // os mesmos produtos, evitando misturar uma página parcial com outra.
   useEffect(() => {
@@ -180,6 +190,10 @@ export default function App() {
   useEffect(() => {
     setPriceRange([catalogMinPrice, catalogMaxPrice]);
   }, [catalogMinPrice, catalogMaxPrice]);
+
+  useEffect(() => {
+    setProductDisplayLimit(PRODUCTS_PER_VIEW);
+  }, [searchQuery, selectedCategory, priceRange]);
 
   // Modals
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -559,6 +573,11 @@ export default function App() {
       .sort((a, b) => hasSearch ? b.score - a.score || a.index - b.index : a.index - b.index)
       .map(({ product }) => product);
   }, [products, selectedCategory, searchQuery, hasSearch, priceRange]);
+  const visibleFilteredProducts = useMemo(
+    () => filteredProducts.slice(0, productDisplayLimit),
+    [filteredProducts, productDisplayLimit]
+  );
+  const showMoreProducts = () => setProductDisplayLimit((current) => current + PRODUCTS_PER_VIEW);
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50 selection:bg-teal-100 selection:text-teal-900">
       {/* Mobile PWA Install Announcement Banner */}
@@ -631,7 +650,7 @@ export default function App() {
                 </div>}
                 {filteredProducts.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                    {filteredProducts.map((p) => (
+                    {visibleFilteredProducts.map((p) => (
                       <ProductCard
                         key={p.id}
                         product={p}
@@ -661,6 +680,13 @@ export default function App() {
                     </button>
                   </div>
                 ) : null}
+                {visibleFilteredProducts.length < filteredProducts.length && (
+                  <div className="flex justify-center pt-2">
+                    <button type="button" onClick={showMoreProducts} className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800">
+                      Mostrar mais produtos ({visibleFilteredProducts.length} de {filteredProducts.length})
+                    </button>
+                  </div>
+                )}
               </section>
             ) : (
               <>
@@ -754,7 +780,7 @@ export default function App() {
               {/* Grid or Empty State */}
               {filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                  {filteredProducts.map((p) => (
+                  {visibleFilteredProducts.map((p) => (
                     <ProductCard
                       key={p.id}
                       product={p}
@@ -789,6 +815,13 @@ export default function App() {
                   </button>
                 </div>
               ) : null}
+              {visibleFilteredProducts.length < filteredProducts.length && (
+                <div className="flex justify-center pt-2">
+                  <button type="button" onClick={showMoreProducts} className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800">
+                    Mostrar mais produtos ({visibleFilteredProducts.length} de {filteredProducts.length})
+                  </button>
+                </div>
+              )}
               </div>
             </section>
               </>
