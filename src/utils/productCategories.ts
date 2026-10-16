@@ -133,6 +133,27 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira).{0,40}(infantil|menino|menina|bebe|crianca|kids)/.test(text) || /(infantil|menino|menina|bebe|crianca|kids).{0,40}(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira)/.test(text)) return 'CALÇADOS INFANTIS M/F';
   if (/(gravadora|gravacao|cortadora|rolo rotativo|sculpfun|artilume|acmer|mecolour|lightburn).{0,45}laser|laser.{0,45}(gravadora|gravacao|cortadora|rolo rotativo)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
 
+  // Acessórios devem sair de Smartphones mesmo quando o feed atribui a
+  // categoria principal do aparelho.
+  if (/(pelicula|capa|capinha|suporte para (celular|smartphone|tablet)|carregador de celular|acessorio para celular|case para celular)/.test(text)) return 'Acessórios para celulares';
+
+  // Painéis, racks e suportes para TV são móveis; a TV eletrônica fica em TVs.
+  if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
+
+  // Peças e proteção de moto não são calçados, mesmo quando o título cita
+  // pedal, tênis ou sapato para descrever o produto.
+  if (/(honda|motociclet|moto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis).{0,90}(calcado|tenis|sapato|pedal|protetor)?/.test(text)) return 'MOTOS & ACESSÓRIOS';
+
+  // Impressoras, scanners e multifuncionais ficam em máquinas & impressoras;
+  // furadeiras, serras e chaves continuam em ferramentas.
+  if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
+
+  // Acessórios de fogão pertencem à categoria de eletro e acessórios.
+  if (/(espalhador|tampinha|boca[s]? de fogao|sorvete[s]? fogao|protetor fogao|queimador|kit completo.{0,35}fogao|acessorio[s]? de fogao)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+
+  // Os itens mostrados como eletrodomésticos são utilidades domésticas.
+  if (/(frigideira.{0,35}ceramica|ceramica.{0,35}frigideira|panela.{0,35}ceramica|ceramica.{0,35}panela|prato.{0,35}ceramica|bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Utilidades';
+
   if (/(coala home|odorizante|aromatizante|difusor de aromas|home spray|antimofo|evita mofo|desumidificador|limpeza|limpador)/.test(text)) return 'Utilidades';
   if (/(relogio despertador|despertador|relogio de mesa)/.test(text)) return 'Utilidades';
   if (/(vela.{0,25}(filtro de barro|filtro de agua)|filtro de barro.{0,25}vela)/.test(text)) return 'Casa & Cozinha';
@@ -146,8 +167,8 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(notebook|laptop|chromebook)/.test(text)) return 'Notebook';
   if (/(camera de seguranca|camera wi fi|camera wifi)/.test(text)) return 'ELETRÔNICOS';
   if (/(computador|desktop|pc gamer|placa mae|placa de video|memoria ram)/.test(text)) return 'Computadores';
+  if (/(smartwatch|smart watch|relogio inteligente)/.test(text)) return 'ELETRÔNICOS';
   if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
-  if (/(capa para celular|capinha|pelicula para celular|carregador de celular|acessorio para celular)/.test(text)) return 'Acessórios para celulares';
   if (/(fone de ouvido|headphone|headset|earbud|caixa de som|soundbar|alto falante)/.test(text)) return 'Fones & Headphones';
   if (/(playstation|xbox|nintendo|videogame|video game|console gamer|joystick|controle gamer)/.test(text)) return 'Games';
   if (/(geladeira|refrigerador|fogao|microondas|micro ondas|lava roupa|lavadora|air fryer|ar condicionado|cafeteira eletrica|sanduicheira|liquidificador|batedeira|aspirador (de )?po|aspirador vertical|aspirador robo|espremedor.{0,70}(eletric|watts|mondial))/.test(text)) return 'Eletrodomésticos';
@@ -171,7 +192,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(camisa|camiseta|shorts?|bermuda|calca|blusa|saia|vestido|roupa|jaqueta|cropped|lingerie)/.test(text)) {
     if (/(masculin|homem|men\b)/.test(text)) return 'Moda Masculina';
     if (/(infantil|bebe|crianca|kids)/.test(text)) return 'CALÇADOS INFANTIS M/F';
-    return 'Moda Feminina';
+    return /(feminin|mulher|women|unissex|unisex)/.test(text) ? 'Moda Feminina' : 'Moda Masculina';
   }
   return undefined;
 };
@@ -195,7 +216,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     'TVs', 'Notebook', 'ELETRÔNICOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
     'Fones & Headphones', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
-    'MÁQUINAS & IMPRESSORAS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
+    'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
   ]);
   if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
@@ -213,4 +234,5 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
 
   return inferred || raw || 'Outros';
 }
+
 
