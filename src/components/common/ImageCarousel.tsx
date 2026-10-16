@@ -221,7 +221,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
         style={{ touchAction: 'pan-y' }}
-        className={`relative w-full aspect-[4/3] sm:aspect-[1/1] md:aspect-[4/3] lg:aspect-[5/4] min-h-[270px] sm:min-h-[310px] md:min-h-[340px] rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-teal-950/80 ${
+        className={`relative w-full aspect-[2.45/1] min-h-[220px] sm:min-h-[300px] lg:min-h-[390px] rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-teal-950/80 ${
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
       >
@@ -244,7 +244,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                   <div
                     aria-label={slide.alt}
                     style={{
-                      transform: `scale(1.03) translateX(${parallaxOffset}px)`,
+                      transform: `scale(1) translateX(${parallaxOffset}px)`,
                       transition: isDragging ? 'none' : `transform ${transitionDuration}ms ease-in-out`
                     }}
                     className="w-full h-full pointer-events-none will-change-transform"
@@ -258,10 +258,10 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                     referrerPolicy="no-referrer"
                     loading={idx === 0 ? 'eager' : 'lazy'}
                     style={{
-                      transform: `scale(1.03) translateX(${parallaxOffset}px)`,
+                      transform: `scale(1) translateX(${parallaxOffset}px)`,
                       transition: isDragging ? 'none' : `transform ${transitionDuration}ms ease-in-out`
                     }}
-                    className={`w-full h-full object-cover pointer-events-none will-change-transform ${
+                    className={`w-full h-full object-contain pointer-events-none will-change-transform ${
                       imageClassName || ''
                     } ${slide.objectPosition || 'object-center'}`}
                   />
@@ -351,4 +351,5 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
     </div>
   );
 };
+
 
