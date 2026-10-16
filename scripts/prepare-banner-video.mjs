@@ -3,8 +3,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const partsDir = path.join(projectRoot, 'public', 'videos', 'parts');
-const outputPath = path.join(projectRoot, 'public', 'videos', 'promo-comercio-popular.mp4');
+const partsRoot = path.join(projectRoot, 'public', 'videos');
+const partsDir = path.join(partsRoot, 'design-parts');
+const legacyPartsDir = path.join(partsRoot, 'parts');
+const outputPath = path.join(partsRoot, 'promo-comercio-popular.mp4');
 
 const parts = fs.readdirSync(partsDir)
   .filter((file) => file.endsWith('.b64'))
@@ -18,4 +20,5 @@ const encodedVideo = parts.map((file) => fs.readFileSync(path.join(partsDir, fil
 const video = Buffer.from(encodedVideo, 'base64');
 fs.writeFileSync(outputPath, video);
 fs.rmSync(partsDir, { recursive: true, force: true });
+fs.rmSync(legacyPartsDir, { recursive: true, force: true });
 console.log(`Vídeo do banner preparado: ${video.length} bytes`);
