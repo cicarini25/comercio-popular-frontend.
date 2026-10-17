@@ -138,11 +138,14 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(vestido|saia|camisola|pijama|macacao|jaqueta|casaco|moletom|blusa|blusao|top|lingerie|sutia|conjunto|calca|shorts?|bermuda|roupa)/.test(text) &&
       /(feminin|mulher|senhora|women|menina|tric[oô]|croche|renda|boho|florid|verao|cetim|decote|alca|vestido|saia|camisola)/.test(text) &&
       !/(agulha|linha de bordado|fio de bordado|barbante|kit de croche|conjunto de acessorios|acessorios de renda|fita de cetim)/.test(text)) return 'Moda Feminina';
+  if (/(guarda roupa|guarda-roupa|roupeiro|closet|wardrobe|armario|armário).{0,45}(quarto|porta|modulado|modular|roupeiro|closet)?/.test(text) &&
+      !/(organizador|caixa organizadora|armario organizador)/.test(text)) return 'Móveis';
   if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   // Ferramentas têm prioridade mesmo quando o anúncio usa palavras como
   // "brinquedo" ou "acessório" para descrever o formato do produto.
   if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa|(?:organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta))/.test(text) &&
       !/(martelo de carne|amaciador de carne|batedor de carne|amassador de carne)/.test(text)) return 'Ferramentas';
+  if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora|gravadora a laser|gravacao a laser|cortadora|rolo rotativo|prensa termica|maquina gravadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
   // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
   if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
   // Sinais específicos vencem palavras genéricas como "boneca", "brinquedo"
@@ -153,6 +156,14 @@ const inferFromText = (title: string, description: string): string | undefined =
   // Utensílios de cozinha vencem termos comerciais como "multifuncional";
   // frigideiras e panelas não são máquinas nem impressoras.
   if (/(frigideira|panela|espremedor manual|espremedor de frutas|utensilio de cozinha|prato|talher|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
+  // Equipamentos de preparo de alimentos não são computadores, mesmo quando
+  // o anúncio usa "processador" ou "multifuncional".
+  if (/(mixer|batedeira|liquidificador|triturador de alimentos|processador de alimentos|processador.{0,30}(ovo|alimento|cozinha)|triturador.{0,30}(ovo|alimento|cozinha))/.test(text)) return 'Eletrodomésticos';
+  // Cortadoras de papel e máquinas de corte pertencem a Máquinas & Impressoras,
+  // ainda que o feed tenha enviado a categoria Notebook.
+  if (/(maquina de corte|cortadora de papel|cortador de papel|corte de papel|papel redondo)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
+  if (/(capacitor|capacitores).{0,70}(microondas|micro ondas|forno)|\b(microondas|micro ondas|forno).{0,70}(capacitor|capacitores)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+  if (/(monitor|display).{0,55}(computador|pc|desktop|hdmi|vga)|\b(computador|pc|desktop).{0,55}(monitor|display)/.test(text)) return 'Computadores';
   if (/(tanquinho|maquina de lavar|lavadora|lavar roupa).{0,90}(\d+\s?kg|programas?|timer|capacidade|centrifug|automatica|automatico|digital)|\b(tanquinho|maquina de lavar|lavadora)\b/.test(text)) return 'Eletrodomésticos';
   if (/(brinqued|boneca|boneco|lego|pelucia|quebra cabeca|massinha|playset|carrinho infantil|jogo infantil|tabuleiro infantil|fantasia infantil)/.test(text)) return 'Brinquedos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Femininos';
@@ -168,6 +179,8 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(torneira|registro de agua|arejador|adaptador de torneira|conector de torneira|mangueira de torneira)/.test(text)) return 'Utilidades';
   if (/(tomada|interruptor|plugue|adaptador eletrico|conector eletrico|soquete)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(mini impressora|impressora termica|impressora portatil|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
+  // TV continua em TVs mesmo quando o anúncio também inclui soundbar.
+  if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(som carro|radio automotivo|radio carro|aparelho radio automotivo|alto falante automotivo)/.test(text)) return 'AUTO & ACESSÓRIOS';
   if (/(radio|aparelho de som|caixa de som|soundbar|microfone)/.test(text)) return 'Aparelhos de Som';
   if (/(amplificador|alto falante de som|saude auditiva|radio portatil|radio fm|speaker|caixa de som|aparelho de som|som bluetooth)/.test(text)) return 'Aparelhos de Som';
