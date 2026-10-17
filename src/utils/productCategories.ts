@@ -133,6 +133,11 @@ const inferFromText = (title: string, description: string): string | undefined =
   // Regras prioritárias: elas corrigem categorias genéricas que chegam do feed.
   // A ordem é intencional: acessórios e peças específicas vencem a categoria
   // ampla atribuída pela plataforma.
+  // Roupas com tricô, crochê ou renda continuam sendo Moda Feminina; só os
+  // materiais e ferramentas de artesanato ficam em Armarinhos & Tricô.
+  if (/(vestido|saia|camisola|macacao|jaqueta|blusa|top|lingerie|sutia|conjunto|calca|shorts?|bermuda|roupa)/.test(text) &&
+      /(feminin|mulher|senhora|women|menina|tric[oô]|croche|renda|boho|florid|verao|cetim|decote|alca|vestido|saia|camisola)/.test(text) &&
+      !/(agulha|linha de bordado|fio de bordado|barbante|kit de croche|conjunto de acessorios|acessorios de renda|fita de cetim)/.test(text)) return 'Moda Feminina';
   if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
   if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
@@ -149,8 +154,20 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(pneu|camara de ar).{0,35}(bicicleta|bike)|\b(bicicleta|bike).{0,45}(pneu|camara de ar|e bike|eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
   if (/(torneira|registro de agua|arejador|adaptador de torneira|conector de torneira|mangueira de torneira)/.test(text)) return 'Utilidades';
   if (/(tomada|interruptor|plugue|adaptador eletrico|conector eletrico|soquete)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+  if (/(mini impressora|impressora termica|impressora portatil|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
+  if (/(som carro|radio automotivo|radio carro|aparelho radio automotivo|alto falante automotivo)/.test(text)) return 'AUTO & ACESSÓRIOS';
+  if (/(radio|aparelho de som|caixa de som|soundbar|microfone)/.test(text)) return 'Aparelhos de Som';
+  if (/(amplificador|alto falante de som|saude auditiva|radio portatil|radio fm|speaker|caixa de som|aparelho de som|som bluetooth)/.test(text)) return 'Aparelhos de Som';
+  if (/(bicicleta ergometrica|bicicleta de academia|bike de academia)/.test(text)) return 'Esportes & Lazer';
+  if (/(bicicleta|bike|e bike|ebike|bike eletrica|bicicleta eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
+  if (/(mochila|mala|bolsa|case|capa).{0,45}(notebook|laptop)|\b(conector|adaptador|fonte|carregador|alto falante).{0,45}(notebook|laptop)/.test(text)) return /\b(conector|adaptador|fonte|carregador|alto falante)\b/.test(text) ? 'Computadores' : 'Utilidades';
+  if (/(headset|headphone|fone de ouvido|fone gamer|earphone|earbud)/.test(text)) return 'Fones & Headphones';
+  if (/(lixeira|lixo|cesto de lixo|cesto para lixo|varal|cabideiro|secador de roupas|organizador de roupas|cabide|prendedor de roupa)/.test(text)) return 'Utilidades';
   if (/(lavadora de alta pressao|maquina de lavar.{0,30}alta press|hidrolavadora|lavadora pressao)/.test(text)) return 'Ferramentas';
-  if (/(maquina de lavar|lavadora).{0,90}(\d+\s?kg|programas?|timer|capacidade|centrifug|automatica|automatico|digital)/.test(text)) return 'Eletrodomésticos';
+  // Motores e peças de tanquinho pertencem a peças de eletrodomésticos;
+  // o tanquinho completo pertence a Eletrodomésticos.
+  if (/(motor|peca|modulo|sensor|bomba|agitador).{0,45}(tanquinho|lavadora|maquina de lavar)|\b(tanquinho|lavadora|maquina de lavar).{0,45}(motor|peca|modulo|sensor|bomba|agitador)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+  if (/(tanquinho|maquina de lavar|lavadora|lavar roupa).{0,90}(\d+\s?kg|programas?|timer|capacidade|centrifug|automatica|automatico|digital)|\b(tanquinho|maquina de lavar|lavadora)\b/.test(text)) return 'Eletrodomésticos';
   if (/(acendedor|acendimento|chicote|interruptor|usina|resistencia|resisival|membrana|teclado|display|diodo|magnetron|pressostato|eletrobomba|suspensao|kit mica|ponta piteira|placa|interface|bomba drenagem).{0,80}(fogao|forno|cooktop|fogareiro|lavadora|lavar|micro ondas|microondas)|\b(fogao|forno|cooktop|fogareiro|lavadora|lavar|micro ondas|microondas).{0,80}(acendedor|acendimento|chicote|interruptor|usina|resistencia|resisival|membrana|teclado|display|diodo|magnetron|pressostato|eletrobomba|suspensao|kit mica|ponta piteira|placa|interface|bomba drenagem)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(fogao eletrico|fogareiro eletrico|fogao portatil|fogao semi industrial|fogao de ferro)/.test(text)) return 'Eletrodomésticos';
   if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
@@ -167,7 +184,10 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(peca|modulo|sensor|agitador|micro chave|protetor de polia|banda|cinta|atuador|tirante|reparo|reposicao).{0,80}(lavadora|lavar|maquina de lavar|micro ondas|microondas|brastemp|consul)|\b(lavadora|maquina de lavar|micro ondas|microondas).{0,80}(peca|modulo|sensor|agitador|micro chave|protetor|banda|cinta|atuador|tirante|reparo|reposicao)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(frigideira|panela|espremedor manual|espremedor de frutas|utensilio de cozinha|prato|talher|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
   if (/(bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Utilidades';
-  if (/(camisa|camiseta|regata|shorts?|bermuda|calca|blusa|saia|vestido|roupa|jaqueta|cropped|lingerie)/.test(text)) {
+  // Vestidos, saias e peças explicitamente femininas não podem cair em Moda Masculina
+  // só porque o feed forneceu essa categoria genérica.
+  if (/(vestido|saia|cropped|lingerie|blusa feminina|calca feminina|calca de mulher|moda feminina|feminina|mulher|women)/.test(text)) return 'Moda Feminina';
+  if (/(camisa|camiseta|regata|shorts?|bermuda|calca|blusa|roupa|jaqueta)/.test(text)) {
     if (/(infantil|bebe|crianca|kids)/.test(text)) return 'CALÇADOS INFANTIS M/F';
     if (/(feminin|mulher|women)/.test(text)) return 'Moda Feminina';
     return 'Moda Masculina';
@@ -265,7 +285,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     'Brinquedos', 'Pets', 'Instrumentos Musicais', 'ARMARINHOS & TRICÔ', 'Moda Feminina', 'Moda Masculina', 'CALÇADOS INFANTIS M/F',
     'TVs', 'Notebook', 'ELETRÔNICOS', 'RELÓGIOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
     'CAMA/MESA/BANHO',
-    'Fones & Headphones', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
+    'Fones & Headphones', 'Aparelhos de Som', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
     'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'AUTO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
   ]);
