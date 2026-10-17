@@ -138,6 +138,8 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(vestido|saia|camisola|pijama|macacao|jaqueta|casaco|moletom|blusa|blusao|top|lingerie|sutia|conjunto|calca|shorts?|bermuda|roupa)/.test(text) &&
       /(feminin|mulher|senhora|women|menina|tric[oô]|croche|renda|boho|florid|verao|cetim|decote|alca|vestido|saia|camisola)/.test(text) &&
       !/(agulha|linha de bordado|fio de bordado|barbante|kit de croche|conjunto de acessorios|acessorios de renda|fita de cetim)/.test(text)) return 'Moda Feminina';
+  if (/(feminin|mulher|senhora|women|menina)/.test(text) &&
+      !/(agulha|linha|fio|barbante|croche|tric[oô]|costura|bordado|acessorios de renda|fita de cetim|artesanato)/.test(text)) return 'Moda Feminina';
   if (/(guarda roupa|guarda-roupa|roupeiro|closet|wardrobe|armario|armário).{0,45}(quarto|porta|modulado|modular|roupeiro|closet)?/.test(text) &&
       !/(organizador|caixa organizadora|armario organizador)/.test(text)) return 'Móveis';
   if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
@@ -146,6 +148,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa|(?:organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta))/.test(text) &&
       !/(martelo de carne|amaciador de carne|batedor de carne|amassador de carne)/.test(text)) return 'Ferramentas';
   if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora|gravadora a laser|gravacao a laser|cortadora|rolo rotativo|prensa termica|maquina gravadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
+  if (/(toyota|yaris|corolla|honda|volkswagen|fiat|ford|chevrolet|hyundai|kia).{0,90}(valvula|virabrequim|cabecote|motor|pistao|biela|embreagem|comando|peca)|\b(virabrequim|cabecote|pistao|biela|tampa de valvulas)\b/.test(text)) return 'AUTO & ACESSÓRIOS';
   // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
   if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
   // Sinais específicos vencem palavras genéricas como "boneca", "brinquedo"
