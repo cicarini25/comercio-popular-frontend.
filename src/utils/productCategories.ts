@@ -137,6 +137,8 @@ const inferFromText = (title: string, description: string): string | undefined =
   // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
   if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
   if (/(brinqued|boneca|boneco|lego|pelucia|quebra cabeca|massinha|playset|carrinho infantil|jogo infantil|tabuleiro infantil|fantasia infantil)/.test(text)) return 'Brinquedos';
+  if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Femininos';
+  if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(masculino|homem|men)|\b(masculino|homem|men).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Masculino';
   if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(pelicula|capa|capinha|suporte para (celular|smartphone|tablet)|carregador de celular|acessorio para celular|case para celular)/.test(text)) return 'Acessórios para celulares';
