@@ -150,6 +150,9 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno|tamanco).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno)/.test(text)) return 'Calçados Femininos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno).{0,55}(masculino|homem|men)|\b(masculino|homem|men).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno)/.test(text)) return 'Calçados Masculino';
   if (/(escova de limpeza|escova para limpeza|limpeza|limpador|limpa janela|limpa vidro|faxina|lavagem|higienizacao|higienizador|lixeira|lixo|cesto de lixo|organizador|caixa organizadora|cesto|cesta|armazenamento|multiuso|armario organizador|luminaria|abajur|luz noturna|luz de mesa)/.test(text)) return 'Utilidades';
+  // Utensílios de cozinha vencem termos comerciais como "multifuncional";
+  // frigideiras e panelas não são máquinas nem impressoras.
+  if (/(frigideira|panela|espremedor manual|espremedor de frutas|utensilio de cozinha|prato|talher|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
   if (/(tanquinho|maquina de lavar|lavadora|lavar roupa).{0,90}(\d+\s?kg|programas?|timer|capacidade|centrifug|automatica|automatico|digital)|\b(tanquinho|maquina de lavar|lavadora)\b/.test(text)) return 'Eletrodomésticos';
   if (/(brinqued|boneca|boneco|lego|pelucia|quebra cabeca|massinha|playset|carrinho infantil|jogo infantil|tabuleiro infantil|fantasia infantil)/.test(text)) return 'Brinquedos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Femininos';
