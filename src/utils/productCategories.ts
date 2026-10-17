@@ -145,10 +145,15 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   // Ferramentas têm prioridade mesmo quando o anúncio usa palavras como
   // "brinquedo" ou "acessório" para descrever o formato do produto.
-  if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa|(?:organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta))/.test(text) &&
+  if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|chave sextavada|chave allen|chave torx|chave philips|chave de fenda|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa|(?:organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta))/.test(text) &&
       !/(martelo de carne|amaciador de carne|batedor de carne|amassador de carne)/.test(text)) return 'Ferramentas';
   if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora|gravadora a laser|gravacao a laser|cortadora|rolo rotativo|prensa termica|maquina gravadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
   if (/(toyota|yaris|corolla|honda|volkswagen|fiat|ford|chevrolet|hyundai|kia).{0,90}(valvula|virabrequim|cabecote|motor|pistao|biela|embreagem|comando|peca)|\b(virabrequim|cabecote|pistao|biela|tampa de valvulas)\b/.test(text)) return 'AUTO & ACESSÓRIOS';
+  if (/(microondas|micro ondas|forno).{0,80}(prato|carrossel|carrocel|bandeja|suporte)|\b(prato|carrossel|carrocel|bandeja).{0,80}(microondas|micro ondas|forno)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+  if (/(pc gamer|computador gamer|computador desktop|desktop gamer|placa mae|placa de video|memoria ram|processador para pc|processador intel|processador amd)/.test(text)) return 'Computadores';
+  if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
+  if (/(smartphone|celular|iphone|galaxy|poco [a-z0-9]+|android phone)/.test(text)) return 'Smartphones';
+  if (/(videogame|video game|mini game|console gamer|playstation|xbox|nintendo|joystick|controle gamer)/.test(text)) return 'Games';
   // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
   if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
   // Sinais específicos vencem palavras genéricas como "boneca", "brinquedo"
