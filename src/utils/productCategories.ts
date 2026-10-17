@@ -135,10 +135,13 @@ const inferFromText = (title: string, description: string): string | undefined =
   // ampla atribuída pela plataforma.
   // Roupas com tricô, crochê ou renda continuam sendo Moda Feminina; só os
   // materiais e ferramentas de artesanato ficam em Armarinhos & Tricô.
-  if (/(vestido|saia|camisola|macacao|jaqueta|blusa|top|lingerie|sutia|conjunto|calca|shorts?|bermuda|roupa)/.test(text) &&
+  if (/(vestido|saia|camisola|pijama|macacao|jaqueta|casaco|moletom|blusa|blusao|top|lingerie|sutia|conjunto|calca|shorts?|bermuda|roupa)/.test(text) &&
       /(feminin|mulher|senhora|women|menina|tric[oô]|croche|renda|boho|florid|verao|cetim|decote|alca|vestido|saia|camisola)/.test(text) &&
       !/(agulha|linha de bordado|fio de bordado|barbante|kit de croche|conjunto de acessorios|acessorios de renda|fita de cetim)/.test(text)) return 'Moda Feminina';
   if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  // Ferramentas têm prioridade mesmo quando o anúncio usa palavras como
+  // "brinquedo" ou "acessório" para descrever o formato do produto.
+  if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
   // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
   if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
   if (/(brinqued|boneca|boneco|lego|pelucia|quebra cabeca|massinha|playset|carrinho infantil|jogo infantil|tabuleiro infantil|fantasia infantil)/.test(text)) return 'Brinquedos';
