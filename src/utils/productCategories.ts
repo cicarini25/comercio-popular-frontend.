@@ -279,6 +279,14 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (curatedCategory) return curatedCategory;
   if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey) && !/(organizador|caixa organizadora|extratora|lavadora de estofados)/.test(titleKey)) return 'Móveis';
 
+  // O feed também coloca roupas em Calçados Femininos/Masculino. Só manter
+  // a categoria de calçados quando o título realmente indicar um calçado.
+  const hasGarment = /(vestido|saia|camisola|pijama|macacao|jaqueta|blusa|top|lingerie|sutia|shorts?|bermuda|calca|camisa|camiseta|roupa|moletom)/.test(titleKey);
+  const hasFootwear = /(tenis|sapato|sandalia|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno|tamanco)/.test(titleKey);
+  if (hasGarment && !hasFootwear && (exact === 'Calçados Femininos' || exact === 'Calçados Masculino')) {
+    return /(feminin|mulher|women)/.test(titleKey) || exact === 'Calçados Femininos' ? 'Moda Feminina' : 'Moda Masculina';
+  }
+
   // O título do produto é o melhor sinal para corrigir categorias genéricas erradas do feed.
   const titleCategory = inferFromText(title, '');
   const titleDrivenCategories = new Set([
