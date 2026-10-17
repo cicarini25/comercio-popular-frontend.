@@ -141,9 +141,16 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   // Ferramentas têm prioridade mesmo quando o anúncio usa palavras como
   // "brinquedo" ou "acessório" para descrever o formato do produto.
-  if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
+  if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa|(?:organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta))/.test(text) &&
+      !/(martelo de carne|amaciador de carne|batedor de carne|amassador de carne)/.test(text)) return 'Ferramentas';
   // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
   if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
+  // Sinais específicos vencem palavras genéricas como "boneca", "brinquedo"
+  // ou "pelúcia" usadas no título do anúncio.
+  if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno|tamanco).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno)/.test(text)) return 'Calçados Femininos';
+  if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno).{0,55}(masculino|homem|men)|\b(masculino|homem|men).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno)/.test(text)) return 'Calçados Masculino';
+  if (/(escova de limpeza|escova para limpeza|limpeza|limpador|limpa janela|limpa vidro|faxina|lavagem|higienizacao|higienizador|lixeira|lixo|cesto de lixo|organizador|caixa organizadora|cesto|cesta|armazenamento|multiuso|armario organizador|luminaria|abajur|luz noturna|luz de mesa)/.test(text)) return 'Utilidades';
+  if (/(tanquinho|maquina de lavar|lavadora|lavar roupa).{0,90}(\d+\s?kg|programas?|timer|capacidade|centrifug|automatica|automatico|digital)|\b(tanquinho|maquina de lavar|lavadora)\b/.test(text)) return 'Eletrodomésticos';
   if (/(brinqued|boneca|boneco|lego|pelucia|quebra cabeca|massinha|playset|carrinho infantil|jogo infantil|tabuleiro infantil|fantasia infantil)/.test(text)) return 'Brinquedos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Femininos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(masculino|homem|men)|\b(masculino|homem|men).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Masculino';
