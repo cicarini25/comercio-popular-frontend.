@@ -564,9 +564,10 @@ export default function App() {
   const filteredProducts = useMemo(() => {
     return products.map((product, index) => ({ product, index, score: productSearchScore(product, searchQuery) }))
       .filter(({ product, score }) => {
-        const productCategory = product.catalogSource === 'api'
-          ? product.category
-          : resolveProductCategory(product.category, product.title, product.description);
+        // Recalcula a categoria pelo título também para itens vindos da API.
+        // O banco mantém o catálogo original; a vitrine usa a classificação
+        // corrigida para filtrar e exibir cada produto na aba certa.
+        const productCategory = resolveProductCategory(product.category, product.title, product.description);
         const matchesCategory = hasSearch || selectedCategory === 'Todas as Categorias' || productCategory === selectedCategory;
         return matchesCategory && (!hasSearch || score >= 0) && product.price >= priceRange[0] && product.price <= priceRange[1];
       })
