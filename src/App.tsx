@@ -93,7 +93,16 @@ export default function App() {
             fetchAffiliateCatalog(offset + CATALOG_PAGE_SIZE, controller.signal),
           ]);
           if (controller.signal.aborted) return;
-          pages.forEach(page => page.products.forEach(product => completeCatalog.set(product.id, product)));
+          pages.forEach(page => page.products.forEach(product => {
+            // Normaliza a categoria no próprio item exibido. Assim o card,
+            // o filtro e o contador usam a mesma classificação corrigida,
+            // mesmo quando o banco trouxe uma categoria antiga.
+            const normalizedProduct = {
+              ...product,
+              category: resolveProductCategory(product.category, product.title, product.description),
+            };
+            completeCatalog.set(product.id, normalizedProduct);
+          }));
           // Disponibiliza a primeira leva imediatamente. As páginas seguintes
           // entram em segundo plano, sem deixar a vitrine vazia durante a carga.
           setProducts([...completeCatalog.values()]);
