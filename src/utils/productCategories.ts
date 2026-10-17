@@ -144,6 +144,10 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta)|\b(kit|caixa) de ferramentas\b/.test(text)) return 'Ferramentas';
   if (/(torneira|registro de agua|arejador|adaptador de torneira|conector de torneira|mangueira de torneira)/.test(text)) return 'Utilidades';
   if (/(tomada|interruptor|plugue|adaptador eletrico|conector eletrico|soquete)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+  if (/(lavadora de alta pressao|maquina de lavar.{0,30}alta press|hidrolavadora|lavadora pressao)/.test(text)) return 'Ferramentas';
+  if (/(maquina de lavar|lavadora).{0,90}(\d+\s?kg|programas?|timer|capacidade|centrifug|automatica|automatico|digital)/.test(text)) return 'Eletrodomésticos';
+  if (/(acendedor|acendimento|chicote|interruptor|usina|resistencia|resisival|membrana|teclado|display|diodo|magnetron|pressostato|eletrobomba|suspensao|kit mica|ponta piteira|placa|interface|bomba drenagem).{0,80}(fogao|forno|cooktop|fogareiro|lavadora|lavar|micro ondas|microondas)|\b(fogao|forno|cooktop|fogareiro|lavadora|lavar|micro ondas|microondas).{0,80}(acendedor|acendimento|chicote|interruptor|usina|resistencia|resisival|membrana|teclado|display|diodo|magnetron|pressostato|eletrobomba|suspensao|kit mica|ponta piteira|placa|interface|bomba drenagem)/.test(text)) return 'ELETRO & ACESSÓRIOS';
+  if (/(fogao eletrico|fogareiro eletrico|fogao portatil|fogao semi industrial|fogao de ferro)/.test(text)) return 'Eletrodomésticos';
   if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(pelicula|capa|capinha|suporte para (celular|smartphone|tablet)|carregador de celular|acessorio para celular|case para celular)/.test(text)) return 'Acessórios para celulares';
