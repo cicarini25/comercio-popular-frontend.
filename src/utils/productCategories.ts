@@ -26,9 +26,9 @@ const curatedCategoryByTitle = new Map<string, string>([
   [normalizeKey("Tapete Sala 1,50x1,00 Peludo 4 Cm De Altura Shaggy Promoção"), 'Utilidades'],
   [normalizeKey("Cabo De Carregamento Rápido Baseus Pd Usb C Para Typec Qc 4.0 Para iPhone 15 / Xiaomi / Huawei / Macbook (100W)"), 'ELETRÔNICOS'],
   [normalizeKey("Inova Carregador Portátil Power Bank Grande 20000mah/10000mAh Turbo 22.5W PD Rápido Com Display Portátil"), 'ELETRÔNICOS'],
-  [normalizeKey("Teclado Mecanico Gamer TGT Sherman Compacto, Rainbow, ABNT2, Switch Azul, Preto, TGT-SHTKL-RBW01"), 'ELETRÔNICOS'],
-  [normalizeKey("Mouse Para Jogos Sem Fio Leve ATTACK SHARK X11 Com Base De Carregamento RGB Tri-Mode-2.4G/USB-C/BT"), 'ELETRÔNICOS'],
-  [normalizeKey("UGREEN USB Bluetooth 5.4 5.3 Adaptador Receptor De Transmissor Sem Fio Dongle Para PC Windows 11 10 8.1 7 Fone De Ouvido"), 'ELETRÔNICOS'],
+  [normalizeKey("Teclado Mecanico Gamer TGT Sherman Compacto, Rainbow, ABNT2, Switch Azul, Preto, TGT-SHTKL-RBW01"), 'Computadores'],
+  [normalizeKey("Mouse Para Jogos Sem Fio Leve ATTACK SHARK X11 Com Base De Carregamento RGB Tri-Mode-2.4G/USB-C/BT"), 'Computadores'],
+  [normalizeKey("UGREEN USB Bluetooth 5.4 5.3 Adaptador Receptor De Transmissor Sem Fio Dongle Para PC Windows 11 10 8.1 7 Fone De Ouvido"), 'Computadores'],
 ]);
 
 const canonicalCategories = new Map(
@@ -139,9 +139,14 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(brinqued|boneca|boneco|lego|pelucia|quebra cabeca|massinha|playset|carrinho infantil|jogo infantil|tabuleiro infantil|fantasia infantil)/.test(text)) return 'Brinquedos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Femininos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(masculino|homem|men)|\b(masculino|homem|men).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Masculino';
+  if (/(teclado gamer|teclado mecanico gamer|mouse gamer|mouse para jogos|monitor para pc|webcam|hub usb|adaptador bluetooth para pc|placa de video|memoria ram|processador)/.test(text)) return 'Computadores';
   if (/(martelo de carne|amaciador de carne|batedor de carne|amassador de carne|ralador|descascador|abridor de lata|utensilio culinario)/.test(text)) return 'Casa & Cozinha';
   if (/(escova de limpeza|escova para limpeza|limpeza|limpador|limpa janela|limpa vidro|faxina|lavagem|higienizacao|higienizador)/.test(text)) return 'Utilidades';
   if (/(organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta)|\b(kit|caixa) de ferramentas\b/.test(text)) return 'Ferramentas';
+  if (/(organizador|caixa organizadora|cesto|cesta|armazenamento|multiuso|armario organizador|luminaria|luminaria de mesa|abajur|luz de mesa|mosquiteiro|mosquiteira)/.test(text)) return /mosquiteir/.test(text) ? 'CAMA/MESA/BANHO' : 'Utilidades';
+  if (/(escorredor de louca|escorredor de pratos|secador de louca|secador de pratos|porta pratos|prateleira de cozinha)/.test(text)) return 'Casa & Cozinha';
+  if (/(extratora|lavadora de estofados|limpa estofado|aspirador de estofado)/.test(text)) return 'Eletrodomésticos';
+  if (/(pneu|camara de ar).{0,35}(bicicleta|bike)|\b(bicicleta|bike).{0,45}(pneu|camara de ar|e bike|eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
   if (/(torneira|registro de agua|arejador|adaptador de torneira|conector de torneira|mangueira de torneira)/.test(text)) return 'Utilidades';
   if (/(tomada|interruptor|plugue|adaptador eletrico|conector eletrico|soquete)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(lavadora de alta pressao|maquina de lavar.{0,30}alta press|hidrolavadora|lavadora pressao)/.test(text)) return 'Ferramentas';
@@ -252,13 +257,14 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const titleKey = normalizeKey(title);
   const curatedCategory = curatedCategoryByTitle.get(titleKey);
   if (curatedCategory) return curatedCategory;
-  if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey)) return 'Móveis';
+  if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey) && !/(organizador|caixa organizadora|extratora|lavadora de estofados)/.test(titleKey)) return 'Móveis';
 
   // O título do produto é o melhor sinal para corrigir categorias genéricas erradas do feed.
   const titleCategory = inferFromText(title, '');
   const titleDrivenCategories = new Set([
     'Brinquedos', 'Pets', 'Instrumentos Musicais', 'ARMARINHOS & TRICÔ', 'Moda Feminina', 'Moda Masculina', 'CALÇADOS INFANTIS M/F',
     'TVs', 'Notebook', 'ELETRÔNICOS', 'RELÓGIOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
+    'CAMA/MESA/BANHO',
     'Fones & Headphones', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
     'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'AUTO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
