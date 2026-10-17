@@ -311,7 +311,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const titleKey = normalizeKey(title);
   const curatedCategory = curatedCategoryByTitle.get(titleKey);
   if (curatedCategory) return curatedCategory;
-  if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey) && !/(organizador|caixa organizadora|extratora|lavadora de estofados)/.test(titleKey)) return 'Móveis';
+  if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey) && !/(organizador|caixa organizadora|extratora|lavadora de estofados|mosquiteiro|mosquiteira)/.test(titleKey)) return 'Móveis';
 
   // O feed também coloca roupas em Calçados Femininos/Masculino. Só manter
   // a categoria de calçados quando o título realmente indicar um calçado.
