@@ -5,6 +5,11 @@ const normalizeKey = (value: unknown) =>
     ? value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
     : '';
 
+// Só classifica como acessório de celular quando um item próprio de celular
+// aparece ligado a um aparelho; palavras isoladas como “película” ou “capa”
+// não bastam (ex.: película de unha, capa de máquina, “capacidade”).
+const mobilePhoneAccessoryPattern = /\b(peliculas?|capas?|capinhas?|cases?|pouch|estojos?|suportes?|carregadores?|cabos?|power bank|protetores? de tela)\b.{0,120}\b(celular|smartphone|iphone|galaxy|android|samsung|xiaomi|motorola|redmi|phone)\b|\b(celular|smartphone|iphone|galaxy|android|samsung|xiaomi|motorola|redmi|phone)\b.{0,120}\b(peliculas?|capas?|capinhas?|cases?|pouch|estojos?|suportes?|carregadores?|cabos?|power bank|protetores? de tela)\b/;
+
 
 // Categorias definidas para os produtos selecionados dos lotes do feed Shopee.
 const curatedCategoryByTitle = new Map<string, string>([
@@ -130,6 +135,18 @@ const categoryAliases: Record<string, string> = {
 
 const inferFromText = (title: string, description: string): string | undefined => {
   const text = normalizeKey(title + ' ' + description);
+  const titleKey = normalizeKey(title);
+
+  // O produto principal prevalece sobre acessórios incluídos no kit ou citados
+  // como compatibilidade no título.
+  if (/\bmoto serras?\b|\bmotosserras?\b/.test(titleKey)) return 'Ferramentas';
+  if (/(mini moto de dedo|moto de dedo|moto.{0,35}brinquedo|brinquedo.{0,35}moto)/.test(titleKey)) return 'Brinquedos';
+  if (/^(kit )?(pc gamer|computador.{0,25}(gamer|desktop)|desktop.{0,25}gamer)/.test(titleKey)) return 'Computadores';
+  if (/(som automotivo|radio automotivo|radio de carro|som de carro|aparelho de som.{0,45}(carro|automotivo)|radio veicular)/.test(titleKey)) return 'AUTO & ACESSÓRIOS';
+  if (/(radio portatil|radio fm|radio am|radio digital|radio de emergencia|radio transistor|receptor de radio)/.test(titleKey)) return 'Aparelhos de Som';
+  if (/(bicicleta ergometrica|bicicleta de academia|bike de academia)/.test(titleKey)) return 'Esportes & Lazer';
+  if (/(electric scooter|scooter eletrica|bicicleta.{0,70}(eletrica|bateria|motor)|bike.{0,70}(eletrica|bateria|motor)|e bike|ebike)/.test(titleKey) ||
+      (/\b(bicicleta|bike)\b/.test(titleKey) && !/(ergometrica|de academia)/.test(titleKey))) return 'Bike Elétrica e Acessórios';
 
   // O tipo concreto do produto prevalece sobre termos de público como “feminino”.
   const footwear = /\b(tenis|sapatos?|sandalias?|chinelos?|botas?|sapatilhas?|scarpins?|calcados?|chuteiras?|mocassins?|coturnos?|tamancos?)\b/.test(text);
@@ -140,7 +157,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (footwear && masculineAudience) return 'Calçados Masculino';
   if (/\b(perfumes?|shampoos?|cosmeticos?|hidratantes?|maquiagens?|skincare|esmaltes?|protetor(?:es)? solar(?:es)?)\b/.test(text) &&
       feminineAudience && !/\b(bone|chapeu|viseira|visor)\b/.test(text)) return 'Cuidado & Beleza';
-  if (/(agulhas? (de|para) (costura|bordado|ponto cruz|colcha)|linhas? (de|para) costura|linhas? de colcha|fios? (de|para) croch[e]|l[aã] (para|de) tric[o]|barbante|novelo|calcador.{0,50}maquina de costura|acessorios? (para|de) maquina de costura|kit de costura|ziper invisivel|botoes? de pressao|tear)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(agulhas? (de|para) (costura|bordado|ponto cruz|colcha)|linhas? (de|para) costura|linhas? de colcha|fios? (de|para) croch[e]|l[aã] (para|de) tric[o]|barbante|novelo|calcador.{0,50}maquina de costura|acessorios? (para|de) maquina de costura|kit de costura|ziper invisivel|botoes? de pressao|\btear\b)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(tapetes?.{0,30}(banheiro|banho|box|chuveiro)|(banheiro|banho|box|chuveiro).{0,30}tapetes?|toalhas?.{0,25}(banho|banheiro|rosto)|roupao|jogo de cama|lencol|fronha|edredom|colcha|capa de colchao|toalha de mesa|caminho de mesa|guardanapo de tecido)/.test(text)) return 'CAMA/MESA/BANHO';
   if (/(smartwatch|smart watch|relogio inteligente|galaxy watch|apple watch)/.test(text) && !/(headphones?|fone[s]? de ouvido|earbuds?)/.test(text)) return 'RELÓGIOS';
   if (/(pelicula|capa|capinha|case|pouch|estojo|suporte|carregador|cabo|power bank|protetor de tela).{0,120}(celular|smartphone|iphone|galaxy|android|samsung|xiaomi|motorola|redmi|phone)|(celular|smartphone|iphone|galaxy|android|samsung|xiaomi|motorola|redmi|phone).{0,120}(pelicula|capa|capinha|case|pouch|estojo|suporte|carregador|cabo|power bank|protetor de tela)/.test(text)) return 'Acessórios para celulares';
@@ -165,7 +182,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/\b(guarda roupa|roupeiro|closet|wardrobe)\b/.test(text)) return 'Móveis';
   if (/(armario|armário).{0,45}(quarto|porta|modulado|modular|roupeiro|closet)?/.test(text) &&
       !/(organizador|caixa organizadora|armario organizador)/.test(text)) return 'Móveis';
-  if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|\btear\b|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   // Ferramentas têm prioridade mesmo quando o anúncio usa palavras como
   // "brinquedo" ou "acessório" para descrever o formato do produto.
   if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|chave sextavada|chave allen|chave torx|chave philips|chave de fenda|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa|(?:organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta))/.test(text) &&
@@ -236,7 +253,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(fogao eletrico|fogareiro eletrico|fogao portatil|fogao semi industrial|fogao de ferro)/.test(text)) return 'Eletrodomésticos';
   if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
-  if (/(pelicula|capa|capinha|suporte para (celular|smartphone|tablet)|carregador de celular|acessorio para celular|case para celular)/.test(text)) return 'Acessórios para celulares';
+  if (mobilePhoneAccessoryPattern.test(text)) return 'Acessórios para celulares';
   if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
   if (/(smartwatch|smart watch|relogio inteligente|galaxy watch|apple watch)/.test(text)) return 'RELÓGIOS';
   if (/(honda|motociclet|\bmoto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis)/.test(text)) return 'MOTOS & ACESSÓRIOS';
@@ -257,14 +274,14 @@ const inferFromText = (title: string, description: string): string | undefined =
     return 'Moda Masculina';
   }
 
-  if (/(croche|crochetar|\btric[oô]\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(croche|crochetar|\btric[oô]\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|\btear\b|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira).{0,40}(infantil|menino|menina|bebe|crianca|kids)/.test(text) || /(infantil|menino|menina|bebe|crianca|kids).{0,40}(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira)/.test(text)) return 'CALÇADOS INFANTIS M/F';
   if (/(gravadora|gravacao|cortadora|rolo rotativo|sculpfun|artilume|acmer|mecolour|lightburn).{0,45}laser|laser.{0,45}(gravadora|gravacao|cortadora|rolo rotativo)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
 
   // Acessórios devem sair de Smartphones mesmo quando o feed atribui a
   // categoria principal do aparelho.
-  if (/(pelicula|capa|capinha|suporte para (celular|smartphone|tablet)|carregador de celular|acessorio para celular|case para celular)/.test(text)) return 'Acessórios para celulares';
+  if (mobilePhoneAccessoryPattern.test(text)) return 'Acessórios para celulares';
 
   // Painéis, racks e suportes para TV são móveis; a TV eletrônica fica em TVs.
   if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
@@ -342,7 +359,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const titleHasMaleAudience = /\b(masculin[oa]s?|homens?|men|mens|meninos?)\b/.test(titleKey);
   if (/(halter(es)?|caneleira|mini band|ginastica|academia residencial|corda de pular|colchonete.{0,35}(exercicio|treino)|kit.{0,40}(treino|academia))/.test(titleKey)) return 'Esportes & Lazer';
   if (/(luminaria|abajur|lustre|arandela|pendente|spot de luz|lampada)/.test(titleKey)) return 'Utilidades';
-  if (/(agulhas? (de|para) (costura|bordado|ponto cruz|colcha)|linhas? (de|para) costura|linhas? de colcha|fios? (de|para) croch[e]|l[aã] (para|de) tric[o]|barbante|novelo|calcador.{0,50}maquina de costura|acessorios? (para|de) maquina de costura|kit de costura|ziper invisivel|botoes? de pressao|tear)/.test(titleKey)) return 'ARMARINHOS & TRICÔ';
+  if (/(agulhas? (de|para) (costura|bordado|ponto cruz|colcha)|linhas? (de|para) costura|linhas? de colcha|fios? (de|para) croch[e]|l[aã] (para|de) tric[o]|barbante|novelo|calcador.{0,50}maquina de costura|acessorios? (para|de) maquina de costura|kit de costura|ziper invisivel|botoes? de pressao|\btear\b)/.test(titleKey)) return 'ARMARINHOS & TRICÔ';
   if (/(toalhas?.{0,35}(banho|banheiro|rosto|infantil|bebe)|roupao.{0,35}(infantil|bebe)|\b(toalha|toalhas)\b.{0,35}(banho|rosto|infantil|bebe))/.test(titleKey)) return 'CAMA/MESA/BANHO';
   if (/(capacitor|fusivel|magnetron|membrana.{0,35}(microondas|micro ondas)|motor prato|prato.{0,35}(microondas|micro ondas)|kit mica|eletrobomba|batedor.{0,35}(batedeira|tanquinho)|bucha.{0,35}(agitador|lavadora)|gabinete.{0,35}(maquina de lavar|lavadora)|bomba de agua.{0,35}(maquina de lavar|lavadora)|conjunto eletrodo.{0,25}(fogao|cooktop)|kit.{0,35}(espalhador|queimador).{0,25}fogao|acessorios?.{0,45}(fogao|microondas|micro ondas|lavadora|tanquinho|aspirador|geladeira|batedeira)|pecas?.{0,45}(fogao|microondas|micro ondas|lavadora|tanquinho|aspirador|geladeira|batedeira)|fusivel.{0,45}(microondas|micro ondas)|termostato.{0,45}(microondas|micro ondas))/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (exact === 'MOTOS & ACESSÓRIOS' && /(moto|motocicleta|capacete|bauleto|cb ?\d|biz 125|crosser|twister)/.test(titleKey) && !/(bicicleta.{0,40}eletrica|bike.{0,40}eletrica|e bike|ebike)/.test(titleKey)) return exact;
