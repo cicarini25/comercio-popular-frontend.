@@ -93,9 +93,11 @@ describe('Categorias de produtos importados do feed Shopee', () => {
     expect(resolveProductCategory('Eletrodomésticos', 'Air Fryer Elétrica 6,5L Fritadeira Elétrica Multifuncional Inox')).toBe('Eletrodomésticos');
   });
 
-  it('move apenas a camiseta masculina identificada de MODA VERÃO PRAIA para Moda Masculina', () => {
+  it('move roupas masculinas não aquáticas de MODA VERÃO PRAIA para Moda Masculina', () => {
     expect(resolveProductCategory('MODA VERÃO PRAIA', 'Regata Streetwear Camisa Masculina Estilo Verão Praia Summer Blusa Cavada Unissex Larga Algodão')).toBe('Moda Masculina');
-    expect(resolveProductCategory('MODA VERÃO PRAIA', 'Regata Streetwear Bataria 100% Masculina Estilo Verão Praia Summer Blusa Cavada Unissex Larga Algodão')).toBe('MODA VERÃO PRAIA');
+    expect(resolveProductCategory('MODA VERÃO PRAIA', 'Kit Masculino Regata e Bermuda Tactel Estampa Frontal Águia Moderno Estilosa')).toBe('Moda Masculina');
+    expect(resolveProductCategory('MODA VERÃO PRAIA', 'Shorts Masculino Tactel Praia Academia Treino Corrida Verão Secagem Rápida')).toBe('MODA VERÃO PRAIA');
+    expect(resolveProductCategory('MODA VERÃO PRAIA', 'Biquíni feminino com bojo')).toBe('MODA VERÃO PRAIA');
   });
 
   it('preserva calçados e roupas quando os termos do anúncio são ambíguos', () => {
@@ -103,6 +105,48 @@ describe('Categorias de produtos importados do feed Shopee', () => {
     expect(resolveProductCategory('Calçados Masculino', 'Tênis Masculino Feminino para academia e caminhada')).toBe('Calçados Masculino');
     expect(resolveProductCategory('Moda Masculina', 'Camiseta Resident Evil Umbrella Corporation Playstation 5')).toBe('Moda Masculina');
     expect(resolveProductCategory('Moda Feminina', 'Short 5088 tecido plissado com tira de amarrar sem bolso')).toBe('Moda Feminina');
+  });
+
+  it('separa ferramentas de costura de CAMA/MESA/BANHO sem deslocar roupa de renda', () => {
+    expect(resolveProductCategory('CAMA/MESA/BANHO', 'Agulha de costura doméstica, agulha de colcha e bordado')).toBe('ARMARINHOS & TRICÔ');
+    expect(resolveProductCategory('CAMA/MESA/BANHO', 'Linha de costura à mão para colcha')).toBe('ARMARINHOS & TRICÔ');
+    expect(resolveProductCategory('ARMARINHOS & TRICÔ', 'Toalha de banho infantil felpuda')).toBe('CAMA/MESA/BANHO');
+    expect(resolveProductCategory('CAMA/MESA/BANHO', 'Toalha de banho infantil felpuda')).toBe('CAMA/MESA/BANHO');
+    expect(resolveProductCategory('Moda Feminina', 'Blusa feminina de renda')).toBe('Moda Feminina');
+  });
+
+  it('separa acessórios/peças de eletrodomésticos do aparelho completo', () => {
+    expect(resolveProductCategory('Eletrodomésticos', 'Motor prato para microondas 127v')).toBe('ELETRO & ACESSÓRIOS');
+    expect(resolveProductCategory('ELETRO & ACESSÓRIOS', 'Batedor para batedeira planetária original')).toBe('ELETRO & ACESSÓRIOS');
+    expect(resolveProductCategory('ELETRO & ACESSÓRIOS', 'Liquidificador doméstico 500W')).toBe('Eletrodomésticos');
+  });
+
+  it('mantém produtos automotivos e de motocicleta fora de áudio, celular e moda', () => {
+    expect(resolveProductCategory('Aparelhos de Som', 'Aparelho de som automotivo Bluetooth para carro')).toBe('AUTO & ACESSÓRIOS');
+    expect(resolveProductCategory('Móveis', 'Tampa Válvulas Toyota Yaris 1.5 2019 a 2026')).toBe('AUTO & ACESSÓRIOS');
+    expect(resolveProductCategory('Acessórios para celulares', 'Protetor de calçado para pedal e câmbio de moto')).toBe('MOTOS & ACESSÓRIOS');
+    expect(resolveProductCategory('MOTOS & ACESSÓRIOS', 'Carregador de bicicleta elétrica 60V')).toBe('Bike Elétrica e Acessórios');
+  });
+
+  it('distingue acessórios para celular, fones, microfones e computadores', () => {
+    expect(resolveProductCategory('Smartphones', 'Capa Case de silicone compatível com smartphone Samsung')).toBe('Acessórios para celulares');
+    expect(resolveProductCategory('ELETRÔNICOS', 'Power bank portátil para smartphone 20000mAh')).toBe('Acessórios para celulares');
+    expect(resolveProductCategory('Smartphones', 'Microfone Boya XLR para câmera e smartphones')).toBe('Aparelhos de Som');
+    expect(resolveProductCategory('Smartphones', 'Fone Bluetooth sem fio para celular')).toBe('Fones & Headphones');
+    expect(resolveProductCategory('Fones & Headphones', 'Headset gamer com mouse gamer USB para PC')).toBe('Computadores');
+  });
+
+  it('corrige categorias de Móveis para esportes, iluminação e cozinha de brinquedo', () => {
+    expect(resolveProductCategory('Móveis', 'Bola de futebol oficial para esporte e lazer')).toBe('Esportes & Lazer');
+    expect(resolveProductCategory('Esportes & Lazer', 'Ginástica Academia Residencial Halteres Caneleiras Colchão Kit Mini Band')).toBe('Esportes & Lazer');
+    expect(resolveProductCategory('Móveis', 'Ginástica Academia Residencial Halteres Caneleiras Colchão Kit Mini Band')).toBe('Esportes & Lazer');
+    expect(resolveProductCategory('Móveis', 'Luminária de mesa LED para leitura')).toBe('Utilidades');
+    expect(resolveProductCategory('Móveis', 'Cozinha infantil de brinquedo com acessórios')).toBe('Brinquedos');
+  });
+
+  it('coloca o controle de videogame em Games mesmo se o título mencionar roupa', () => {
+    expect(resolveProductCategory('Moda Masculina', 'Controle Gamer com receptor USB Regata Canelada Masculina Premium Kit')).toBe('Games');
+    expect(resolveProductCategory('Moda Masculina', 'Camiseta Resident Evil com estampa Playstation 5')).toBe('Moda Masculina');
   });
 });
 
