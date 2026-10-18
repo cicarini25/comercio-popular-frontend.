@@ -19,6 +19,7 @@ const curatedCategoryByTitle = new Map<string, string>([
   [normalizeKey("espátula de silicone redonda com cabo de madeira resistente para cozinha - oikos"), 'Casa & Cozinha'],
   [normalizeKey("Tabua de Corte Dupla Face Antiderrapante Carnes Legumes 35cm"), 'Casa & Cozinha'],
   [normalizeKey("Bolsa Pequena Feminina de Mão e Tiracolo Bolsinha Transversal Clutch Mini Bag"), 'Moda Feminina'],
+  [normalizeKey("Regata Streetwear Camisa Masculina Estilo Verão Praia Summer Blusa Cavada Unissex Larga Algodão"), 'Moda Masculina'],
   [normalizeKey("Edredom Cama Quarto Casal Queen Dupla Face Quentinho"), 'Utilidades'],
   [normalizeKey("Kit Cobre Leito Colcha Casal 3 Peças Boutis Estampada Dupla Face Porta Travesseiro Aba Americana"), 'Utilidades'],
   [normalizeKey("Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial"), 'Utilidades'],
@@ -130,6 +131,22 @@ const categoryAliases: Record<string, string> = {
 const inferFromText = (title: string, description: string): string | undefined => {
   const text = normalizeKey(title + ' ' + description);
 
+  // O tipo concreto do produto prevalece sobre termos de público como “feminino”.
+  const footwear = /\b(tenis|sapatos?|sandalias?|chinelos?|botas?|sapatilhas?|scarpins?|calcados?|chuteiras?|mocassins?|coturnos?|tamancos?)\b/.test(text);
+  const feminineAudience = /\b(feminin[oa]s?|mulheres?|women|womens)\b/.test(text);
+  const masculineAudience = /\b(masculin[oa]s?|homens?|men|mens)\b/.test(text);
+  if (footwear && feminineAudience && masculineAudience) return undefined;
+  if (footwear && feminineAudience) return 'Calçados Femininos';
+  if (footwear && masculineAudience) return 'Calçados Masculino';
+  if (/\b(perfumes?|shampoos?|cosmeticos?|hidratantes?|maquiagens?|skincare|esmaltes?|protetor(?:es)? solar(?:es)?)\b/.test(text) &&
+      feminineAudience && !/\b(bone|chapeu|viseira|visor)\b/.test(text)) return 'Cuidado & Beleza';
+  if (/(tapetes?.{0,30}(banheiro|banho|box|chuveiro)|(banheiro|banho|box|chuveiro).{0,30}tapetes?|toalhas?.{0,25}(banho|banheiro|rosto)|roupao|jogo de cama|lencol|fronha|edredom|colcha|capa de colchao|toalha de mesa|caminho de mesa|guardanapo de tecido)/.test(text)) return 'CAMA/MESA/BANHO';
+  if (/(smartwatch|smart watch|relogio inteligente|galaxy watch|apple watch)/.test(text) && !/(headphones?|fone[s]? de ouvido|earbuds?)/.test(text)) return 'RELÓGIOS';
+  if (/(pelicula|capa|capinha|case|suporte|carregador|protetor de tela).{0,70}(celular|smartphone|iphone|galaxy|android)|(celular|smartphone|iphone|galaxy|android).{0,70}(pelicula|capa|capinha|case|suporte|carregador|protetor de tela)/.test(text)) return 'Acessórios para celulares';
+  if (/(headset|headphone|fone de ouvido|fone gamer|earphone|earbud)/.test(text) && !/(amplificador|amplifier|\bdac\b)/.test(text)) return 'Fones & Headphones';
+  if (/(videogame|video game|mini game|console gamer|console de jogos|game console|console de videogame|joystick|controle gamer)/.test(text)) return 'Games';
+  if (/\b(air fryer|fritadeira eletrica|fritadeira a ar)\b/.test(text)) return 'Eletrodomésticos';
+
   // Regras prioritárias: elas corrigem categorias genéricas que chegam do feed.
   // A ordem é intencional: acessórios e peças específicas vencem a categoria
   // ampla atribuída pela plataforma.
@@ -140,22 +157,28 @@ const inferFromText = (title: string, description: string): string | undefined =
       !/(agulha|linha de bordado|fio de bordado|barbante|kit de croche|conjunto de acessorios|acessorios de renda|fita de cetim)/.test(text)) return 'Moda Feminina';
   if (/(feminin|mulher|senhora|women|menina)/.test(text) &&
       !/(agulha|linha|fio|barbante|croche|tric[oô]|costura|bordado|acessorios de renda|fita de cetim|artesanato)/.test(text)) return 'Moda Feminina';
-  if (/(guarda roupa|guarda-roupa|roupeiro|closet|wardrobe|armario|armário).{0,45}(quarto|porta|modulado|modular|roupeiro|closet)?/.test(text) &&
+  if (/\b(guarda roupa|roupeiro|closet|wardrobe)\b/.test(text)) return 'Móveis';
+  if (/(armario|armário).{0,45}(quarto|porta|modulado|modular|roupeiro|closet)?/.test(text) &&
       !/(organizador|caixa organizadora|armario organizador)/.test(text)) return 'Móveis';
   if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|tear|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   // Ferramentas têm prioridade mesmo quando o anúncio usa palavras como
   // "brinquedo" ou "acessório" para descrever o formato do produto.
   if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|chave sextavada|chave allen|chave torx|chave philips|chave de fenda|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa|(?:organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta))/.test(text) &&
       !/(martelo de carne|amaciador de carne|batedor de carne|amassador de carne)/.test(text)) return 'Ferramentas';
-  if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora|gravadora a laser|gravacao a laser|cortadora|rolo rotativo|prensa termica|maquina gravadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
+  if (/(impressora|jato de tinta|plotter|scanner|rotulador|etiquetadora|gravadora a laser|gravacao a laser|cortadora|rolo rotativo|prensa termica|maquina gravadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
   if (/(toyota|yaris|corolla|honda|volkswagen|fiat|ford|chevrolet|hyundai|kia).{0,90}(valvula|virabrequim|cabecote|motor|pistao|biela|embreagem|comando|peca)|\b(virabrequim|cabecote|pistao|biela|tampa de valvulas)\b/.test(text)) return 'AUTO & ACESSÓRIOS';
   if (/(microondas|micro ondas|forno).{0,80}(prato|carrossel|carrocel|bandeja|suporte)|\b(prato|carrossel|carrocel|bandeja).{0,80}(microondas|micro ondas|forno)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(pc gamer|computador gamer|computador desktop|desktop gamer|placa mae|placa de video|memoria ram|processador para pc|processador intel|processador amd)/.test(text)) return 'Computadores';
+  if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(smartphone|celular|iphone|galaxy|poco [a-z0-9]+|android phone)/.test(text)) return 'Smartphones';
   if (/(videogame|video game|mini game|console gamer|playstation|xbox|nintendo|joystick|controle gamer)/.test(text)) return 'Games';
+  // Peças hidráulicas e kits de fixação prevalecem sobre a categoria genérica
+  // da Shopee (alguns itens deste tipo chegam incorretamente marcados como Pets).
+  if (/(valvula.{0,45}(esgoto|retencao|hidraul|agua|descarga)|esgoto.{0,45}valvula|tubo.{0,35}(hidraul|esgoto)|conexao.{0,35}(hidraul|esgoto)|sifao|ralo.{0,30}(banheiro|pia|esgoto)|encanamento|hidraulica)/.test(text)) return 'Ferramentas';
+  if (/(bucha.{0,45}(fixacao|parede|parafuso|gancho)|parafuso.{0,35}(fixacao|bucha)|gancho.{0,35}(bucha|fixacao|parede)|fixacao.{0,35}(parede|bucha|gancho)|kit.{0,30}(bucha|parafuso|gancho)|buchas? de fixacao)/.test(text)) return 'Ferramentas';
   // Animais e produtos para animais têm prioridade sobre brinquedos e eletros.
-  if (/(racao|petiscos?|cachorro|caes|cao\b|gato|gatos|coleira|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?\b)/.test(text)) return 'Pets';
+  if (/\b(racao|petiscos?|cachorros?|caes|cao|gatos?|coleiras?|peitoral|arranhador|aquario|passaro|comedouro|bebedouro pet|produto pet|pets?)\b/.test(text)) return 'Pets';
   // Sinais específicos vencem palavras genéricas como "boneca", "brinquedo"
   // ou "pelúcia" usadas no título do anúncio.
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno|tamanco).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno)/.test(text)) return 'Calçados Femininos';
@@ -209,7 +232,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(pelicula|capa|capinha|suporte para (celular|smartphone|tablet)|carregador de celular|acessorio para celular|case para celular)/.test(text)) return 'Acessórios para celulares';
   if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
   if (/(smartwatch|smart watch|relogio inteligente|galaxy watch|apple watch)/.test(text)) return 'RELÓGIOS';
-  if (/(honda|motociclet|moto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis)/.test(text)) return 'MOTOS & ACESSÓRIOS';
+  if (/(honda|motociclet|\bmoto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis)/.test(text)) return 'MOTOS & ACESSÓRIOS';
   if (/(carro|automotivo|veiculo|autopeca|acessorio automotivo|tapete automotivo|suporte veicular|camera veicular)/.test(text)) return 'AUTO & ACESSÓRIOS';
   if (/(ferramenta|furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
   if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
@@ -241,7 +264,7 @@ const inferFromText = (title: string, description: string): string | undefined =
 
   // Peças e proteção de moto não são calçados, mesmo quando o título cita
   // pedal, tênis ou sapato para descrever o produto.
-  if (/(honda|motociclet|moto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis).{0,90}(calcado|tenis|sapato|pedal|protetor)?/.test(text)) return 'MOTOS & ACESSÓRIOS';
+  if (/(\bhonda\b|motociclet|\bmoto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis).{0,90}(calcado|tenis|sapato|pedal|protetor)?/.test(text)) return 'MOTOS & ACESSÓRIOS';
 
   // Ferramentas manuais e elétricas não devem ficar junto de impressoras.
   if (/(ferramenta|furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
@@ -291,7 +314,7 @@ const inferFromText = (title: string, description: string): string | undefined =
   if (/(academia|halter|esteira|bicicleta|camping|esporte|fitness|bola de futebol)/.test(text)) return 'Esportes & Lazer';
   if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza|monitor de pressao|aparelho de pressao|manicure|unhas?|esmalte|gel uv|pinceis)/.test(text)) return 'Cuidado & Beleza';
   if (/(cafe|\bcha\b|alimento|bebida|suplemento|chocolate|mantimento)/.test(text)) return 'Alimentos & Bebidas';
-  if (/(carro|automotivo|moto|veiculo|scooter|patinete eletrico|acessorio automotivo)/.test(text)) return 'MOTOS & ACESSÓRIOS';
+  if (/\b(carros?|automotivo|moto|veiculo|scooter|patinete eletrico|acessorio automotivo)\b/.test(text)) return 'MOTOS & ACESSÓRIOS';
   if (/(utilidade|organizador|selador|limpeza|armazenamento|pote hermetico)/.test(text)) return 'Utilidades';
   if (/(camisa|camiseta|regata|shorts?|bermuda|calca|blusa|saia|vestido|roupa|jaqueta|cropped|lingerie)/.test(text)) {
     if (/(masculin|homem|men\b)/.test(text)) return 'Moda Masculina';
@@ -306,17 +329,26 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const raw = typeof category === 'string' ? category.trim() : '';
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
-  if (exact === 'CALÇADOS INFANTIS M/F') return exact;
-  if (exact === 'CAMA/MESA/BANHO' || exact === 'MODA VERÃO PRAIA' || exact === 'MODA INFANTIL FEMININA' || exact === 'MODA INFANTIL MASCULINA') return exact;
   const titleKey = normalizeKey(title);
+  const clothingItem = /\b(camisas?|camisetas?|regatas?|polos?|vestidos?|saias?|camisolas?|pijamas?|macacoes?|jaquetas?|casacos?|moletons?|blusas?|lingeries?|shorts?|bermudas?|calcas?|roupas?)\b/.test(titleKey);
+  const titleHasFemaleAudience = /\b(feminin[oa]s?|mulheres?|women|womens|meninas?)\b/.test(titleKey);
+  const titleHasMaleAudience = /\b(masculin[oa]s?|homens?|men|mens|meninos?)\b/.test(titleKey);
+  if (clothingItem && exact === 'Moda Masculina' && !(titleHasFemaleAudience && !titleHasMaleAudience)) return exact;
+  if (clothingItem && exact === 'Moda Feminina' && !(titleHasMaleAudience && !titleHasFemaleAudience)) return exact;
+  if (exact === 'CALÇADOS INFANTIS M/F') return exact;
+  if (exact === 'MODA VERÃO PRAIA' && curatedCategoryByTitle.get(titleKey) === 'Moda Masculina') return 'Moda Masculina';
+  if (exact === 'CAMA/MESA/BANHO' || exact === 'MODA VERÃO PRAIA' || exact === 'MODA INFANTIL FEMININA' || exact === 'MODA INFANTIL MASCULINA') return exact;
   const curatedCategory = curatedCategoryByTitle.get(titleKey);
   if (curatedCategory) return curatedCategory;
-  if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey) && !/(organizador|caixa organizadora|extratora|lavadora de estofados|mosquiteiro|mosquiteira)/.test(titleKey)) return 'Móveis';
+  if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey) &&
+      !/(organizador|caixa organizadora|extratora|lavadora de estofados|mosquiteiro|mosquiteira|pet|cachorro|cao|gato|canil)/.test(titleKey)) return 'Móveis';
 
   // O feed também coloca roupas em Calçados Femininos/Masculino. Só manter
   // a categoria de calçados quando o título realmente indicar um calçado.
   const hasGarment = /(vestido|saia|camisola|pijama|macacao|jaqueta|blusa|top|lingerie|sutia|shorts?|bermuda|calca|camisa|camiseta|roupa|moletom)/.test(titleKey);
-  const hasFootwear = /(tenis|sapato|sandalia|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno|tamanco)/.test(titleKey);
+  const hasFootwear = /\b(tenis|sapatos?|sandalias?|chinelos?|botas?|sapatilhas?|scarpins?|calcados?|chuteiras?|mocassins?|coturnos?|tamancos?)\b/.test(titleKey);
+  if (hasFootwear && exact === 'Calçados Femininos' && !(titleHasMaleAudience && !titleHasFemaleAudience)) return exact;
+  if (hasFootwear && exact === 'Calçados Masculino' && !(titleHasFemaleAudience && !titleHasMaleAudience)) return exact;
   if (hasGarment && !hasFootwear && (exact === 'Calçados Femininos' || exact === 'Calçados Masculino')) {
     return /(feminin|mulher|women)/.test(titleKey) || exact === 'Calçados Femininos' ? 'Moda Feminina' : 'Moda Masculina';
   }
