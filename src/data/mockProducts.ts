@@ -460,6 +460,9 @@ export const SELLER_PLANS: SellerPlan[] = [
 export const CATEGORIES = [
   'Todas as Categorias',
   'Utilidades',
+  'ELÉTRICA & HIDRÁULICA',
+  'LUMINÁRIAS',
+  'BOLSAS & MOCHILAS',
   'Casa & Cozinha',
   'CAMA/MESA/BANHO',
   'MODA VERÃO PRAIA',
