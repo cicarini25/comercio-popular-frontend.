@@ -134,8 +134,14 @@ const categoryAliases: Record<string, string> = {
 };
 
 const inferFromText = (title: string, description: string): string | undefined => {
-  const text = normalizeKey(title + ' ' + description);
-  const titleKey = normalizeKey(title);
+const text = normalizeKey(title + ' ' + description);
+const titleKey = normalizeKey(title);
+
+  // Alimentos e utensílios/acessórios de Air Fryer não são eletrodomésticos.
+  if (/\badocantes?\b/.test(text)) return 'Alimentos & Bebidas';
+  if (/(botao|peca|reparo|reposicao).{0,60}air fryer|air fryer.{0,60}(botao|peca|reparo|reposicao)/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  if (/(silicone.{0,50}(panela|forma|forro|cesto).{0,70}air fryer|air fryer.{0,70}(silicone.{0,50}(panela|forma|forro|cesto)|forro|papel descartavel|pegador|pinca|limpa|limpeza|desengordurante)|forro.{0,50}air fryer|pegador culinario.{0,60}air fryer|pinca.{0,60}air fryer|tapete.{0,40}silicone.{0,40}air fryer|limpa air fryer|kit.{0,40}limpa air fryer)/.test(titleKey)) return 'Utilidades';
+  if (/(fogareiro|fogao).{0,50}eletric|eletric.{0,50}(fogareiro|fogao)/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
 
   // O produto principal prevalece sobre acessórios incluídos no kit ou citados
   // como compatibilidade no título.
@@ -357,6 +363,11 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const clothingItem = /\b(camisas?|camisetas?|regatas?|polos?|vestidos?|saias?|camisolas?|pijamas?|macacoes?|jaquetas?|casacos?|moletons?|blusas?|lingeries?|shorts?|bermudas?|calcas?|roupas?)\b/.test(titleKey);
   const titleHasFemaleAudience = /\b(feminin[oa]s?|mulheres?|women|womens|meninas?)\b/.test(titleKey);
   const titleHasMaleAudience = /\b(masculin[oa]s?|homens?|men|mens|meninos?)\b/.test(titleKey);
+  // Regras específicas precisam vencer categorias genéricas do feed e as
+  // regras automotivas abaixo (que também reconhecem “carro”, “pneu” e “biela”).
+  if (/(geladeira|frigobar|refrigerador)/.test(titleKey) && /(portatil|veicular|compacta|caminhao|carro|mini)/.test(titleKey)) return 'Eletrodomésticos';
+  if (/\bpneus?\b/.test(titleKey) && /(moto|motociclet)/.test(titleKey) && /(remendo|reparo|reparador|vacina|selante|spray|macarrao|tapa furo|furo)/.test(titleKey)) return 'MOTOS & ACESSÓRIOS';
+  if (/(chave|jogo).{0,20}biela/.test(titleKey) && /(kit|jogo|ferramentas?)/.test(titleKey)) return 'Ferramentas';
   if (/(halter(es)?|caneleira|mini band|ginastica|academia residencial|corda de pular|colchonete.{0,35}(exercicio|treino)|kit.{0,40}(treino|academia))/.test(titleKey)) return 'Esportes & Lazer';
   if (/(luminaria|abajur|lustre|arandela|pendente|spot de luz|lampada)/.test(titleKey)) return 'Utilidades';
   if (/(agulhas? (de|para) (costura|bordado|ponto cruz|colcha)|linhas? (de|para) costura|linhas? de colcha|fios? (de|para) croch[e]|l[aã] (para|de) tric[o]|barbante|novelo|calcador.{0,50}maquina de costura|acessorios? (para|de) maquina de costura|kit de costura|ziper invisivel|botoes? de pressao|\btear\b)/.test(titleKey)) return 'ARMARINHOS & TRICÔ';
