@@ -7,6 +7,7 @@ import './index.css';
 import { setupServiceWorker } from './registerSW';
 import ShopeeImportAdmin from './components/ShopeeImportAdmin';
 import SheinImportAdmin from './components/SheinImportAdmin';
+import AliExpressImportAdmin from './components/AliExpressImportAdmin';
 
 setupServiceWorker();
 
@@ -17,7 +18,8 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <AuthProvider>
         {currentPath === '/admin/importar-shopee' ? <ShopeeImportAdmin /> :
-          currentPath === '/admin/importar-shein' ? <SheinImportAdmin /> : <App />}
+          currentPath === '/admin/importar-shein' ? <SheinImportAdmin /> :
+            currentPath === '/admin/importar-aliexpress' ? <AliExpressImportAdmin /> : <App />}
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
