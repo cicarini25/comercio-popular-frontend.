@@ -363,6 +363,27 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const clothingItem = /\b(camisas?|camisetas?|regatas?|polos?|vestidos?|saias?|camisolas?|pijamas?|macacoes?|jaquetas?|casacos?|moletons?|blusas?|lingeries?|shorts?|bermudas?|calcas?|roupas?)\b/.test(titleKey);
   const titleHasFemaleAudience = /\b(feminin[oa]s?|mulheres?|women|womens|meninas?)\b/.test(titleKey);
   const titleHasMaleAudience = /\b(masculin[oa]s?|homens?|men|mens|meninos?)\b/.test(titleKey);
+  // O produto principal vence palavras incidentais do título (por exemplo,
+  // “computador” num controle compatível ou “fone” num anúncio de smartphone).
+  if (/^(controle|controlador|gamepad|joystick)\b/.test(titleKey) &&
+      /(playstation|\bps[1-5]\b|xbox|nintendo|switch|videogame|video game|console)/.test(titleKey)) return 'Games';
+  if (/^(controle remoto|controle universal|controle para tv|controle tv|remote control|tv voz universal controle remoto)/.test(titleKey) ||
+      (/controle remoto/.test(titleKey) && /(universal|compativel|rmf[- ]|ponteiro magico|mr24)/.test(titleKey))) return 'ELETRÔNICOS';
+  // Insumos e acessórios específicos de costura/crochê vencem palavras como
+  // “feminina”, “camisola” ou “multifuncional” presentes em títulos de produtos.
+  if (/(croche|crochetar|barbante|\btear\b|bordadeira|ponto cruz|maquina de costura|kit de costura|calcador.{0,60}(costura|bordado|ziper)|agulhas?.{0,45}(costura|bordado|croche|trico)|linhas?.{0,45}(costura|bordado|croche|trico)|fios?.{0,45}(costura|bordado|croche|trico)|la.{0,25}para trico)/.test(titleKey)) return 'ARMARINHOS & TRICÔ';
+  // Dois anúncios específicos do catálogo foram confirmados pelo utilizador:
+  // a camiseta feminina e o kit de pijama infantil masculino.
+  if (titleKey === normalizeKey('Camisa Camiseta Fé Masculino Feminino Casual 100% Algodão')) return 'Moda Feminina';
+  if (titleKey === normalizeKey('KIT 4 Peça Conjunto Manga Longa Calça + Manga Curta Shorts Verão e Inverno Pijama Masculino Feminina Afd')) return 'MODA INFANTIL MASCULINA';
+  if (/^conjunto cozinha fogao geladeira pia micro ondas e armario rosa\b/.test(titleKey)) return 'Brinquedos';
+  if (/^(smart ?watch|relogio inteligente|galaxy watch|apple watch|relogio de pulso|relogio digital)/.test(titleKey)) return 'RELÓGIOS';
+  if (/^(smart ?tv|tv\b|televisor|televisao)/.test(titleKey) ||
+      /^(samsung|lg|tcl|philips|sony|panasonic|aoc).{0,35}\b(smart ?tv|tv|televisor|televisao)\b/.test(titleKey)) return 'TVs';
+  if (/^(smartphone|celular|iphone|samsung galaxy|galaxy [aszm]|redmi (note|[0-9])|xiaomi (redmi|poco)|poco [a-z0-9]|motorola (edge|moto)|realme )/.test(titleKey)) return 'Smartphones';
+  // Placas, módulos e amplificadores de potência são componentes eletrónicos;
+  // amplificadores Hi-Fi completos sem estes sinais continuam em Aparelhos de Som.
+  if (/(placas?.{0,70}(amplificador|amplificadora|audio|som|potencia)|amplificador[a-z]*.{0,70}placa|modulos?.{0,70}(audio|som|amplificador|potencia)|(audio|som|amplificador|potencia).{0,70}modulos?|pre amplificador(?:es)?|amplificador(?:es)?.{0,60}potencia|potencia.{0,60}amplificador(?:es)?)/.test(titleKey)) return 'ELETRÔNICOS';
   // Regras específicas precisam vencer categorias genéricas do feed e as
   // regras automotivas abaixo (que também reconhecem “carro”, “pneu” e “biela”).
   if (/(geladeira|frigobar|refrigerador)/.test(titleKey) && /(portatil|veicular|compacta|caminhao|carro|mini)/.test(titleKey)) return 'Eletrodomésticos';
