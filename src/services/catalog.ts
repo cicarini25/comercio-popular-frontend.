@@ -4,7 +4,7 @@ import { resolveProductCategory } from '../utils/productCategories';
 import { CATEGORIES } from '../data/mockProducts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const SUPPORTED_AFFILIATE_PLATFORMS = new Set(['shopee', 'shein']);
+const SUPPORTED_AFFILIATE_PLATFORMS = new Set(['shopee', 'shein', 'aliexpress']);
 // O catálogo usa páginas de 100 itens (limite público da API) e o App percorre
 // todas as páginas para que nenhuma aba fique com produtos faltando.
 export const CATALOG_PAGE_SIZE = 100;
