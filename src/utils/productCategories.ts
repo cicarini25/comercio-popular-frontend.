@@ -368,6 +368,17 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  // Componentes de computador podem conter traduções erradas como “liquidificador”.
+  if (/^(processador de chip cpu de computador|liquidificador computador cpu chip su processador)/.test(titleKey) &&
+      /(cpu|processador)/.test(titleKey) && /(chip|c4d|snapdragon|qualcomm|maya|rhino|3dmax|fbx)/.test(titleKey)) return 'Computadores';
+  // Organizadores e forros de geladeira são utilidades, não eletrodomésticos.
+  if (/geladeira/.test(titleKey) && /(caixa|cesta|cesto|organiz|armazenamento)/.test(titleKey)) return 'Utilidades';
+  if (/geladeira/.test(titleKey) && /toalhas?/.test(titleKey)) return 'Utilidades';
+  // Grades/grelhas vendidas como acessórios para micro-ondas são peças de eletro.
+  if (/(microondas|micro ondas)/.test(titleKey) && /(grade|grelha|malha)/.test(titleKey) && /acessorios?/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  // Componentes de lavadora não são aparelhos completos.
+  if (/(micro\s*chave|microchave)/.test(titleKey) && /(lavadora|tanquinho|maquina de lavar)/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  if (/(kit.{0,50}mangueira.{0,80}(lavadora|tanquinho|maquina de lavar)|(lavadora|tanquinho|maquina de lavar).{0,80}kit.{0,50}mangueira)/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   // Exceções de categoria confirmadas nos anúncios concretos do catálogo.
   if (/^r raf vara de cozinha com fio 5 em 1/.test(titleKey) && /utensilios de cozinha eletricos/.test(titleKey)) return 'Eletrodomésticos';
   if (/^kit minha nova cozinha\b/.test(titleKey) && /(geladeira|fogao)/.test(titleKey)) return 'Brinquedos';
