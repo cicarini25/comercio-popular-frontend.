@@ -137,6 +137,14 @@ const inferFromText = (title: string, description: string): string | undefined =
 const text = normalizeKey(title + ' ' + description);
 const titleKey = normalizeKey(title);
 
+  // Brinquedos que citam máquina de lavar não são eletrodomésticos reais.
+  if (/(kit lavanderia.{0,40}boneca|lavanderia.{0,40}boneca|boneca.{0,40}(lavanderia|maquina de lavar))/.test(titleKey)) return 'Brinquedos';
+  // Peças de lavadoras, tanquinhos, fogões e fornos são acessórios de eletro.
+  // Não deslocar ferramentas usadas para desmontar/reparar esses aparelhos.
+  const toolForAppliance = /^(chave|ferramenta|extrator|saca|kit de ferramentas)\b/.test(titleKey);
+  const washerOrAppliancePart = /(molas? de tirantes?|kit.{0,35}vara de suspensao.{0,45}(lavadora|tanquinho|maquina de lavar)|kit.{0,45}(potencia|mangueiras?).{0,50}(lavadora|tanquinho|maquina de lavar)|membranas?.{0,40}(painel|lavadora)|motor(?:es)?.{0,35}tanquinho|polias?.{0,35}tanquinho|grades?.{0,35}fornos?|grelhas?.{0,35}fornos?|grades?.{0,35}(de|para) forno|grelhas?.{0,35}(de|para) forno|p[eé]s?.{0,25}fogao|tampinhas?.{0,25}fogao|retentor(?:es)?.{0,55}(lavadora|tanquinho|maquina de lavar|fogao|forno)|porcas?.{0,55}(lavadora|tanquinho|maquina de lavar|fogao|forno)|(lavadora|tanquinho|maquina de lavar|fogao|forno).{0,55}porcas?|((tirantes?|pressostatos?|agitador(?:es)?|atuador(?:es)?|mangueiras?|juntas?|cintas?|bandas?|protetor(?:es)? de polia|p[eé]s?).{0,70}(lavadora|tanquinho|maquina de lavar)|(lavadora|tanquinho|maquina de lavar).{0,70}(tirantes?|pressostatos?|agitador(?:es)?|atuador(?:es)?|mangueiras?|juntas?|cintas?|bandas?|protetor(?:es)? de polia|p[eé]s?)))/.test(titleKey);
+  if (!toolForAppliance && washerOrAppliancePart) return 'ELETRO & ACESSÓRIOS';
+
   // Alimentos e utensílios/acessórios de Air Fryer não são eletrodomésticos.
   if (/\badocantes?\b/.test(text)) return 'Alimentos & Bebidas';
   if (/(botao|peca|reparo|reposicao).{0,60}air fryer|air fryer.{0,60}(botao|peca|reparo|reposicao)/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
@@ -360,6 +368,8 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  // O título identifica uma ferramenta de manutenção, não a peça mencionada.
+  if (/^(chave|ferramenta|extrator|saca)\b/.test(titleKey) && /(agitador|lavadora|tanquinho)/.test(titleKey)) return 'Ferramentas';
   const clothingItem = /\b(camisas?|camisetas?|regatas?|polos?|vestidos?|saias?|camisolas?|pijamas?|macacoes?|jaquetas?|casacos?|moletons?|blusas?|lingeries?|shorts?|bermudas?|calcas?|roupas?)\b/.test(titleKey);
   const titleHasFemaleAudience = /\b(feminin[oa]s?|mulheres?|women|womens|meninas?)\b/.test(titleKey);
   const titleHasMaleAudience = /\b(masculin[oa]s?|homens?|men|mens|meninos?)\b/.test(titleKey);
