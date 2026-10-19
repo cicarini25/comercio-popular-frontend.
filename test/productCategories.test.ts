@@ -96,7 +96,7 @@ describe('Categorias de produtos importados do feed Shopee', () => {
   it('move roupas masculinas não aquáticas de MODA VERÃO PRAIA para Moda Masculina', () => {
     expect(resolveProductCategory('MODA VERÃO PRAIA', 'Regata Streetwear Camisa Masculina Estilo Verão Praia Summer Blusa Cavada Unissex Larga Algodão')).toBe('Moda Masculina');
     expect(resolveProductCategory('MODA VERÃO PRAIA', 'Kit Masculino Regata e Bermuda Tactel Estampa Frontal Águia Moderno Estilosa')).toBe('Moda Masculina');
-    expect(resolveProductCategory('MODA VERÃO PRAIA', 'Shorts Masculino Tactel Praia Academia Treino Corrida Verão Secagem Rápida')).toBe('MODA VERÃO PRAIA');
+    expect(resolveProductCategory('MODA VERÃO PRAIA', 'Shorts Masculino Tactel Praia Academia Treino Corrida Verão Secagem Rápida')).toBe('Moda Masculina');
     expect(resolveProductCategory('MODA VERÃO PRAIA', 'Biquíni feminino com bojo')).toBe('MODA VERÃO PRAIA');
   });
 
