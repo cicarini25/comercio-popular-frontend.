@@ -31,7 +31,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       <div className="mx-auto w-full max-w-7xl overflow-hidden rounded-3xl bg-teal-950 shadow-xl">
         <video
           ref={videoRef}
-          src="/videos/promo-comercio-popular.mp4"
+          src="/videos/promo-comercio-popular.mp4?v=e24678fe"
           autoPlay
           muted
           loop
