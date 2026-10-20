@@ -41,6 +41,7 @@ export default function AliExpressImportAdmin() {
       if (!token.trim()) throw new Error('Informe o token administrativo do backend.');
       if (!keywords.trim()) throw new Error('Informe o que deseja buscar no AliExpress.');
       const query = new URLSearchParams({ keywords: keywords.trim(), pageSize: '50', targetCurrency: 'BRL', shipToCountry: 'BR', targetLanguage: 'PT' });
+      if (category) query.set('siteCategory', category);
       const response = await fetch(`${API_BASE_URL}/api/integrations/aliexpress/search?${query}`, {
         headers: { Authorization: `Bearer ${token.trim()}`, Accept: 'application/json' }
       });
@@ -49,7 +50,12 @@ export default function AliExpressImportAdmin() {
       const rows = Array.isArray(data?.products) ? data.products as AliExpressProduct[] : [];
       setProducts(rows);
       setSelected(new Set(rows.map((product) => product.externalId)));
-      setNotice(rows.length ? `${rows.length} ofertas encontradas. Confira a seleção antes de gravar.` : 'Nenhuma oferta encontrada.');
+      const filtered = Number(data?.filteredOut || 0);
+      setNotice(rows.length
+        ? `${rows.length} ofertas relevantes encontradas${filtered ? `; ${filtered} resultados sem correspondência clara foram ocultados` : ''}. Confira os títulos antes de gravar.`
+        : filtered
+          ? `A busca retornou ${filtered} ofertas, mas nenhuma teve correspondência clara com os termos. Tente uma pesquisa mais específica.`
+          : 'Nenhuma oferta encontrada.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Falha na consulta.');
       setProducts([]);
@@ -102,11 +108,12 @@ export default function AliExpressImportAdmin() {
           <label className="font-semibold">Buscar no AliExpress
             <input className={input} value={keywords} onChange={(event) => setKeywords(event.target.value)} placeholder="ex.: luminária de mesa" />
           </label>
-          <label className="font-semibold">Categoria do site (opcional)
+          <label className="font-semibold">Categoria de destino no site (opcional)
             <select className={input} value={category} onChange={(event) => setCategory(event.target.value)}>
               <option value="">Usar categoria retornada pelo AliExpress</option>
               {CATEGORIES.filter((item) => item !== 'Todas as Categorias').map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
+            <span className="mt-1 block text-sm font-normal text-slate-500">Usada como contexto adicional na busca e como destino se confirmar a importação. O AliExpress pode ignorar categorias externas; confira os títulos antes de gravar.</span>
           </label>
           <button disabled={busy} className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white disabled:opacity-50 sm:col-span-2" type="submit">{busy ? 'Consultando…' : 'Consultar ofertas'}</button>
         </form>
