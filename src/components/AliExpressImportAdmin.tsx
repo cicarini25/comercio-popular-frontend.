@@ -12,6 +12,7 @@ type AliExpressProduct = {
   productUrl: string;
   affiliateUrl: string;
   category?: string;
+  siteCategory?: string;
   commissionRate?: string;
   shopId?: string;
   [key: string]: unknown;
@@ -108,12 +109,12 @@ export default function AliExpressImportAdmin() {
           <label className="font-semibold">Buscar no AliExpress
             <input className={input} value={keywords} onChange={(event) => setKeywords(event.target.value)} placeholder="ex.: luminária de mesa" />
           </label>
-          <label className="font-semibold">Categoria de destino no site (opcional)
+          <label className="font-semibold">Categoria de fallback no site (opcional)
             <select className={input} value={category} onChange={(event) => setCategory(event.target.value)}>
-              <option value="">Usar categoria retornada pelo AliExpress</option>
+              <option value="">Detectar automaticamente pelo título</option>
               {CATEGORIES.filter((item) => item !== 'Todas as Categorias').map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
-            <span className="mt-1 block text-sm font-normal text-slate-500">Usada como contexto adicional na busca e como destino se confirmar a importação. O AliExpress pode ignorar categorias externas; confira os títulos antes de gravar.</span>
+            <span className="mt-1 block text-sm font-normal text-slate-500">O sistema classifica cada oferta pelo título; esta opção só é usada como fallback quando não há sinal suficiente. Confira a categoria sugerida antes de gravar.</span>
           </label>
           <button disabled={busy} className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white disabled:opacity-50 sm:col-span-2" type="submit">{busy ? 'Consultando…' : 'Consultar ofertas'}</button>
         </form>
@@ -136,6 +137,7 @@ export default function AliExpressImportAdmin() {
                   <span className="min-w-0">
                     <img className="h-32 w-full rounded object-contain" src={product.imageUrl} alt="" referrerPolicy="no-referrer" />
                     <span className="mt-2 block line-clamp-3 text-sm font-semibold">{product.title}</span>
+                    <span className="mt-1 block text-xs font-medium text-emerald-800">Categoria sugerida: {product.siteCategory || 'Revisar manualmente'}</span>
                     <span className="mt-1 block text-sm text-slate-600">{Number(product.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                   </span>
                 </label>
