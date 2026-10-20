@@ -137,6 +137,29 @@ const inferFromText = (title: string, description: string): string | undefined =
 const text = normalizeKey(title + ' ' + description);
 const titleKey = normalizeKey(title);
 
+  const tvLedAccessory = /\b(barras? de led|led bars?|led strips?|fitas? led)\b/.test(titleKey) &&
+    /\b(tvs?|televisao|televisor|televisions?)\b/.test(titleKey);
+  if (tvLedAccessory) return 'ELETRÔNICOS';
+
+  const utilityOverride = /\b(porta chaves?|porta chaveiro|key holders?|key racks?)\b/.test(titleKey) ||
+    /\bcortadores? de biscoitos?\b/.test(titleKey) ||
+    (/\b(arejador(?:es)?|aerador(?:es)?|ejador(?:es)?)\b/.test(titleKey) && /\b(torneiras?|tornerias?|faucets?|taps?)\b/.test(titleKey));
+  if (utilityOverride) return 'Utilidades';
+
+  if (/(papel de parede|wallpaper)/.test(titleKey) && /(ps4|playstation|playgaming|gaming|gamer)/.test(titleKey)) return 'Utilidades';
+
+  // As novas abas têm prioridade sobre categorias genéricas antigas do feed.
+  // Sensores de torneira e módulos de deteção/controlos elétricos vão para a
+  // categoria elétrica/hidráulica, não para Utilidades ou Luminárias.
+  const plumbingFixture = /\b(torneiras?|tornerias?|faucets?|taps?|bacias?|cubas?|lavatorios?|lavabos?|sifoes?|ralos?)\b/.test(titleKey);
+  const electricalSensor = /\b(sensor|modulo)\b/.test(titleKey) &&
+    /\b(infravermelho|corpo humano|radar|movimento|controle de luz|luz sonora)\b/.test(titleKey);
+  if (plumbingFixture || electricalSensor) return 'ELÉTRICA & HIDRÁULICA';
+
+  if (/\b(luminarias?|abajures?|lustres?|arandelas?|pendentes?|plafons?|spots? de luz|lampadas?|luzes? de mesa|luz noturna|desk lamps?|table lamps?|floor lamps?|wall lamps?|light fixtures?|ceiling lights?)\b/.test(titleKey)) return 'LUMINÁRIAS';
+  const laptopCarryItem = /\bmaletas?(?: de| para)? (?:notebook|laptop)\b|\bporta[- ]?(?:notebook|laptop)s?\b/.test(titleKey);
+  if (laptopCarryItem || /\b(mochilas?|backpacks?|rucksacks?)\b/.test(titleKey)) return 'BOLSAS & MOCHILAS';
+
   // Brinquedos que citam máquina de lavar não são eletrodomésticos reais.
   if (/(kit lavanderia.{0,40}boneca|lavanderia.{0,40}boneca|boneca.{0,40}(lavanderia|maquina de lavar))/.test(titleKey)) return 'Brinquedos';
   // Peças de lavadoras, tanquinhos, fogões e fornos são acessórios de eletro.
@@ -422,7 +445,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/\bpneus?\b/.test(titleKey) && /(moto|motociclet)/.test(titleKey) && /(remendo|reparo|reparador|vacina|selante|spray|macarrao|tapa furo|furo)/.test(titleKey)) return 'MOTOS & ACESSÓRIOS';
   if (/(chave|jogo).{0,20}biela/.test(titleKey) && /(kit|jogo|ferramentas?)/.test(titleKey)) return 'Ferramentas';
   if (/(halter(es)?|caneleira|mini band|ginastica|academia residencial|corda de pular|colchonete.{0,35}(exercicio|treino)|kit.{0,40}(treino|academia))/.test(titleKey)) return 'Esportes & Lazer';
-  if (/(luminaria|abajur|lustre|arandela|pendente|spot de luz|lampada)/.test(titleKey)) return 'Utilidades';
+  if (/(luminaria|abajur|lustre|arandela|pendente|spot de luz|lampada)/.test(titleKey)) return 'LUMINÁRIAS';
   if (/(agulhas? (de|para) (costura|bordado|ponto cruz|colcha)|linhas? (de|para) costura|linhas? de colcha|fios? (de|para) croch[e]|l[aã] (para|de) tric[o]|barbante|novelo|calcador.{0,50}maquina de costura|acessorios? (para|de) maquina de costura|kit de costura|ziper invisivel|botoes? de pressao|\btear\b)/.test(titleKey)) return 'ARMARINHOS & TRICÔ';
   if (/(toalhas?.{0,35}(banho|banheiro|rosto|infantil|bebe)|roupao.{0,35}(infantil|bebe)|\b(toalha|toalhas)\b.{0,35}(banho|rosto|infantil|bebe))/.test(titleKey)) return 'CAMA/MESA/BANHO';
   if (/(capacitor|fusivel|magnetron|membrana.{0,35}(microondas|micro ondas)|motor prato|prato.{0,35}(microondas|micro ondas)|kit mica|eletrobomba|batedor.{0,35}(batedeira|tanquinho)|bucha.{0,35}(agitador|lavadora)|gabinete.{0,35}(maquina de lavar|lavadora)|bomba de agua.{0,35}(maquina de lavar|lavadora)|conjunto eletrodo.{0,25}(fogao|cooktop)|kit.{0,35}(espalhador|queimador).{0,25}fogao|acessorios?.{0,45}(fogao|microondas|micro ondas|lavadora|tanquinho|aspirador|geladeira|batedeira)|pecas?.{0,45}(fogao|microondas|micro ondas|lavadora|tanquinho|aspirador|geladeira|batedeira)|fusivel.{0,45}(microondas|micro ondas)|termostato.{0,45}(microondas|micro ondas))/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
@@ -459,11 +482,12 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     'Fones & Headphones', 'Aparelhos de Som', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
     'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'AUTO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
+    'ELÉTRICA & HIDRÁULICA', 'LUMINÁRIAS', 'BOLSAS & MOCHILAS',
   ]);
   if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
 
   const inferred = inferFromText(title, description);
-  const specificCategories = new Set(['Brinquedos', 'Calçados Masculino', 'Calçados Femininos', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios', 'Móveis']);
+  const specificCategories = new Set(['Brinquedos', 'Calçados Masculino', 'Calçados Femininos', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios', 'Móveis', 'ELÉTRICA & HIDRÁULICA', 'LUMINÁRIAS', 'BOLSAS & MOCHILAS']);
   if (inferred && (specificCategories.has(inferred) || !exact)) return inferred;
   if (exact) return exact;
 

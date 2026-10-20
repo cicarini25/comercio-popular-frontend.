@@ -140,7 +140,7 @@ describe('Categorias de produtos importados do feed Shopee', () => {
     expect(resolveProductCategory('Móveis', 'Bola de futebol oficial para esporte e lazer')).toBe('Esportes & Lazer');
     expect(resolveProductCategory('Esportes & Lazer', 'Ginástica Academia Residencial Halteres Caneleiras Colchão Kit Mini Band')).toBe('Esportes & Lazer');
     expect(resolveProductCategory('Móveis', 'Ginástica Academia Residencial Halteres Caneleiras Colchão Kit Mini Band')).toBe('Esportes & Lazer');
-    expect(resolveProductCategory('Móveis', 'Luminária de mesa LED para leitura')).toBe('Utilidades');
+    expect(resolveProductCategory('Móveis', 'Luminária de mesa LED para leitura')).toBe('LUMINÁRIAS');
     expect(resolveProductCategory('Móveis', 'Cozinha infantil de brinquedo com acessórios')).toBe('Brinquedos');
   });
 
