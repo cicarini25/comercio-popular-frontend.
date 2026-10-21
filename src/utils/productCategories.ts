@@ -391,6 +391,39 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  // Exceções confirmadas pelo utilizador: o objeto principal do título vence
+  // categorias antigas e palavras secundárias (bicicleta, lâmpada, mochila).
+  if (/\bcabo de forca\b/.test(titleKey) && /\b(bipolar|energia|10a)\b/.test(titleKey) &&
+      /\b(tv|samsung|lg|ps4|ps5|xbox|impressoras?)\b/.test(titleKey)) return 'ELETRÔNICOS';
+  if (/\b(playstation|ps[1-5])\b/.test(titleKey) && /\b(kit festa|festa em casa|aniversario|mesversario)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(bonecos?|figuras?)\b/.test(titleKey) && /\b(playstation|simbolos? playstation)\b/.test(titleKey) && /\b(impressao 3d|articulados?)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(fogao|cooktop)\b/.test(titleKey) && /\b(4 bocas|quatro bocas)\b/.test(titleKey) &&
+      /\b(inox|embutir|acendimento|bivolt|star new|essencial|mesa cozinha|cozinha moderna|vidro)\b/.test(titleKey)) return 'Eletrodomésticos';
+  if (/\b(caixas? de som|soundbar|alto falante)\b/.test(titleKey) && /\b(bluetooth|sem fio|wireless)\b/.test(titleKey)) return 'Aparelhos de Som';
+  if (/\b(mesas?)\b/.test(titleKey) && /\b(redonda|parede dobravel|jantar|cozinha|sala|industrial|mdf|pe ferro)\b/.test(titleKey) &&
+      !/\b(mesa de som|mesa digitalizadora|mesa de trabalho de costura)\b/.test(titleKey)) return 'Móveis';
+  if (/\b(mini cozinha|cozinha de brincar|freezer cooker|brincar de cozinhar)\b/.test(titleKey) &&
+      /\b(brinquedo|brincar|infantil|rosa|educativo|comidinhas|fogao|forno|freezer)\b/.test(titleKey)) return 'Brinquedos';
+  if (/\b(carimbo|marcador|molde)\b/.test(titleKey) && /\b(brigadeiros?|confeitaria|confeiteiros?|aniversario|festa)\b/.test(titleKey)) return 'Utilidades';
+  if (/(smartwatch|smart watch)/.test(titleKey) && /\b(fone de ouvido|fone|headphone|earphone)\b/.test(titleKey) && /\b(conjunto|kit|em 1|presente)\b/.test(titleKey)) return 'RELÓGIOS';
+  if (/\b(bolsas?|bolsinhas?|clutches?|mini bags?)\b/.test(titleKey) &&
+      /\b(mao|tiracolo|transversal|clutch|mini bag|handbag)\b/.test(titleKey)) return 'BOLSAS & MOCHILAS';
+  if (/\b(camisetas?|camisas?)\b/.test(titleKey) && /\beu odeio cardio\b/.test(titleKey)) return 'Moda Feminina';
+  if (/\b(camisas?|camisetas?)\b/.test(titleKey) &&
+      /\b(masculino|masculina)\b/.test(titleKey) && /\b(feminino|feminina)\b/.test(titleKey) &&
+      /\b(musculacao|academia)\b/.test(titleKey)) return 'Moda Masculina';
+  if (/\b(relogios? despertador|despertadores?|alarm clocks?)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(vestidos?|macaquinhos?)\b/.test(titleKey) &&
+      /\b(infantil|juvenil|crianca|criancas|menina|meninas|kids)\b/.test(titleKey) &&
+      /\b(princesa|ballet|bale|jazz|ginastica ritmica|tule|festa infantil|decote halter)\b/.test(titleKey)) return 'MODA INFANTIL FEMININA';
+  if (/\b(chuteiras?|cleats?)\b/.test(titleKey) && /\b(futebol|campo|football|soccer|trava)\b/.test(titleKey)) return 'Esportes & Lazer';
+  if (/\b(cestas?|cestos?|baskets?)\b/.test(titleKey) && /\b(bicicletas?|bikes?|mountain bike|e bike)\b/.test(titleKey)) return 'Bike Elétrica e Acessórios';
+  if (/\b(bolsas?|bags?|pouches?)\b/.test(titleKey) && /\b(guid[aã]o|handlebar|bicicletas?|bikes?|mountain bike)\b/.test(titleKey)) return 'BOLSAS & MOCHILAS';
+  if (/\b(ziper(?:es)?|zippers?|fechos? eclair)\b/.test(titleKey) && /\b(reparo|repair|remov[ií]veis?|removable|cursor|puxador|cabe[çc]a|substitui[cç][ãa]o|fixadores?|extrator|kit)\b/.test(titleKey)) return 'ARMARINHOS & TRICÔ';
+  if (/\b(maquina de solda|ferro de solda|ponta de ferro de solda)\b/.test(titleKey)) return 'Ferramentas';
+  if (/\b(moto|motocicleta|motorcycle|bmw f\d{3})\b/.test(titleKey) && /\b(farol|lampadas?|luzes?|led|protetor do farol|luz de freio)\b/.test(titleKey)) return 'MOTOS & ACESSÓRIOS';
+  if (/\b(fogao|forno|cooktop)\b/.test(titleKey) && /\b(bacias?|espalhadores?|queimadores?)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  if (/\b(lampadas?|bulbs?)\b/.test(titleKey) && /\b(g9|fogao|fogoes|forno|fornos|cooktop|fisher|electrolux)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   // Componentes de computador podem conter traduções erradas como “liquidificador”.
   if (/^(processador de chip cpu de computador|liquidificador computador cpu chip su processador)/.test(titleKey) &&
       /(cpu|processador)/.test(titleKey) && /(chip|c4d|snapdragon|qualcomm|maya|rhino|3dmax|fbx)/.test(titleKey)) return 'Computadores';
