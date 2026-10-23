@@ -391,6 +391,17 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  // Correções específicas confirmadas pelo utilizador. Estas regras ficam na
+  // resolução final para vencer inclusive quando o feed já traz uma categoria.
+  if (/\btapete[s]?\b/.test(titleKey) && /\b(pedagogic|amarelinha|coordenacao motora|brincadeiras ludicas)\b/.test(titleKey)) return 'Brinquedos';
+  if (/\b(toalha[s]?|toalhas?)\b/.test(titleKey) && /\bmesa[s]?\b/.test(titleKey)) return 'CAMA/MESA/BANHO';
+  if (/\b(sensor|sensores)\b/.test(titleKey) && /\b(pressao|contato|alarme|cama escolar|resistencia)\b/.test(titleKey)) return 'ELETRÔNICOS';
+  if (/\b(rgb|luz de perseguicao|monitor de mesa)\b/.test(titleKey) && /\b(luz|decoracao|computador|monitor|jogos?)\b/.test(titleKey)) return 'ELETRÔNICOS';
+  if (/\b(mangueiras?|removedor(?:es)? de cabelo|acessorios?)\b/.test(titleKey) && /\b(tanquinho|lavadora|maquina de lavar|robo aspirador|aspirador de po)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  if (/\b(espalhadores?|queimadores?|bocas?)\b/.test(titleKey) && /\b(fogao|fogoes)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  if (/\b(torneiras?|torneira|faucets?|taps?)\b/.test(titleKey)) return 'ELÉTRICA & HIDRÁULICA';
+  if (/\b(saude auditiva|aparelho[s]? de osso)\b/.test(titleKey) && /\b(alto[- ]falante|bluetooth|fone[s]? de ouvido)\b/.test(titleKey)) return 'Cuidado & Beleza';
+  if (/(som carro|som automotivo|kit som automotivo|radio de carro|radio automotivo|alto falante.{0,35}carro|aparelho de som.{0,120}carro)/.test(titleKey)) return 'AUTO & ACESSÓRIOS';
   // Exceções confirmadas pelo utilizador: o objeto principal do título vence
   // categorias antigas e palavras secundárias (bicicleta, lâmpada, mochila).
   if (/\bcabo de forca\b/.test(titleKey) && /\b(bipolar|energia|10a)\b/.test(titleKey) &&
