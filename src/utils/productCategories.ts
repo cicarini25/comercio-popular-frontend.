@@ -409,6 +409,12 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (titleKey === normalizeKey('Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial')) return 'Móveis';
   if (titleKey === normalizeKey('Fio de algodão preenchido para bolsas tecidas à mão, fio para crochê.')) return 'ARMARINHOS & TRICÔ';
   if (titleKey === normalizeKey('Pote Organizador de Pastilhas Lava - Louças Preto - Máquina de Lavar Louça')) return 'ELETRO & ACESSÓRIOS';
+  if (exact === 'ELETRO & ACESSÓRIOS' && /\b(fogao|fogoes|cooktop)\b/.test(titleKey) &&
+      !/\b(espalhador|queimador|manipulo|eletrodo|gaxeta|peca|acessorio)\b/.test(titleKey)) return 'Eletrodomésticos';
+  if (exact === 'ELETRO & ACESSÓRIOS' && /\b(tanquinho|maquina de lavar|lavadora|lavar roupa)\b/.test(titleKey) &&
+      !/\b(mangueira|mangureira|peca|modulo|sensor|acessorio|removedor)\b/.test(titleKey)) return 'Eletrodomésticos';
+  if (exact === 'ELETRO & ACESSÓRIOS' && /\b(microondas|micro ondas|micro-ondas)\b/.test(titleKey)) return 'Eletrodomésticos';
+  if (exact === 'ELETRO & ACESSÓRIOS' && /\b(52cm|hdmi|capacitor touch|tela secundaria)\b/.test(titleKey) && /\b(display|monitor|tela)\b/.test(titleKey)) return 'TVs';
   // Correções específicas confirmadas pelo utilizador. Estas regras ficam na
   // resolução final para vencer inclusive quando o feed já traz uma categoria.
   if (/\btapete[s]?\b/.test(titleKey) && /\b(pedagogic|amarelinha|coordenacao motora|brincadeiras ludicas)\b/.test(titleKey)) return 'Brinquedos';
