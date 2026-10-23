@@ -391,6 +391,21 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  const completeAppliancesConfirmed = [
+    'Tanquinho Britânia 15kg Semi Automático BLT15A 510W Silencioso Dispenser Duplo 110/220V',
+    'Máquina de lavar 12Kg Philco 16 Modos de operação PLR12A',
+    'Máquina de Lavar Roupa Midea 12kg Sistema Wave Impeller e Compacta Branca',
+    'Máquina de Lavar Midea MA512W150A-WK05 15kg Automática Branca Abertura Superior 220V',
+    'Máquina de Lavar Brastemp 15kg Automática Cesto Inox Multi Dispenser BWF15AB',
+    'Máquina De Lavar 12kg Branca Wave Impeller Midea MAV04W120/WKBR04 110V',
+    'Mini máquina de lavar roupa 11L dobrável portátil moderna máquina de lavar automática 110v/220v superloja',
+    'Micro-Ondas Mondial 21 Litros MO-01-21-B Preto 1200W Display Digital',
+    'Maquina de Lavar Midea Wave Agitador 15KG 13 programas com Timer Digital - Branco',
+  ].map(normalizeKey);
+  if ((canonicalCategories.get(key) === 'Eletrodomésticos' || canonicalCategories.get(key) === 'ELETRO & ACESSÓRIOS') &&
+      completeAppliancesConfirmed.some((confirmedTitle) => titleKey.startsWith(confirmedTitle))) {
+    return 'Eletrodomésticos';
+  }
   const isElectroCategory = exact === 'Eletrodomésticos' || exact === 'ELETRO & ACESSÓRIOS';
   const isElectroAccessoryTitle = /\b(eletrobomba|capacitor|diodo|detector|display|fusivel|magnetron|membrana|motor prato|prato de microondas|kit mica|batedor|bucha|agitador|usina|acendedor|eletrodo|interruptor|lampada|mangueiras?|mangureiras?|espalhadores?|tampinhas?|queimadores?|bocas? de fogao|gaxeta|vedacao|peca|modulo|reparo|reposicao|acessorio|sensor)\b/.test(titleKey);
   const isCompleteElectroTitle =
