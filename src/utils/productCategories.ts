@@ -475,7 +475,10 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
       !/\b(espalhador|queimador|manipulo|eletrodo|gaxeta|peca|acessorio)\b/.test(titleKey)) return 'Eletrodomésticos';
   if (exact === 'ELETRO & ACESSÓRIOS' && /\b(tanquinho|maquina de lavar|lavadora|lavar roupa)\b/.test(titleKey) &&
       !/\b(mangueira|mangureira|peca|modulo|sensor|acessorio|removedor)\b/.test(titleKey)) return 'Eletrodomésticos';
-  if (exact === 'ELETRO & ACESSÓRIOS' && /\b(microondas|micro ondas|micro-ondas)\b/.test(titleKey)) return 'Eletrodomésticos';
+  if (exact === 'ELETRO & ACESSÓRIOS' && /\b(microondas|micro ondas|micro-ondas)\b/.test(titleKey) &&
+      !/\b(capacitor|diodo|detector|display|fusivel|motor|membrana|prato|bandeja|magnetron|p[eé]s?|base|almofada|acessorio|peca|reparo|reposicao)\b/.test(titleKey)) {
+    return 'Eletrodomésticos';
+  }
   if (exact === 'ELETRO & ACESSÓRIOS' && /\b(52cm|hdmi|capacitor touch|tela secundaria)\b/.test(titleKey) && /\b(display|monitor|tela)\b/.test(titleKey)) return 'TVs';
   // Correções específicas confirmadas pelo utilizador. Estas regras ficam na
   // resolução final para vencer inclusive quando o feed já traz uma categoria.
@@ -625,7 +628,10 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'AUTO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
     'ELÉTRICA & HIDRÁULICA', 'LUMINÁRIAS', 'BOLSAS & MOCHILAS',
   ]);
-  if (titleCategory && titleDrivenCategories.has(titleCategory)) return titleCategory;
+  if (titleCategory && titleDrivenCategories.has(titleCategory) &&
+      !(exact === 'ELETRO & ACESSÓRIOS' && titleCategory === 'Eletrodomésticos')) {
+    return titleCategory;
+  }
 
   const inferred = inferFromText(title, description);
   const specificCategories = new Set(['Brinquedos', 'Calçados Masculino', 'Calçados Femininos', 'Pets', 'Instrumentos Musicais', 'Bike Elétrica e Acessórios', 'Móveis', 'ELÉTRICA & HIDRÁULICA', 'LUMINÁRIAS', 'BOLSAS & MOCHILAS']);
