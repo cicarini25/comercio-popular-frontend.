@@ -393,6 +393,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const titleKey = normalizeKey(title);
   const grupo1MaquinasConfirmadas = new Set([
     normalizeKey('Tanquinho 10kg Newmaq'),
+    normalizeKey('Tanquinho 10kg Newmaq | Máquina de Lavar Roupa Semiautomático | 9 Programas de Lavagem'),
     normalizeKey('Máquina de Lavar Roupa Semiautomático | 9 Programas de Lavagem'),
     normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Preta - NA-F150B1B'),
     normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Branca - NA-F150B1W'),
