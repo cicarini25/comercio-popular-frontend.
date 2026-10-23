@@ -407,6 +407,8 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   ]);
   if (grupo1Eletrodomesticos.has(titleKey)) return 'Eletrodomésticos';
   if (titleKey === normalizeKey('Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial')) return 'Móveis';
+  if (titleKey === normalizeKey('Fio de algodão preenchido para bolsas tecidas à mão, fio para crochê.')) return 'ARMARINHOS & TRICÔ';
+  if (titleKey === normalizeKey('Pote Organizador de Pastilhas Lava - Louças Preto - Máquina de Lavar Louça')) return 'ELETRO & ACESSÓRIOS';
   // Correções específicas confirmadas pelo utilizador. Estas regras ficam na
   // resolução final para vencer inclusive quando o feed já traz uma categoria.
   if (/\btapete[s]?\b/.test(titleKey) && /\b(pedagogic|amarelinha|coordenacao motora|brincadeiras ludicas)\b/.test(titleKey)) return 'Brinquedos';
