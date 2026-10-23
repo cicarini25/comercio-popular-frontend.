@@ -406,6 +406,20 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     normalizeKey('Máquina de Lavar 15kg /tanquinho Semi-Automática Wanke Evolution Lavagem por Agitação Com 4 programas'),
   ]);
   if (grupo1MaquinasConfirmadas.has(titleKey)) return 'Eletrodomésticos';
+  const pecasFogaoConfirmadas = new Set([
+    normalizeKey('Tampinhas Fogão Dako Supreme Titan 4 Bocas Kit 4 Peças Pretas Compatível'),
+    normalizeKey('Bocas do Fogão 4 Bocas Mueller Decorato Vetro com Mesa de Vidro queimadores e espalhadores'),
+    normalizeKey('Espalhadores Boca Chama Tampinha Fogão Atlas Itatiaia Coliseum Ágata Grécia Coliseum Mônaco 4 ou 5 Bocas'),
+    normalizeKey('Kit C/ 4 Interruptor + Chicote Fogão Cooktop Fischer 4 Bocas'),
+    normalizeKey('Kit 4 Espalhadores Tampinhas Bocas Fogão Atlas Utop Glass 4 Bocas 30000075'),
+    normalizeKey('Kit Completo Atlas 4 Espalhadores + 4 Sorvetes Fogão 4 Bocas Monaco Coliseu Grécia Glass'),
+    normalizeKey('Protetor Fogão Antiaderente Reutilizável Resistente Ao Calor Para Boca Fogão Gás Kit 1 4 Ou 6 Unidades Lavável Ajustável'),
+    normalizeKey('Kit Tampinha Espalhadores Boca De Fogão Dako Delta 4 Bocas'),
+    normalizeKey('Tampinhas Espalhadores Bocas Fogão Atlas Atenas 4 Bocas'),
+    normalizeKey('kit 4 espalhadores bocas fogao atlas monaco top glass 4 bocas'),
+    normalizeKey('Tampinhas Espalhadores Bocas Fogão Atlas Atenas 4 Bocas'),
+  ]);
+  if (exact === 'Eletrodomésticos' && pecasFogaoConfirmadas.has(titleKey)) return 'ELETRO & ACESSÓRIOS';
   // Grupo 1: títulos concretos confirmados pelo utilizador; não generalizar.
   const grupo1Eletrodomesticos = new Set([
     normalizeKey('Tanquinho 10kg Newmaq'),
