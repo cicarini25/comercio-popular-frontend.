@@ -397,6 +397,11 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/\b(toalha[s]?|toalhas?)\b/.test(titleKey) && /\bmesa[s]?\b/.test(titleKey)) return 'CAMA/MESA/BANHO';
   if (/\b(sensor|sensores)\b/.test(titleKey) && /\b(pressao|contato|alarme|cama escolar|resistencia)\b/.test(titleKey)) return 'ELETRÔNICOS';
   if (/\b(rgb|luz de perseguicao|monitor de mesa)\b/.test(titleKey) && /\b(luz|decoracao|computador|monitor|jogos?)\b/.test(titleKey)) return 'ELETRÔNICOS';
+  if (/\bpratos?\b/.test(titleKey) && /\b(jogo de pratos?|prato de jantar|ceramica|mesa posta)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(maquina de lavar louca|lavadora de louca|lava loucas?|lavar louca)\b/.test(titleKey)) return 'Eletrodomésticos';
+  if (/\b(mangueiras?|mangureiras?)\b/.test(titleKey) && /\b(tanquinho|lavadora|maquina de lavar)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  if (/\b(radio|aparelho de som)\b/.test(titleKey) && /\b(h[- ]?tech|bluetooth usb am fm|saida de som forte)\b/.test(titleKey)) return 'AUTO & ACESSÓRIOS';
+
   if (/\b(mangueiras?|removedor(?:es)? de cabelo|acessorios?)\b/.test(titleKey) && /\b(tanquinho|lavadora|maquina de lavar|robo aspirador|aspirador de po)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (/\b(espalhadores?|queimadores?|bocas?)\b/.test(titleKey) && /\b(fogao|fogoes)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (/\b(torneiras?|torneira|faucets?|taps?)\b/.test(titleKey)) return 'ELÉTRICA & HIDRÁULICA';
