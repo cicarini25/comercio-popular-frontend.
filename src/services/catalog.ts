@@ -1,6 +1,7 @@
 import { Product } from '../types';
 import { API_BASE_URL, getAuthToken } from './api';
 import { resolveProductCategory } from '../utils/productCategories';
+import { getAuditedProductCategoryOverride } from '../utils/catalogProductCategoryOverrides';
 import { CATEGORIES } from '../data/mockProducts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -36,9 +37,10 @@ export function mapCatalogProduct(row: any): Product | null {
   // A categoria inferida pelo título corrige classificações genéricas do feed
   // (por exemplo, painel de TV, acessórios de fogão e peças de moto). O
   // override só é usado quando o produto não traz nenhum sinal classificável.
-  const effectiveCategory = inferredCategory && inferredCategory !== 'Outros'
+  const auditedCategoryOverride = getAuditedProductCategoryOverride(row.id);
+  const effectiveCategory = auditedCategoryOverride || (inferredCategory && inferredCategory !== 'Outros'
     ? inferredCategory
-    : selectedCategory || inferredCategory;
+    : selectedCategory || inferredCategory);
   const price = Number(offer.price);
   const original = Number(offer.originalPrice);
   const stock = offer.stockUnits == null ? null : Number(offer.stockUnits);
