@@ -185,6 +185,13 @@ const titleKey = normalizeKey(title);
   if (/(electric scooter|scooter eletrica|bicicleta.{0,70}(eletrica|bateria|motor)|bike.{0,70}(eletrica|bateria|motor)|e bike|ebike)/.test(titleKey) ||
       (/\b(bicicleta|bike)\b/.test(titleKey) && !/(ergometrica|de academia)/.test(titleKey))) return 'Bike Elétrica e Acessórios';
 
+  // Bolas de jogo e kits de futebol são artigos desportivos, mesmo quando o
+  // título diz "costurada" ou combina chuteira, mochila e meião.
+  const sportsBall = /\bbolas?\b.{0,100}\b(futebol|futsal|volei|voleibol|basquete|handebol)\b|\b(futebol|futsal|volei|voleibol|basquete|handebol)\b.{0,100}\bbolas?\b/.test(titleKey);
+  const soccerKit = /\bchuteiras?\b/.test(titleKey) && /\bfutebol\b/.test(titleKey) &&
+    /\b(mochilas?|meiao|relogios?)\b/.test(titleKey);
+  if (sportsBall || soccerKit) return 'Esportes & Lazer';
+
   // O tipo concreto do produto prevalece sobre termos de público como “feminino”.
   const footwear = /\b(tenis|sapatos?|sandalias?|chinelos?|botas?|sapatilhas?|scarpins?|calcados?|chuteiras?|mocassins?|coturnos?|tamancos?)\b/.test(text);
   const feminineAudience = /\b(feminin[oa]s?|mulheres?|women|womens)\b/.test(text);
@@ -219,7 +226,7 @@ const titleKey = normalizeKey(title);
   if (/\b(guarda roupa|roupeiro|closet|wardrobe)\b/.test(text)) return 'Móveis';
   if (/(armario|armário).{0,45}(quarto|porta|modulado|modular|roupeiro|closet)?/.test(text) &&
       !/(organizador|caixa organizadora|armario organizador)/.test(text)) return 'Móveis';
-  if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|\btear\b|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(croche|crochetar|\btrico\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|\btear\b|bordado|bordadeira|\bcostura\b|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   // Ferramentas têm prioridade mesmo quando o anúncio usa palavras como
   // "brinquedo" ou "acessório" para descrever o formato do produto.
   if (/(furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|chave sextavada|chave allen|chave torx|chave philips|chave de fenda|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa|(?:organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta))/.test(text) &&
@@ -311,8 +318,8 @@ const titleKey = normalizeKey(title);
     return 'Moda Masculina';
   }
 
-  if (/(croche|crochetar|\btric[oô]\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|\btear\b|bordado|bordadeira|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
-  if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado|costura|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(croche|crochetar|\btric[oô]\b|agulha[s]? de (croche|trico)|agulha[s]? para (croche|trico)|linha[s]? de (croche|trico)|fio[s]? de (croche|trico)|la para trico|barbante|\btear\b|bordado|bordadeira|\bcostura\b|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
+  if (/(ponto cruz|bordado|bordadeira|bandagem de bordado|maquina de bordado|\bcostura\b|linha para bordar|fio para bordado)/.test(text)) return 'ARMARINHOS & TRICÔ';
   if (/(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira).{0,40}(infantil|menino|menina|bebe|crianca|kids)/.test(text) || /(infantil|menino|menina|bebe|crianca|kids).{0,40}(tenis|sapato|calcado|sandalia|chinelo|bota|sapatilha|chuteira)/.test(text)) return 'CALÇADOS INFANTIS M/F';
   if (/(gravadora|gravacao|cortadora|rolo rotativo|sculpfun|artilume|acmer|mecolour|lightburn).{0,45}laser|laser.{0,45}(gravadora|gravacao|cortadora|rolo rotativo)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
 
