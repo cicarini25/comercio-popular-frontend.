@@ -391,6 +391,33 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  const acessoriosEletrodomesticosConfirmados = new Set([
+    normalizeKey('Eletrobomba Bomba De Agua Maquina De Lavar Electrolux 15kg 127v'),
+    normalizeKey('Eletrobomba Bomba De Agua Maquina De Lavar Electrolux 15kg'),
+    normalizeKey('Display Microondas Pme31 Micro-ondas Yh-ml07bs-08 Ylc070amb-v0'),
+    normalizeKey('Diodo Alta Tensão CL04-12A Forno Microondas Micro-ondas LG Conexão PTH 12Kv 450Ma 6851W1A002K'),
+    normalizeKey('Detector de Micro-ondas, Detector de Vazamento de Micro-Ondas com Display Digital LCD, Função de Alarme Integrada, Medida'),
+    normalizeKey('Capacitor Microondas 0.80uf X 2100v Alta Tensão Para Microondas'),
+    normalizeKey('SEIS 6 Capacitor Microondas Alta Qualidade 0,80uf 2000v Fusível 20a JRK MICROONDAS'),
+    normalizeKey('Batedor Tanquinho Suggar Lavamax Eco 10kg 12kg 13kg 15kg 18Kg 20Kg Kit Completo'),
+    normalizeKey('BUCHA DO AGITADOR ORIGINAL LAVADORA COLORMAQ 11-12-15kg'),
+    normalizeKey('Usina 5 Saidas Original Fogão Brastemp E Consul W10362642'),
+    normalizeKey('Usina 5 Saídas Acendedor Fogão Brastemp Consul W10362642 Módulo Ignição Original'),
+    normalizeKey('ACENDEDOR FOGAO FLAME'),
+    normalizeKey('DOIS 2 Kit Lâmpada Halógena G9 Fogões Fornos 25w 220v Electrolux'),
+    normalizeKey('DOIS 2 Conj Eletroldo Fogão/cooktop Brastemp/consul 4 E 5 Bocas'),
+    normalizeKey('Usina de Acendimento Automático Fogão Cooktop Brastemp Consul 4 Bocas Bdd62 Cd060'),
+    normalizeKey('Interruptor Original Do Fogão Brastemp Ative W10343716'),
+    normalizeKey('Usina 7 Saidas Acendimento Fogao Brastemp Consul Terminal'),
+    normalizeKey('Conjunto Eletroldo Fogão/cooktop Brastemp 4 e 5 Bocas'),
+    normalizeKey('Usina 6 Saidas Acendimento Fogao Brastemp 5 Bocas'),
+    normalizeKey('Usina De Ignição Original Fogão Brastemp E Consul 5 Saídas'),
+  ]);
+
+  if (exact === 'Eletrodomésticos' && acessoriosEletrodomesticosConfirmados.has(titleKey)) {
+    return 'ELETRO & ACESSÓRIOS';
+  }
+
   const grupo1MaquinasConfirmadas = new Set([
     normalizeKey('Tanquinho 10kg Newmaq'),
     normalizeKey('Tanquinho 10kg Newmaq | Máquina de Lavar Roupa Semiautomático | 9 Programas de Lavagem'),
