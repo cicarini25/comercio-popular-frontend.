@@ -391,6 +391,20 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  const grupo1MaquinasConfirmadas = new Set([
+    normalizeKey('Tanquinho 10kg Newmaq'),
+    normalizeKey('Máquina de Lavar Roupa Semiautomático | 9 Programas de Lavagem'),
+    normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Preta - NA-F150B1B'),
+    normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Branca - NA-F150B1W'),
+    normalizeKey('Máquina de Lavar Frontal Electrolux 12kg Cinza Ônix Inverter com Água Quente e Lavagem Inteligente (LFC12)'),
+    normalizeKey('Máquina de Lavar Frontal Electrolux 12kg Branca Inverter com Água Quente e Lavagem Inteligente (LFB12)'),
+    normalizeKey('Máquina de Lavar Electrolux Premium Care 15Kg com Cesto Inox, Jet&Clean e Time Control'),
+    normalizeKey('Máquina de Lavar Electrolux 15kg Branca Essential Care com Cesto Inox e Jet&Clean (LED15)'),
+    normalizeKey('Máquina de Lavar 15kg Electrolux Premium Care com Cesto Inox. Jet&Clean e Time Control (LEC15)'),
+    normalizeKey('Máquina de Lavar 15kg /Electrolux Premium Care com Cesto Inox. Jet&Clean e Time Control (LEC15)'),
+    normalizeKey('Máquina de Lavar 15kg /tanquinho Semi-Automática Wanke Evolution Lavagem por Agitação Com 4 programas'),
+  ]);
+  if (grupo1MaquinasConfirmadas.has(titleKey)) return 'Eletrodomésticos';
   // Grupo 1: títulos concretos confirmados pelo utilizador; não generalizar.
   const grupo1Eletrodomesticos = new Set([
     normalizeKey('Tanquinho 10kg Newmaq'),
