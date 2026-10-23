@@ -391,6 +391,22 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  // Grupo 1: títulos concretos confirmados pelo utilizador; não generalizar.
+  const grupo1Eletrodomesticos = new Set([
+    normalizeKey('Tanquinho 10kg Newmaq'),
+    normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg'),
+    normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Titânio - NA-F150B1T'),
+    normalizeKey('Máquina de Lavar Frontal Electrolux 12kg'),
+    normalizeKey('Máquina de Lavar Frontal Electrolux 12kg Branca'),
+    normalizeKey('Máquina de Lavar Electrolux Premium Care'),
+    normalizeKey('Máquina de Lavar Electrolux LEC15 15kg'),
+    normalizeKey('Máquina de Lavar Electrolux 15kg Branca'),
+    normalizeKey('Máquina de Lavar Electrolux 15kg Branca Essentia'),
+    normalizeKey('Máquina de Lavar 15kg Electrolux Premium Care com Cesto Inox'),
+    normalizeKey('Forno de fritadeira de ar 8L utensílios de cozinha multiuso para casa utensílios de cozinha assar automaticamente'),
+  ]);
+  if (grupo1Eletrodomesticos.has(titleKey)) return 'Eletrodomésticos';
+  if (titleKey === normalizeKey('Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial')) return 'Móveis';
   // Correções específicas confirmadas pelo utilizador. Estas regras ficam na
   // resolução final para vencer inclusive quando o feed já traz uma categoria.
   if (/\btapete[s]?\b/.test(titleKey) && /\b(pedagogic|amarelinha|coordenacao motora|brincadeiras ludicas)\b/.test(titleKey)) return 'Brinquedos';
