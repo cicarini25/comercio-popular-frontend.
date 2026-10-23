@@ -391,6 +391,21 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  const grupo1MaquinasConfirmadas = new Set([
+    normalizeKey('Tanquinho 10kg Newmaq'),
+    normalizeKey('Tanquinho 10kg Newmaq | Máquina de Lavar Roupa Semiautomático | 9 Programas de Lavagem'),
+    normalizeKey('Máquina de Lavar Roupa Semiautomático | 9 Programas de Lavagem'),
+    normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Preta - NA-F150B1B'),
+    normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Branca - NA-F150B1W'),
+    normalizeKey('Máquina de Lavar Frontal Electrolux 12kg Cinza Ônix Inverter com Água Quente e Lavagem Inteligente (LFC12)'),
+    normalizeKey('Máquina de Lavar Frontal Electrolux 12kg Branca Inverter com Água Quente e Lavagem Inteligente (LFB12)'),
+    normalizeKey('Máquina de Lavar Electrolux Premium Care 15Kg com Cesto Inox, Jet&Clean e Time Control'),
+    normalizeKey('Máquina de Lavar Electrolux 15kg Branca Essential Care com Cesto Inox e Jet&Clean (LED15)'),
+    normalizeKey('Máquina de Lavar 15kg Electrolux Premium Care com Cesto Inox. Jet&Clean e Time Control (LEC15)'),
+    normalizeKey('Máquina de Lavar 15kg /Electrolux Premium Care com Cesto Inox. Jet&Clean e Time Control (LEC15)'),
+    normalizeKey('Máquina de Lavar 15kg /tanquinho Semi-Automática Wanke Evolution Lavagem por Agitação Com 4 programas'),
+  ]);
+  if (grupo1MaquinasConfirmadas.has(titleKey)) return 'Eletrodomésticos';
   const acessoriosEletrodomesticosConfirmados = new Set([
     normalizeKey('Eletrobomba Bomba De Agua Maquina De Lavar Electrolux 15kg 127v'),
     normalizeKey('Eletrobomba Bomba De Agua Maquina De Lavar Electrolux 15kg'),
@@ -413,26 +428,9 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     normalizeKey('Usina 6 Saidas Acendimento Fogao Brastemp 5 Bocas'),
     normalizeKey('Usina De Ignição Original Fogão Brastemp E Consul 5 Saídas'),
   ]);
-
-  if (exact === 'Eletrodomésticos' && acessoriosEletrodomesticosConfirmados.has(titleKey)) {
+  if ([...acessoriosEletrodomesticosConfirmados].some((confirmedTitle) => titleKey.startsWith(confirmedTitle))) {
     return 'ELETRO & ACESSÓRIOS';
   }
-
-  const grupo1MaquinasConfirmadas = new Set([
-    normalizeKey('Tanquinho 10kg Newmaq'),
-    normalizeKey('Tanquinho 10kg Newmaq | Máquina de Lavar Roupa Semiautomático | 9 Programas de Lavagem'),
-    normalizeKey('Máquina de Lavar Roupa Semiautomático | 9 Programas de Lavagem'),
-    normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Preta - NA-F150B1B'),
-    normalizeKey('Máquina de lavar Ideal+ Panasonic 15Kg Lavagem Eficiente SmartSense Função Vanish Branca - NA-F150B1W'),
-    normalizeKey('Máquina de Lavar Frontal Electrolux 12kg Cinza Ônix Inverter com Água Quente e Lavagem Inteligente (LFC12)'),
-    normalizeKey('Máquina de Lavar Frontal Electrolux 12kg Branca Inverter com Água Quente e Lavagem Inteligente (LFB12)'),
-    normalizeKey('Máquina de Lavar Electrolux Premium Care 15Kg com Cesto Inox, Jet&Clean e Time Control'),
-    normalizeKey('Máquina de Lavar Electrolux 15kg Branca Essential Care com Cesto Inox e Jet&Clean (LED15)'),
-    normalizeKey('Máquina de Lavar 15kg Electrolux Premium Care com Cesto Inox. Jet&Clean e Time Control (LEC15)'),
-    normalizeKey('Máquina de Lavar 15kg /Electrolux Premium Care com Cesto Inox. Jet&Clean e Time Control (LEC15)'),
-    normalizeKey('Máquina de Lavar 15kg /tanquinho Semi-Automática Wanke Evolution Lavagem por Agitação Com 4 programas'),
-  ]);
-  if (grupo1MaquinasConfirmadas.has(titleKey)) return 'Eletrodomésticos';
   const pecasFogaoConfirmadas = new Set([
     normalizeKey('Tampinhas Fogão Dako Supreme Titan 4 Bocas Kit 4 Peças Pretas Compatível'),
     normalizeKey('Bocas do Fogão 4 Bocas Mueller Decorato Vetro com Mesa de Vidro queimadores e espalhadores'),
@@ -446,7 +444,9 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     normalizeKey('kit 4 espalhadores bocas fogao atlas monaco top glass 4 bocas'),
     normalizeKey('Tampinhas Espalhadores Bocas Fogão Atlas Atenas 4 Bocas'),
   ]);
-  if (exact === 'Eletrodomésticos' && pecasFogaoConfirmadas.has(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  if ([...pecasFogaoConfirmadas].some((confirmedTitle) => titleKey.startsWith(confirmedTitle))) {
+    return 'ELETRO & ACESSÓRIOS';
+  }
   // Grupo 1: títulos concretos confirmados pelo utilizador; não generalizar.
   const grupo1Eletrodomesticos = new Set([
     normalizeKey('Tanquinho 10kg Newmaq'),
@@ -479,6 +479,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/\b(rgb|luz de perseguicao|monitor de mesa)\b/.test(titleKey) && /\b(luz|decoracao|computador|monitor|jogos?)\b/.test(titleKey)) return 'ELETRÔNICOS';
   if (/\bpratos?\b/.test(titleKey) && /\b(jogo de pratos?|prato de jantar|ceramica|mesa posta)\b/.test(titleKey)) return 'Utilidades';
   if (/\b(escova|escovas)\b/.test(titleKey) && /\b(lavar louca|lava louca|fogao de cozinha)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
+  if (/\bhanjia\b/.test(titleKey) && /\b(desinfeccao|utensilios de mesa|secagem|dreno)\b/.test(titleKey)) return 'Eletrodomésticos';
   if (/\b(maquina de lavar louca|lavadora de louca|lava loucas?|lavar louca)\b/.test(titleKey)) return 'Eletrodomésticos';
   if (/\b(mangueiras?|mangureiras?)\b/.test(titleKey) && /\b(tanquinho|lavadora|maquina de lavar)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (/\b(radio|aparelho de som)\b/.test(titleKey) && /\b(h[- ]?tech|bluetooth usb am fm|saida de som forte)\b/.test(titleKey)) return 'AUTO & ACESSÓRIOS';
@@ -487,6 +488,11 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/\btigela\b/.test(titleKey) && /\b(batedeira|planetaria)\b/.test(titleKey)) return 'Casa & Cozinha';
   if (/\b(vedacao|gaxeta)\b/.test(titleKey) && /\b(porta forno|forno|fogao)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (/\b(enfeite televisor retro|monitor boneca|tela expositor)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(escrivaninha|mesa de estudos|mesa home office)\b/.test(titleKey) && /\b(estudos?|home office|gaveta)\b/.test(titleKey)) return 'Móveis';
+  if (/\b(tanquinho|maquina de lavar|lavadora|lavar roupa)\b/.test(titleKey) && !/\b(mangueiras?|pecas?|modulo|sensor|acessorios?|removedor(?:es)?)\b/.test(titleKey)) return 'Eletrodomésticos';
+  if (/\b(air fryer|fritadeira de ar|fritadeira eletrica|forno de fritadeira)\b/.test(titleKey)) return 'Eletrodomésticos';
+  if (/\b(maleta de ferramentas?|caixa de ferramenta|saco(?: de)? ferramentas?|ferramenta multiuso|chave 48 em 1|chave soquete universal)\b/.test(titleKey) ||
+      /\bferramenta\b.{0,40}\b(saco|chave|reparo)\b/.test(titleKey)) return 'Ferramentas';
 
   if (/\b(mangueiras?|removedor(?:es)? de cabelo|acessorios?)\b/.test(titleKey) && /\b(tanquinho|lavadora|maquina de lavar|robo aspirador|aspirador de po)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (/\b(espalhadores?|queimadores?|bocas?)\b/.test(titleKey) && /\b(fogao|fogoes)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
