@@ -401,23 +401,17 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     'Mini máquina de lavar roupa 11L dobrável portátil moderna máquina de lavar automática 110v/220v superloja',
     'Micro-Ondas Mondial 21 Litros MO-01-21-B Preto 1200W Display Digital',
     'Maquina de Lavar Midea Wave Agitador 15KG 13 programas com Timer Digital - Branco',
+    'Fogão a Gás 4 Bocas Inox Embutir e Mesa Cozinha e Restaurante 4 Queimadores',
+    'Fogão Itatiaia Star New 4 Bocas Com Acendimento Automático Branco/Preto',
   ].map(normalizeKey);
   if ((canonicalCategories.get(key) === 'Eletrodomésticos' || canonicalCategories.get(key) === 'ELETRO & ACESSÓRIOS') &&
       completeAppliancesConfirmed.some((confirmedTitle) => titleKey.startsWith(confirmedTitle))) {
     return 'Eletrodomésticos';
   }
   const isElectroCategory = exact === 'Eletrodomésticos' || exact === 'ELETRO & ACESSÓRIOS';
-  const isElectroAccessoryTitle = /\b(eletrobomba|capacitor|diodo|detector|display|fusivel|magnetron|membrana|motor prato|prato de microondas|kit mica|batedor|bucha|agitador|usina|acendedor|eletrodo|interruptor|lampada|mangueiras?|mangureiras?|espalhadores?|tampinhas?|queimadores?|bocas? de fogao|gaxeta|vedacao|peca|modulo|reparo|reposicao|acessorio|sensor)\b/.test(titleKey);
-  const isCompleteElectroTitle =
-    (/\b(fogao|fogareiro|cooktop)\b/.test(titleKey) && !isElectroAccessoryTitle) ||
-    (/\b(tanquinho|maquina de lavar|lavadora|lavar roupa)\b/.test(titleKey) &&
-      /\b(\d+\s?kg|programas?|automatic[oa]|centrifug|capacidade|premium|electrolux|panasonic|wanke|newmaq)\b/.test(titleKey) &&
-      !isElectroAccessoryTitle) ||
-    (/\b(microondas|micro ondas|micro-ondas)\b/.test(titleKey) &&
-      /\b(forno|litros?|electrolux|midea|brastemp|consul)\b/.test(titleKey) &&
-      !isElectroAccessoryTitle);
+  const isElectroAccessoryTitle = /\b(eletrobomba|capacitor|diodo|detector|display|fusivel|magnetron|membrana|motor prato|prato de microondas|kit mica|batedor|bucha|agitador|usina|acendedor|eletrodo|interruptor|lampada|mangueiras?|mangureiras?|espalhadores?|tampinhas?|queimadores?|bocas? de fogao|gaxeta|vedacao|peca|modulo|reparo|reposicao|acessorio|sensor|tirantes?|pressostatos?|atuadores?|polias?|micro chave|cinta do freio|saca agitador|molas? de suspensao)\b/.test(titleKey) ||
+    (/\bpe almofada\b/.test(titleKey) && /\b(microondas|micro ondas)\b/.test(titleKey));
   if (isElectroCategory && isElectroAccessoryTitle) return 'ELETRO & ACESSÓRIOS';
-  if (isElectroCategory && isCompleteElectroTitle) return 'Eletrodomésticos';
   if (isElectroCategory) return exact;
   const acessoriosEletrodomesticosConfirmados = new Set([
     normalizeKey('Eletrobomba Bomba De Agua Maquina De Lavar Electrolux 15kg 127v'),
