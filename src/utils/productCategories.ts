@@ -391,6 +391,19 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const key = normalizeKey(raw);
   const exact = canonicalCategories.get(key) || categoryAliases[key];
   const titleKey = normalizeKey(title);
+  const isElectroCategory = exact === 'Eletrodomésticos' || exact === 'ELETRO & ACESSÓRIOS';
+  const isElectroAccessoryTitle = /\b(eletrobomba|capacitor|diodo|detector|display|fusivel|magnetron|membrana|motor prato|prato de microondas|kit mica|batedor|bucha|agitador|usina|acendedor|eletrodo|interruptor|lampada|mangueiras?|mangureiras?|espalhadores?|tampinhas?|queimadores?|bocas? de fogao|gaxeta|vedacao|peca|modulo|reparo|reposicao|acessorio|sensor)\b/.test(titleKey);
+  const isCompleteElectroTitle =
+    (/\b(fogao|fogareiro|cooktop)\b/.test(titleKey) && !isElectroAccessoryTitle) ||
+    (/\b(tanquinho|maquina de lavar|lavadora|lavar roupa)\b/.test(titleKey) &&
+      /\b(\d+\s?kg|programas?|automatic[oa]|centrifug|capacidade|premium|electrolux|panasonic|wanke|newmaq)\b/.test(titleKey) &&
+      !isElectroAccessoryTitle) ||
+    (/\b(microondas|micro ondas|micro-ondas)\b/.test(titleKey) &&
+      /\b(forno|litros?|electrolux|midea|brastemp|consul)\b/.test(titleKey) &&
+      !isElectroAccessoryTitle);
+  if (isElectroCategory && isElectroAccessoryTitle) return 'ELETRO & ACESSÓRIOS';
+  if (isElectroCategory && isCompleteElectroTitle) return 'Eletrodomésticos';
+  if (isElectroCategory) return exact;
   const acessoriosEletrodomesticosConfirmados = new Set([
     normalizeKey('Eletrobomba Bomba De Agua Maquina De Lavar Electrolux 15kg 127v'),
     normalizeKey('Eletrobomba Bomba De Agua Maquina De Lavar Electrolux 15kg'),
