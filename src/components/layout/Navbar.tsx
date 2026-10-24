@@ -32,6 +32,7 @@ import { VoiceSearchModal } from './VoiceSearchModal';
 import { ProfileNotificationCard } from '../profile/ProfileNotificationCard';
 import { UserProfileModal } from '../profile/UserProfileModal';
 import { Product } from '../../types';
+import { MegaMenu } from './MegaMenu';
 
 interface NavbarProps {
   user: User | null;
@@ -55,6 +56,7 @@ interface NavbarProps {
   onOpenBarcodeScanner?: () => void;
   favorites?: Product[];
   ordersCount?: number;
+  categoryCounts?: Record<string, number>;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -78,7 +80,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSimulatePriceDrop,
   onOpenBarcodeScanner,
   favorites = [],
-  ordersCount = 0
+  ordersCount = 0,
+  categoryCounts
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -136,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const cartSubtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-neutral-200/80 shadow-xs">
+    <header className="sticky top-0 z-40 border-b border-amber-400/80 bg-amber-300 shadow-sm">
       {/* Top micro-announcement banner */}
       <div className="bg-teal-950 text-teal-100 text-xs py-1.5 px-4">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
@@ -166,8 +169,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Main Bar */}
-      <div className="max-w-7xl mx-auto px-4 py-3 sm:py-3.5">
-        <div className="flex items-center justify-between gap-3 lg:gap-3 2xl:gap-6">
+      <div className="bg-amber-300 px-4 py-3 sm:py-4">
+        <div className="mx-auto max-w-7xl">
+        <div className="flex min-w-0 items-center justify-between gap-2 lg:gap-3 2xl:gap-6">
           {/* Logo */}
           <Logo
             onClick={() => {
@@ -177,13 +181,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           />
 
           {/* Desktop Search Bar with Category Dropdown & Voice Search */}
-          <div className="hidden 2xl:flex min-w-0 flex-1 max-w-2xl items-center">
+          <div className="hidden min-w-0 flex-1 items-center lg:flex lg:max-w-3xl">
             <div className="relative w-full">
               <div
-                className={`relative w-full min-w-0 flex items-center bg-neutral-100 border rounded-xl transition-all ${
+                  className={`relative w-full min-w-0 flex items-center rounded-xl border-2 bg-white shadow-sm transition-all ${
                   isListening
                     ? 'border-coral-500 ring-2 ring-coral-200 bg-coral-50/20'
-                    : 'border-neutral-300 focus-within:border-teal-600 focus-within:ring-2 focus-within:ring-teal-100'
+                    : 'border-white focus-within:border-teal-700 focus-within:ring-2 focus-within:ring-teal-100'
                 }`}
               >
                 <CategoryPicker value={selectedCategory} onChange={onSelectCategory}/>
@@ -270,7 +274,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     if (input) input.blur();
                   }}
                   aria-label="Pesquisar produtos"
-                  className="shrink-0 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 mr-1 rounded-lg text-sm font-medium transition-colors flex items-center justify-center cursor-pointer"
+                  className="shrink-0 rounded-lg bg-teal-800 px-4 py-2.5 mr-1 text-sm font-black text-white transition-colors hover:bg-teal-950 flex items-center justify-center cursor-pointer"
                 >
                   <Search size={16} />
                 </button>
@@ -329,7 +333,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* User & Actions */}
-          <div className="flex items-center gap-1 sm:gap-2 2xl:gap-3">
+          <div className="min-w-0 max-w-[58vw] flex items-center justify-end gap-1 overflow-x-auto scrollbar-none sm:max-w-none sm:gap-2 2xl:gap-3">
             {/* Seller Quick Action Button */}
             <button
               id="btn-nav-seller"
@@ -343,7 +347,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* PWA Install Button */}
-            <PWAInstallButton variant="nav" />
+            <span className="hidden sm:inline-flex"><PWAInstallButton variant="nav" /></span>
 
             {/* User Account Button */}
             {user ? (
@@ -458,11 +462,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="btn-login-header"
                 onClick={onOpenAuth}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors border border-neutral-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-2 py-2 sm:px-3.5 rounded-xl text-xs sm:text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors border border-neutral-200 cursor-pointer"
               >
                 <UserIcon size={16} className="text-teal-700" />
                 <span className="hidden sm:inline">Entrar / Cadastrar</span>
-                <span className="sm:hidden">Entrar</span>
               </button>
             )}
 
@@ -749,10 +752,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Mobile Search Bar with Voice Search */}
         <div className="mt-2.5 2xl:hidden relative">
           <div
-            className={`relative flex items-center bg-neutral-100 border rounded-xl transition-all ${
+            className={`relative flex items-center rounded-xl border-2 bg-white shadow-sm transition-all ${
               isListening
                 ? 'border-coral-500 ring-2 ring-coral-200 bg-coral-50/20'
-                : 'border-neutral-200'
+                : 'border-white'
             }`}
           >
             <CategoryPicker value={selectedCategory} onChange={onSelectCategory} compact />
@@ -862,17 +865,24 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
       </div>
+      </div>
 
       {/* Secondary Navigation Ribbon */}
-      <nav className="border-t border-neutral-200/70 bg-neutral-50/70 px-4 overflow-x-auto scrollbar-none">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-1 sm:gap-2 py-2 text-xs sm:text-sm whitespace-nowrap font-medium text-neutral-600">
+      <nav className="border-t border-amber-400 bg-amber-300 px-4 overflow-x-auto scrollbar-none">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-1 sm:gap-2 py-2.5 text-xs sm:text-sm whitespace-nowrap font-semibold text-teal-950">
           <div className="flex items-center gap-1 sm:gap-2">
+            <MegaMenu
+              selectedCategory={selectedCategory}
+              onSelectCategory={onSelectCategory}
+              categoryCounts={categoryCounts}
+            />
+
             <button
               onClick={() => onSelectTab('home')}
               className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 activeTab === 'home'
-                  ? 'bg-white text-teal-800 font-bold shadow-xs border border-neutral-200'
-                  : 'hover:text-teal-700 hover:bg-neutral-100'
+                  ? 'bg-white text-teal-950 font-black shadow-sm border border-white'
+                  : 'hover:text-teal-950 hover:bg-white/50'
               }`}
             >
               Início
@@ -883,8 +893,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onSelectTab('achadinhos')}
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'achadinhos'
-                  ? 'bg-coral-600 text-white font-bold shadow-xs'
-                  : 'text-coral-800 hover:bg-coral-50'
+                  ? 'bg-teal-800 text-white font-black shadow-sm'
+                  : 'text-teal-950 hover:bg-white/50'
               }`}
             >
               <Flame size={14} className={activeTab === 'achadinhos' ? 'text-white' : 'text-coral-600'} />
@@ -899,8 +909,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onSelectTab('vendedores')}
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'vendedores'
-                  ? 'bg-teal-700 text-white font-bold shadow-xs'
-                  : 'hover:text-teal-800 hover:bg-neutral-100'
+                  ? 'bg-teal-800 text-white font-black shadow-sm'
+                  : 'hover:text-teal-950 hover:bg-white/50'
               }`}
             >
               <Store size={14} />
@@ -912,8 +922,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onSelectTab('favoritos')}
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'favoritos'
-                  ? 'bg-rose-600 text-white font-bold shadow-xs'
-                  : 'text-rose-700 hover:bg-rose-50'
+                  ? 'bg-teal-800 text-white font-black shadow-sm'
+                  : 'text-teal-950 hover:bg-white/50'
               }`}
             >
               <Heart
@@ -951,7 +961,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="hidden md:flex items-center gap-2 text-xs text-neutral-500">
-            <span className="flex items-center gap-1.5 bg-teal-50 px-2 py-1 rounded-xl" aria-label="Acessar plataformas parceiras">
+            <span className="flex items-center gap-1.5 rounded-xl bg-white/70 px-2 py-1" aria-label="Acessar plataformas parceiras">
               {(['shopee', 'mercadolivre', 'amazon', 'aliexpress', 'shein', 'magalu'] as PlatformId[]).map((platform) => (
                 <a
                   key={platform}

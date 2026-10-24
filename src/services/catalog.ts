@@ -44,6 +44,10 @@ export function mapCatalogProduct(row: any): Product | null {
   const price = Number(offer.price);
   const original = Number(offer.originalPrice);
   const stock = offer.stockUnits == null ? null : Number(offer.stockUnits);
+  const rawExpiry = offer.flashDealExpiresAt ?? offer.expiresAt ?? offer.validUntil;
+  const flashDealExpiresAt = typeof rawExpiry === 'string' && Number.isFinite(Date.parse(rawExpiry)) && Date.parse(rawExpiry) > Date.now()
+    ? new Date(rawExpiry).toISOString()
+    : undefined;
   let image = '/favicon.png';
   try { const url = new URL(row.image_url); if (url.protocol === 'https:') image = url.href; } catch { /* fallback */ }
   return {
@@ -56,6 +60,7 @@ export function mapCatalogProduct(row: any): Product | null {
     images: [image], category: effectiveCategory,
     rating: 0, reviewCount: 0, reviews: [], isAchadinho: true,
     stockUnits: stock != null && Number.isInteger(stock) && stock >= 0 ? stock : null,
+    flashDealExpiresAt,
     isVerified: false, isFastShipping: offer.isFastShipping === true,
     isFreeShipping: offer.isFreeShipping === true, isBestPrice: false,
   };
@@ -107,6 +112,20 @@ export async function fetchAffiliateCatalog(offset = 0, signal?: AbortSignal, ca
   if (!response.ok) throw new Error('Não foi possível carregar a vitrine. Tente novamente.');
   const data = await response.json();
   if (!Array.isArray(data.products)) throw new Error('O catálogo retornou uma resposta inválida.');
+  return {
+    products: data.products.map(mapCatalogProduct).filter((p: Product | null): p is Product => p !== null),
+    hasMore: data.products.length === CATALOG_PAGE_SIZE,
+  };
+}
+
+export async function fetchShopeeCatalog(offset = 0, signal?: AbortSignal) {
+  const response = await fetch(`${API_BASE_URL}/api/catalog/products?platform=shopee&limit=${CATALOG_PAGE_SIZE}&offset=${offset}`, {
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000),
+    cache: 'default',
+  });
+  if (!response.ok) throw new Error('Não foi possível carregar o catálogo da Shopee. Tente novamente.');
+  const data = await response.json();
+  if (!Array.isArray(data.products)) throw new Error('O catálogo da Shopee retornou uma resposta inválida.');
   return {
     products: data.products.map(mapCatalogProduct).filter((p: Product | null): p is Product => p !== null),
     hasMore: data.products.length === CATALOG_PAGE_SIZE,

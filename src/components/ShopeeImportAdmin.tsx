@@ -425,7 +425,7 @@ export default function ShopeeImportAdmin() {
                 : ' A classificação foi aplicada aos lotes indicados.'}
             </p>
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {Object.entries(autoCategoryReview.categoryCounts).sort((a, b) => b[1] - a[1]).map(([category, count]) => (
+              {Object.entries(autoCategoryReview.categoryCounts).sort((a, b) => Number(b[1]) - Number(a[1])).map(([category, count]) => (
                 <div key={category} className="rounded-lg border bg-white px-3 py-2 text-sm flex justify-between gap-3">
                   <span>{category}</span><strong>{count}</strong>
                 </div>
@@ -643,4 +643,3 @@ export default function ShopeeImportAdmin() {
     </div>
   </main>;
 }
-

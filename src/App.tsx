@@ -8,6 +8,9 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { PWAInstallButton } from './components/common/PWAInstallButton';
 import { HeroBanner } from './components/home/HeroBanner';
+import { FeaturedCategories } from './components/home/FeaturedCategories';
+import { FlashDealsWidget } from './components/home/FlashDealsWidget';
+import { BrandStories } from './components/home/BrandStories';
 import { AchadinhosSection } from './components/achadinhos/AchadinhosSection';
 import { SellerSection } from './components/sellers/SellerSection';
 import { SellerDashboard } from './components/sellers/SellerDashboard';
@@ -588,6 +591,13 @@ export default function App() {
     [filteredProducts, productDisplayLimit]
   );
   const showMoreProducts = () => setProductDisplayLimit((current) => current + PRODUCTS_PER_VIEW);
+  const categoryCounts = useMemo(() => {
+    return products.reduce<Record<string, number>>((counts, product) => {
+      const category = resolveProductCategory(product.category, product.title, product.description);
+      counts[category] = (counts[category] || 0) + 1;
+      return counts;
+    }, {});
+  }, [products]);
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50 selection:bg-teal-100 selection:text-teal-900">
       {/* Mobile PWA Install Announcement Banner */}
@@ -628,6 +638,7 @@ export default function App() {
         onOpenBarcodeScanner={() => setIsBarcodeScannerOpen(true)}
         favorites={products.filter((p) => wishlistIds.includes(p.id))}
         ordersCount={orders.length}
+        categoryCounts={categoryCounts}
       />
 
       {/* Main Content Area */}
@@ -712,6 +723,32 @@ export default function App() {
               }}
               onSelectTag={(tag) => {
                 handleSearchChange(tag);
+              }}
+            />
+
+            <FeaturedCategories
+              onSelectCategory={(category) => {
+                setSelectedCategory(category);
+                setSearchQuery('');
+                setPriceRange([catalogMinPrice, catalogMaxPrice]);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              categoryCounts={categoryCounts}
+            />
+
+            <FlashDealsWidget
+              products={products}
+              onViewDetails={setSelectedProduct}
+              onAffiliateClick={handleAffiliateClick}
+              onAddToCart={handleAddToCart}
+            />
+
+            <BrandStories
+              onSelectCategory={(category) => {
+                setSelectedCategory(category);
+                setSearchQuery('');
+                setPriceRange([catalogMinPrice, catalogMaxPrice]);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             />
 
