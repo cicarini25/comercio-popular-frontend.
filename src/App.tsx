@@ -1,33 +1,11 @@
 import { CATALOG_PAGE_SIZE, fetchAffiliateCatalog, fetchAffiliateProductById, fetchCatalogFacets, resolveAffiliateRedirect } from './services/catalog';
-import { CatalogProductDetail } from './components/products/CatalogProductDetail';
 import { mapApiUser } from './services/api';
 import { useAuth } from './context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { PWAInstallButton } from './components/common/PWAInstallButton';
-import { HeroBanner } from './components/home/HeroBanner';
-import { FeaturedCategories } from './components/home/FeaturedCategories';
-import { FlashDealsWidget } from './components/home/FlashDealsWidget';
-import { BrandStories } from './components/home/BrandStories';
-import { AchadinhosSection } from './components/achadinhos/AchadinhosSection';
-import { SellerSection } from './components/sellers/SellerSection';
-import { SellerDashboard } from './components/sellers/SellerDashboard';
-import { MerchantRegistrationModal } from './components/sellers/MerchantRegistrationModal';
-import { MerchantApplicationsAdmin } from './components/admin/MerchantApplicationsAdmin';
-import { ProductCard } from './components/products/ProductCard';
-import { ProductVideoShowcase } from './components/products/ProductVideoShowcase';
-import { ProductDetailModal } from './components/products/ProductDetailModal';
-import { AffiliateModal } from './components/products/AffiliateModal';
-import { CartDrawer } from './components/cart/CartDrawer';
-import { CheckoutModal } from './components/checkout/CheckoutModal';
-import { AuthModal } from './components/auth/AuthModal';
-import { SalesChatbot } from './components/chat/SalesChatbot';
-import { OrdersView } from './components/orders/OrdersView';
-import { WishlistView } from './components/wishlist/WishlistView';
-import { BarcodeScannerModal } from './components/scanner/BarcodeScannerModal';
-import { PriceRangeSlider } from './components/products/PriceRangeSlider';
 
 import { Product, CartItem, User, Order, SellerPlan, PriceAlert, ProductReview } from './types';
 import { CATEGORIES } from './data/mockProducts';
@@ -36,7 +14,61 @@ import { resolveProductCategory } from './utils/productCategories';
 import { getOrGenerateReviews } from './data/mockReviews';
 import { formatCurrency } from './utils/formatters';
 import { Flame, Store, Sparkles, Filter, CheckCircle2, SlidersHorizontal, RotateCcw } from 'lucide-react';
-import confetti from 'canvas-confetti';
+
+const CatalogProductDetail = lazy(() => import('./components/products/CatalogProductDetail').then((module) => ({ default: module.CatalogProductDetail })));
+const SellerDashboard = lazy(() => import('./components/sellers/SellerDashboard').then((module) => ({ default: module.SellerDashboard })));
+const MerchantRegistrationModal = lazy(() => import('./components/sellers/MerchantRegistrationModal').then((module) => ({ default: module.MerchantRegistrationModal })));
+const MerchantApplicationsAdmin = lazy(() => import('./components/admin/MerchantApplicationsAdmin').then((module) => ({ default: module.MerchantApplicationsAdmin })));
+const ProductDetailModal = lazy(() => import('./components/products/ProductDetailModal').then((module) => ({ default: module.ProductDetailModal })));
+const AffiliateModal = lazy(() => import('./components/products/AffiliateModal').then((module) => ({ default: module.AffiliateModal })));
+const CartDrawer = lazy(() => import('./components/cart/CartDrawer').then((module) => ({ default: module.CartDrawer })));
+const CheckoutModal = lazy(() => import('./components/checkout/CheckoutModal').then((module) => ({ default: module.CheckoutModal })));
+const AuthModal = lazy(() => import('./components/auth/AuthModal').then((module) => ({ default: module.AuthModal })));
+const OrdersView = lazy(() => import('./components/orders/OrdersView').then((module) => ({ default: module.OrdersView })));
+const WishlistView = lazy(() => import('./components/wishlist/WishlistView').then((module) => ({ default: module.WishlistView })));
+const BarcodeScannerModal = lazy(() => import('./components/scanner/BarcodeScannerModal').then((module) => ({ default: module.BarcodeScannerModal })));
+const AchadinhosSection = lazy(() => import('./components/achadinhos/AchadinhosSection').then((module) => ({ default: module.AchadinhosSection })));
+const SellerSection = lazy(() => import('./components/sellers/SellerSection').then((module) => ({ default: module.SellerSection })));
+const SalesChatbot = lazy(() => import('./components/chat/SalesChatbot').then((module) => ({ default: module.SalesChatbot })));
+const HeroBanner = lazy(() => import('./components/home/HeroBanner').then((module) => ({ default: module.HeroBanner })));
+const FeaturedCategories = lazy(() => import('./components/home/FeaturedCategories').then((module) => ({ default: module.FeaturedCategories })));
+const FlashDealsWidget = lazy(() => import('./components/home/FlashDealsWidget').then((module) => ({ default: module.FlashDealsWidget })));
+const BrandStories = lazy(() => import('./components/home/BrandStories').then((module) => ({ default: module.BrandStories })));
+const ProductCard = lazy(() => import('./components/products/ProductCard').then((module) => ({ default: module.ProductCard })));
+const ProductVideoShowcase = lazy(() => import('./components/products/ProductVideoShowcase').then((module) => ({ default: module.ProductVideoShowcase })));
+const PriceRangeSlider = lazy(() => import('./components/products/PriceRangeSlider').then((module) => ({ default: module.PriceRangeSlider })));
+
+function launchConfetti(options: import('canvas-confetti').Options) {
+  void import('canvas-confetti').then(({ default: confetti }) => confetti(options));
+}
+
+function LazyBoundary({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={null}>{children}</Suspense>;
+}
+
+function DeferredRender({ children, minHeight = 280 }: { children: React.ReactNode; minHeight?: number }) {
+  const [ready, setReady] = useState(false);
+  const placeholderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const placeholder = placeholderRef.current;
+    if (!placeholder || ready) return;
+    if (!('IntersectionObserver' in window)) {
+      setReady(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        setReady(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '300px 0px' });
+    observer.observe(placeholder);
+    return () => observer.disconnect();
+  }, [ready]);
+
+  return <div ref={placeholderRef} style={ready ? undefined : { minHeight }}>{ready ? children : null}</div>;
+}
 
 
 const normalizeProductSearch = (value: string) => value
@@ -354,7 +386,7 @@ export default function App() {
     });
 
     if (isTriggered) {
-      confetti({
+      launchConfetti({
         particleCount: 50,
         spread: 60,
         origin: { y: 0.2 }
@@ -425,7 +457,7 @@ export default function App() {
         return prev.filter((id) => id !== product.id);
       } else {
         try {
-          confetti({
+          launchConfetti({
             particleCount: 30,
             spread: 45,
             origin: { y: 0.8 },
@@ -662,16 +694,16 @@ export default function App() {
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
                     {visibleFilteredProducts.map((p, index) => (
                       <React.Fragment key={p.id}>
-                        <ProductCard
+                        <LazyBoundary><ProductCard
                           product={p}
                           isFavorite={wishlistIds.includes(p.id)}
                           onToggleFavorite={handleToggleFavorite}
                           onAddToCart={handleAddToCart}
                           onViewDetails={setSelectedProduct}
                           onDirectAffiliateClick={handleAffiliateClick}
-                        />
+                        /></LazyBoundary>
                         {index === Math.min(3, visibleFilteredProducts.length - 1) && (
-                          <ProductVideoShowcase products={visibleFilteredProducts} onViewDetails={setSelectedProduct} />
+                          <LazyBoundary><ProductVideoShowcase products={visibleFilteredProducts} onViewDetails={setSelectedProduct} /></LazyBoundary>
                         )}
                       </React.Fragment>
                     ))}
@@ -699,7 +731,7 @@ export default function App() {
             ) : (
               <>
             {/* Hero Banner */}
-            <HeroBanner
+            <LazyBoundary><HeroBanner
               onExploreAchadinhos={() => {
                 setActiveTab('achadinhos');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -711,9 +743,9 @@ export default function App() {
               onSelectTag={(tag) => {
                 handleSearchChange(tag);
               }}
-            />
+            /></LazyBoundary>
 
-            <FeaturedCategories
+            <DeferredRender minHeight={260}><LazyBoundary><FeaturedCategories
               onSelectCategory={(category) => {
                 setSelectedCategory(category);
                 setSearchQuery('');
@@ -723,45 +755,49 @@ export default function App() {
               categoryCounts={categoryCounts}
               onExploreAchadinhos={() => { setActiveTab('achadinhos'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               onExploreSellers={() => { setActiveTab('vendedores'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            />
+            /></LazyBoundary></DeferredRender>
 
-            <FlashDealsWidget
+            <DeferredRender minHeight={280}><LazyBoundary><FlashDealsWidget
               products={products}
               onViewDetails={setSelectedProduct}
               onAffiliateClick={handleAffiliateClick}
               onAddToCart={handleAddToCart}
-            />
+            /></LazyBoundary></DeferredRender>
 
-            <BrandStories
+            <DeferredRender minHeight={220}><LazyBoundary><BrandStories
               onSelectCategory={(category) => {
                 setSelectedCategory(category);
                 setSearchQuery('');
                 setPriceRange([catalogMinPrice, catalogMaxPrice]);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-            />
+            /></LazyBoundary></DeferredRender>
 
             {/* Fixed Section: "Achadinhos do Dia" */}
-            <AchadinhosSection
-              products={products}
-              onAddToCart={handleAddToCart}
-              onViewDetails={setSelectedProduct}
-              onAffiliateClick={handleAffiliateClick}
-              wishlistIds={wishlistIds}
-              onToggleFavorite={handleToggleFavorite}
-            />
+            <DeferredRender minHeight={520}>
+              <LazyBoundary><AchadinhosSection
+                products={products}
+                onAddToCart={handleAddToCart}
+                onViewDetails={setSelectedProduct}
+                onAffiliateClick={handleAffiliateClick}
+                wishlistIds={wishlistIds}
+                onToggleFavorite={handleToggleFavorite}
+              /></LazyBoundary>
+            </DeferredRender>
 
             {/* Marketplace Próprio / Comerciantes Parceiros Section */}
-            <SellerSection
-              products={products}
-              user={user}
-              onSubscribePlan={handleSubscribePlan}
-              onOpenDashboard={() => setIsSellerDashboardOpen(true)}
-              onAddToCart={handleAddToCart}
-              onViewDetails={setSelectedProduct}
-              wishlistIds={wishlistIds}
-              onToggleFavorite={handleToggleFavorite}
-            />
+            <DeferredRender minHeight={520}>
+              <LazyBoundary><SellerSection
+                products={products}
+                user={user}
+                onSubscribePlan={handleSubscribePlan}
+                onOpenDashboard={() => setIsSellerDashboardOpen(true)}
+                onAddToCart={handleAddToCart}
+                onViewDetails={setSelectedProduct}
+                wishlistIds={wishlistIds}
+                onToggleFavorite={handleToggleFavorite}
+              /></LazyBoundary>
+            </DeferredRender>
 
             {/* General Products Catalog Grid */}
             <section className="py-8 max-w-7xl mx-auto px-4 space-y-6">
@@ -799,14 +835,14 @@ export default function App() {
               </div>
 
               {/* Price Range Slider Filter */}
-              <PriceRangeSlider
+              <LazyBoundary><PriceRangeSlider
                 min={catalogMinPrice}
                 max={catalogMaxPrice}
                 value={priceRange}
                 onChange={setPriceRange}
                 onReset={() => setPriceRange([catalogMinPrice, catalogMaxPrice])}
                 matchingCount={filteredProducts.length}
-              />
+              /></LazyBoundary>
 
               <div className="space-y-4">
               {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
@@ -818,16 +854,16 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
                   {visibleFilteredProducts.map((p, index) => (
                     <React.Fragment key={p.id}>
-                      <ProductCard
+                      <LazyBoundary><ProductCard
                         product={p}
                         isFavorite={wishlistIds.includes(p.id)}
                         onToggleFavorite={handleToggleFavorite}
                         onAddToCart={handleAddToCart}
                         onViewDetails={setSelectedProduct}
                         onDirectAffiliateClick={handleAffiliateClick}
-                      />
+                      /></LazyBoundary>
                       {index === Math.min(3, visibleFilteredProducts.length - 1) && (
-                        <ProductVideoShowcase products={visibleFilteredProducts} onViewDetails={setSelectedProduct} />
+                        <LazyBoundary><ProductVideoShowcase products={visibleFilteredProducts} onViewDetails={setSelectedProduct} /></LazyBoundary>
                       )}
                     </React.Fragment>
                   ))}
@@ -865,7 +901,7 @@ export default function App() {
         {/* TAB 2: DEDICATED ACHADINHOS PAGE (/achadinhos) */}
         {activeTab === 'achadinhos' && (
           <div className="py-2">
-            <AchadinhosSection
+            <LazyBoundary><AchadinhosSection
               products={products}
               onAddToCart={handleAddToCart}
               onViewDetails={setSelectedProduct}
@@ -873,14 +909,14 @@ export default function App() {
               isDedicatedPage={true}
               wishlistIds={wishlistIds}
               onToggleFavorite={handleToggleFavorite}
-            />
+            /></LazyBoundary>
           </div>
         )}
 
         {/* TAB 3: DEDICATED SELLERS PAGE */}
         {activeTab === 'vendedores' && (
           <div className="py-2">
-            <SellerSection
+            <LazyBoundary><SellerSection
               isDedicatedPage={true}
               products={products}
               user={user}
@@ -890,21 +926,21 @@ export default function App() {
               onViewDetails={setSelectedProduct}
               wishlistIds={wishlistIds}
               onToggleFavorite={handleToggleFavorite}
-            />
+            /></LazyBoundary>
           </div>
         )}
 
         {/* TAB 4: MY ORDERS & TRACKING */}
         {activeTab === 'pedidos' && (
-          <OrdersView
+          <LazyBoundary><OrdersView
             orders={orders}
             onExploreProducts={() => setActiveTab('home')}
-          />
+          /></LazyBoundary>
         )}
 
         {/* TAB 5: WISHLIST / MEUS FAVORITOS */}
         {activeTab === 'favoritos' && (
-          <WishlistView
+          <LazyBoundary><WishlistView
             favorites={products.filter((p) => wishlistIds.includes(p.id))}
             onToggleFavorite={handleToggleFavorite}
             onClearFavorites={handleClearWishlist}
@@ -916,7 +952,7 @@ export default function App() {
               setActiveTab('achadinhos');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-          />
+          /></LazyBoundary>
         )}
       </main>
 
@@ -945,7 +981,7 @@ export default function App() {
       />
 
       {/* Floating Sales Chatbot "Pop" */}
-      <SalesChatbot
+      <LazyBoundary><SalesChatbot
         products={products}
         user={user}
         onSelectProduct={setSelectedProduct}
@@ -954,21 +990,21 @@ export default function App() {
           setActiveTab('vendedores');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
-      />
+      /></LazyBoundary>
 
       {/* Product Detail Modal */}
       {selectedProduct?.catalogSource === 'api' && (
-        <CatalogProductDetail
+        <LazyBoundary><CatalogProductDetail
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
           onAffiliateClick={(product) => {
             setSelectedProduct(null);
             handleAffiliateClick(product);
           }}
-        />
+        /></LazyBoundary>
       )}
       {selectedProduct && selectedProduct.catalogSource !== 'api' && (
-        <ProductDetailModal
+        <LazyBoundary><ProductDetailModal
           product={
             products.find((p) => p.id === selectedProduct.id) || selectedProduct
           }
@@ -986,55 +1022,55 @@ export default function App() {
           currentUserName={user?.name}
           isFavorite={wishlistIds.includes(selectedProduct.id)}
           onToggleFavorite={handleToggleFavorite}
-        />
+        /></LazyBoundary>
       )}
 
       {/* Affiliate Transparency Redirect Modal */}
       {affiliateProduct && (
-        <AffiliateModal
+        <LazyBoundary><AffiliateModal
           product={affiliateProduct}
           onClose={() => setAffiliateProduct(null)}
           onOpenStore={resolveAffiliateRedirect}
-        />
+        /></LazyBoundary>
       )}
 
       {/* Cart Drawer */}
-      <CartDrawer
+      {isCartOpen && <LazyBoundary><CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         items={cartItems}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveFromCart}
         onCheckout={() => setIsCheckoutOpen(true)}
-      />
+      /></LazyBoundary>}
 
       {/* Integrated Checkout Modal (Mercado Pago / Pix / Cartão / Boleto) */}
       {isCheckoutOpen && (
-        <CheckoutModal
+        <LazyBoundary><CheckoutModal
           isOpen={isCheckoutOpen}
           onClose={() => setIsCheckoutOpen(false)}
           items={cartItems}
           user={user}
           onPaymentComplete={handlePaymentComplete}
           onRequireAuth={() => setIsAuthOpen(true)}
-        />
+        /></LazyBoundary>
       )}
 
-      <MerchantRegistrationModal
+      {merchantPlan !== null && <LazyBoundary><MerchantRegistrationModal
         isOpen={merchantPlan !== null}
         plan={merchantPlan}
         user={user}
         onClose={() => setMerchantPlan(null)}
-      />
+      /></LazyBoundary>}
 
-      <MerchantApplicationsAdmin
+      {isAdminReviewOpen && Boolean(user) && <LazyBoundary><MerchantApplicationsAdmin
         isOpen={isAdminReviewOpen && Boolean(user)}
         onClose={() => navigate('/')}
-      />
+      /></LazyBoundary>}
 
       {/* Two-layer Auth Modal (KYC Facial Biometrics + SMS) */}
       {isAuthOpen && (
-        <AuthModal
+        <LazyBoundary><AuthModal
           isOpen={isAuthOpen}
           onClose={() => {
             sessionStorage.removeItem(PENDING_AFFILIATE_KEY);
@@ -1048,12 +1084,12 @@ export default function App() {
           onSuccess={() => {
             if (!['/conta', '/vendedor', '/admin/comerciantes'].includes(location.pathname)) navigate('/');
           }}
-        />
+        /></LazyBoundary>
       )}
 
       {/* Barcode Scanner Modal (EAN/UPC Camera Reader) */}
       {isBarcodeScannerOpen && (
-        <BarcodeScannerModal
+        <LazyBoundary><BarcodeScannerModal
           isOpen={isBarcodeScannerOpen}
           onClose={() => setIsBarcodeScannerOpen(false)}
           products={products}
@@ -1064,19 +1100,19 @@ export default function App() {
             handleSearchChange(code);
             setActiveTab('home');
           }}
-        />
+        /></LazyBoundary>
       )}
 
       {/* Partner Seller Dashboard */}
       {isSellerDashboardOpen && user && (
-        <SellerDashboard
+        <LazyBoundary><SellerDashboard
           isOpen={isSellerDashboardOpen}
           onClose={() => setIsSellerDashboardOpen(false)}
           user={user}
           products={products}
           onAddNewProduct={handleAddNewProduct}
           onDeleteProduct={handleDeleteProduct}
-        />
+        /></LazyBoundary>
       )}
     </div>
   );

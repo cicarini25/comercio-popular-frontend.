@@ -1,6 +1,6 @@
 import React from 'react';
 import { BadgePercent, ExternalLink, Grid2X2, Store } from 'lucide-react';
-import bannerMarketplaces from '../../assets/images/banner_marketplaces_sem_texto.png';
+import bannerMarketplaces from '../../assets/images/banner_marketplaces_sem_texto.webp';
 
 interface HeroBannerProps {
   onExploreAchadinhos: () => void;

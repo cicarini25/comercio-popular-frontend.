@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import bannerComercioPopular from '../../assets/images/banner_comercio_popular_1789045747520.jpg';
-import bannerMarketplaces from '../../assets/images/banner_marketplaces_sem_texto.png';
+import bannerMarketplaces from '../../assets/images/banner_marketplaces_sem_texto.webp';
 import bannerAppBrowsing from '../../assets/images/banner_app_browsing_1789045778259.jpg';
 import bannerMapaAchados from '../../assets/images/banner_mapa_achados_sem_texto.png';
 import bannerMulherSofa from '../../assets/images/banner_mulher_sofa_1789045812071.jpg';
