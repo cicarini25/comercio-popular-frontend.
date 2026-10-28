@@ -17,7 +17,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     images: [
       '/images/mini_selador_portatil.jpg'
     ],
-    category: 'Utilidades',
+    category: 'Casa & Cozinha',
     isAchadinho: true,
     stockUnits: 4,
     badge: 'Achadinho < R$ 20 🔥',
@@ -79,7 +79,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800&auto=format&fit=crop&q=80'
     ],
-    category: 'ELETRÔNICOS',
+    category: 'LUMINÁRIAS',
     isAchadinho: true,
     stockUnits: 0,
     badge: 'Esgotado',
@@ -107,7 +107,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=800&auto=format&fit=crop&q=80'
     ],
-    category: 'ELETRÔNICOS',
+    category: 'Fones & Headphones',
     isAchadinho: true,
     stockUnits: 12,
     badge: 'Mais Vendido Amazon',
@@ -161,7 +161,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     images: [
       '/images/smartwatch_esportivo.jpg'
     ],
-    category: 'ELETRÔNICOS',
+    category: 'RELÓGIOS',
     isAchadinho: true,
     stockUnits: 5,
     badge: 'Preço Histórico',
@@ -264,7 +264,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=800&auto=format&fit=crop&q=80'
     ],
-    category: 'Moda Masculina',
+    category: 'BOLSAS & MOCHILAS',
     isAchadinho: false,
     stockUnits: 25,
     badge: 'Envio Rápido 24h',
@@ -302,7 +302,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     images: [
       '/images/panos_de_prato.jpg'
     ],
-    category: 'Casa & Cozinha',
+    category: 'CAMA/MESA/BANHO',
     isAchadinho: true,
     stockUnits: 30,
     badge: 'Feito no Brasil 🇧🇷',
@@ -338,7 +338,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=800&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1562273138-f46be4ebdf33?w=800&auto=format&fit=crop&q=80'
     ],
-    category: 'Calçados Masculino',
+    category: 'Calçados Femininos',
     isAchadinho: false,
     stockUnits: 14,
     badge: 'Saúde & Conforto',
@@ -459,7 +459,6 @@ export const SELLER_PLANS: SellerPlan[] = [
 
 export const CATEGORIES = [
   'Todas as Categorias',
-  'Utilidades',
   'ELÉTRICA & HIDRÁULICA',
   'LUMINÁRIAS',
   'BOLSAS & MOCHILAS',
@@ -474,8 +473,7 @@ export const CATEGORIES = [
   'ELETRÔNICOS',
   'RELÓGIOS',
   'Games',
-  'Computadores',
-  'Notebook',
+  'Informática',
   'Smartphones',
   'Acessórios para celulares',
   'Aparelhos de Som',
@@ -497,7 +495,8 @@ export const CATEGORIES = [
   'Esportes & Lazer',
   'Bike Elétrica e Acessórios',
   'Cuidado & Beleza',
-  'Alimentos & Bebidas'
+  'Alimentos & Bebidas',
+  'Outros'
 ];
 
 export const PLATFORM_INFO: Record<string, { name: string; color: string; bg: string; border: string; logoText: string }> = {
@@ -565,3 +564,5 @@ export const PLATFORM_INFO: Record<string, { name: string; color: string; bg: st
     logoText: 'Magalu'
   }
 };
+
+

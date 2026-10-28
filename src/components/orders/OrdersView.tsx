@@ -143,3 +143,4 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ orders, onExploreProduct
     </div>
   );
 };
+

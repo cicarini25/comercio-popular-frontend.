@@ -7,6 +7,9 @@ interface MegaMenuProps {
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
   categoryCounts?: Record<string, number>;
+  groups?: CategoryMenuGroup[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const getCountLabel = (category: string, categoryCounts?: Record<string, number>) => {
@@ -18,9 +21,14 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
   selectedCategory,
   onSelectCategory,
   categoryCounts,
+  groups = CATEGORY_MENU,
+  open: controlledOpen,
+  onOpenChange,
 }) => {
-  const [open, setOpen] = useState(false);
-  const [activeGroup, setActiveGroup] = useState<CategoryMenuGroup>(CATEGORY_MENU[0]);
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = controlledOpen ?? localOpen;
+  const setOpen = (nextOpen: boolean) => onOpenChange ? onOpenChange(nextOpen) : setLocalOpen(nextOpen);
+  const [activeGroup, setActiveGroup] = useState<CategoryMenuGroup>(groups[0] || CATEGORY_MENU[0]);
   const [mobileView, setMobileView] = useState<'groups' | 'items'>('groups');
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -38,6 +46,15 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
   };
 
   useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [open]);
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false);
     };
@@ -47,6 +64,14 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
       cancelClose();
     };
   }, []);
+
+  useEffect(() => {
+    if (!groups.some((group) => group.label === activeGroup.label)) setActiveGroup(groups[0] || CATEGORY_MENU[0]);
+  }, [groups, activeGroup.label]);
+
+  useEffect(() => {
+    if (open) setMobileView('groups');
+  }, [open]);
 
   const chooseCategory = (category: string) => {
     onSelectCategory(category);
@@ -61,22 +86,20 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
       onMouseEnter={cancelClose}
       onMouseLeave={scheduleClose}
       onFocus={cancelClose}
+      onBlur={(event) => {
+        const nextTarget = event.relatedTarget as Node | null;
+        if (!nextTarget || !event.currentTarget.contains(nextTarget)) setOpen(false);
+      }}
     >
       <button
         type="button"
-        aria-haspopup="true"
+        id="btn-open-category-menu"
+        aria-haspopup="dialog"
         aria-expanded={open}
         onMouseEnter={() => setOpen(true)}
         onFocus={() => setOpen(true)}
-        onClick={() => setOpen((value) => {
-          if (!value) setMobileView('groups');
-          return !value;
-        })}
-        className={`group inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 text-xs font-extrabold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:text-sm ${
-          open || selectedCategory !== 'Todas as Categorias'
-            ? 'bg-teal-700 text-white shadow-sm'
-            : 'text-neutral-700 hover:bg-teal-50 hover:text-teal-800'
-        }`}
+        onClick={() => { setMobileView('groups'); setOpen(true); }}
+        className="group inline-flex min-h-10 items-center gap-2 rounded-xl bg-teal-700 px-3 py-2 text-xs font-extrabold text-white shadow-sm transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:text-sm"
       >
         <Grid2X2 size={16} />
         <span className="hidden sm:inline">Todas as Categorias</span>
@@ -86,6 +109,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
 
       {open && (
         <div
+          id="category-menu-desktop"
           role="dialog"
           aria-label="Menu de categorias do Comércio Popular"
           onMouseEnter={cancelClose}
@@ -108,7 +132,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
               </button>
             </div>
             <div className="space-y-1">
-              {CATEGORY_MENU.map((group) => {
+              {groups.map((group) => {
                 const Icon = group.icon;
                 const isActive = activeGroup.label === group.label;
                 return (
@@ -117,7 +141,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                     type="button"
                     onMouseEnter={() => setActiveGroup(group)}
                     onFocus={() => setActiveGroup(group)}
-                    onClick={() => chooseCategory(group.items[0].category)}
+                    onClick={() => { setActiveGroup(group); setMobileView('items'); }}
                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-teal-700 ${
                       isActive ? 'bg-white text-teal-800 shadow-sm' : 'text-neutral-600 hover:bg-white/80 hover:text-teal-800'
                     }`}
@@ -179,7 +203,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
       )}
 
       {open && (
-        <div className="absolute left-0 top-[calc(100%+0.55rem)] z-[70] block max-h-[calc(100vh-10rem)] w-[min(94vw,420px)] overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_22px_70px_rgba(4,33,25,0.18)] lg:hidden">
+        <div id="category-menu-mobile" role="dialog" aria-label="Categorias" className="absolute left-0 top-[calc(100%+0.55rem)] z-[70] block max-h-[calc(100vh-10rem)] w-[min(94vw,420px)] overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_22px_70px_rgba(4,33,25,0.18)] lg:hidden">
           <div className="flex items-center justify-between border-b border-neutral-100 px-2 pb-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-teal-700">Navegue por</p>
@@ -208,7 +232,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
           </div>
           {mobileView === 'groups' ? (
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {CATEGORY_MENU.map((group) => {
+              {groups.map((group) => {
                 const Icon = group.icon;
                 return (
                   <button
@@ -254,3 +278,4 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
     </div>
   );
 };
+

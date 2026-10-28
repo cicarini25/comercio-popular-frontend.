@@ -19,7 +19,8 @@ import {
   Heart,
   Barcode,
   BellRing,
-  PackageX
+  PackageX,
+  Play
 } from 'lucide-react';
 import { Product } from '../../types';
 import { PLATFORM_INFO } from '../../data/mockProducts';
@@ -178,7 +179,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
-        />
+        />        {product.videoUrl && (
+          <span className="absolute bottom-2.5 left-2.5 z-10 inline-flex items-center gap-1.5 rounded-full bg-neutral-950/80 px-2.5 py-1.5 text-[10px] font-extrabold text-white shadow-lg backdrop-blur">
+            <Play size={11} fill="currentColor" /> Vídeo do produto
+          </span>
+        )}
 
         {/* Platform Origin Badge */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
@@ -598,3 +603,4 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     </div>
   );
 };
+

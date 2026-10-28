@@ -126,7 +126,7 @@ function getLocalFallbackGuide(
   ];
 
   if (cat.includes('cozinha') || cat.includes('casa') || cat.includes('utilidades')) {
-    categoryGuideTitle = 'Guia do Especialista: Casa, Cozinha & Utilidades';
+    categoryGuideTitle = 'Guia do Especialista: Casa, Cozinha & Organização';
     verdict = `Excelente aliado na rotina doméstica. O ${product.title} combina ergonomia, higienização rápida e ótimo aproveitamento de espaço em cozinhas brasileiras.`;
     expertScore = 9.5;
     scoreLabel = 'Essencial para a Casa';
@@ -212,3 +212,5 @@ function getLocalFallbackGuide(
     generatedWith: 'expert-engine-v2'
   };
 }
+
+

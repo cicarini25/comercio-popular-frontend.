@@ -427,3 +427,4 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
     </section>
   );
 };
+

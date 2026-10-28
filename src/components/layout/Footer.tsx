@@ -227,3 +227,4 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, onOpenSellerSection
   );
 };
 
+

@@ -81,3 +81,4 @@ const ActionCard = ({ icon:Icon,title,text,action,onClick }:{icon:React.ElementT
 const Metric = ({label,value}:{label:string;value:string}) => <div className="rounded-xl border bg-white p-4"><p className="text-xl font-black text-neutral-900">{value}</p><p className="mt-1 text-sm text-neutral-500">{label}</p></div>;
 const Notice = ({text}:{text:string}) => <div role="status" className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">{text}</div>;
 const DataPanel = Consultation;
+

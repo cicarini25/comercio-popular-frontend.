@@ -1,11 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import { ExternalLink, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ExternalLink, Play, X } from 'lucide-react';
 import { Product } from '../../types';
 import { formatCurrency } from '../../utils/formatters';
 import { PLATFORM_INFO } from '../../data/mockProducts';
 
 export function CatalogProductDetail({ product, onClose, onAffiliateClick }: { product: Product; onClose: () => void; onAffiliateClick: (product: Product) => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const [showVideo, setShowVideo] = useState(false);
   useEffect(() => {
     dialog.current?.showModal();
     return () => dialog.current?.close();
@@ -15,7 +16,12 @@ export function CatalogProductDetail({ product, onClose, onAffiliateClick }: { p
     className="m-auto w-[min(95vw,900px)] max-h-[90vh] overflow-y-auto rounded-3xl p-6 backdrop:bg-black/60">
     <button autoFocus aria-label="Fechar detalhes" onClick={onClose} className="float-right p-2"><X /></button>
     <div className="grid md:grid-cols-2 gap-6 clear-both">
-      <img src={product.images[0]} alt={product.title} className="w-full max-h-96 object-contain rounded-xl" />
+      <div className="space-y-2">
+        {showVideo && product.videoUrl
+          ? <video src={product.videoUrl} controls playsInline preload="none" poster={product.images[0]} className="w-full max-h-96 rounded-xl bg-black" aria-label={'Vídeo de ' + product.title} />
+          : <img src={product.images[0]} alt={product.title} className="w-full max-h-96 object-contain rounded-xl" />}
+        {product.videoUrl && <button type="button" onClick={() => setShowVideo((value) => !value)} className="inline-flex items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-xs font-bold text-neutral-700">{showVideo ? 'Ver imagem' : <><Play size={13} fill="currentColor" /> Assistir vídeo</>}</button>}
+      </div>
       <div className="space-y-4">
         <p className="text-sm text-neutral-500">{platformName} · {product.category}</p>
         <h2 className="text-xl font-bold">{product.title}</h2>
@@ -32,3 +38,4 @@ export function CatalogProductDetail({ product, onClose, onAffiliateClick }: { p
     <p className="whitespace-pre-wrap text-sm leading-relaxed">{product.description}</p>
   </dialog>;
 }
+

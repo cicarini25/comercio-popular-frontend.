@@ -67,11 +67,11 @@ export const FlashDealsWidget: React.FC<FlashDealsWidgetProps> = ({ products, on
             <p><strong className="text-neutral-900">Nenhuma oferta relâmpago válida agora.</strong> O widget só exibe produtos com desconto e validade confirmados pelo catálogo.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
+          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto p-4 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible sm:p-5 lg:grid-cols-4">
             {deals.map((product) => {
             const isAffiliate = product.platform !== 'parceiro';
             return (
-              <article key={product.id} className="group flex min-w-0 flex-col rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <article key={product.id} className="group flex w-[76vw] max-w-[280px] shrink-0 snap-start flex-col rounded-2xl sm:w-auto sm:max-w-none sm:min-w-0 border border-neutral-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                 <button type="button" onClick={() => onViewDetails(product)} className="text-left">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-neutral-100">
                     <img src={product.images[0] || '/favicon.png'} alt={product.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
@@ -102,3 +102,4 @@ export const FlashDealsWidget: React.FC<FlashDealsWidgetProps> = ({ products, on
     </section>
   );
 };
+

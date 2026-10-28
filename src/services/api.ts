@@ -192,6 +192,29 @@ export const api = {
     });
   },
 
+  async uploadSellerProductVideo(productId: string, file: File): Promise<{ product: any }> {
+    const allowedTypes = ['video/mp4', 'video/webm'];
+    if (!allowedTypes.includes(file.type)) throw new Error('Escolha um vídeo MP4 ou WebM.');
+    if (file.size > 20 * 1024 * 1024) throw new Error('O vídeo deve ter no máximo 20 MB.');
+    const token = getAuthToken();
+    if (!token) throw new Error('Entre na sua conta de lojista para enviar o vídeo.');
+
+    let response: Response;
+    try {
+      response = await fetch(API_BASE_URL + '/api/seller/products/' + encodeURIComponent(productId) + '/video', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': file.type },
+        body: file,
+        signal: AbortSignal.timeout(60000),
+      });
+    } catch {
+      throw new Error('Não foi possível enviar o vídeo. Confira sua conexão e tente novamente.');
+    }
+    const data = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(data?.error || 'Não foi possível salvar o vídeo.');
+    return data as { product: any };
+  },
+
   async updateSellerProduct(productId: string, payload: SellerProductPayload & { status?: 'ativo' | 'pausado' }): Promise<{ product: any }> {
     return request<{ product: any }>(`/api/seller/products/${encodeURIComponent(productId)}`, {
       method: 'PATCH',
@@ -227,4 +250,5 @@ export function mapApiUser(user: any): User {
     avatar: user.avatar || ''
   };
 }
+
 

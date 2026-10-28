@@ -38,6 +38,7 @@ import { SellerPlan, Product, User } from '../../types';
 import { SELLER_PLANS } from '../../data/mockProducts';
 import { formatCurrency } from '../../utils/formatters';
 import { ProductCard } from '../products/ProductCard';
+import { ProductVideoShowcase } from '../products/ProductVideoShowcase';
 import { AfterSales, QuickAnswers, Reputation } from './SellerTools';
 import { SellerManagementModule } from './SellerManagementModules';
 
@@ -50,6 +51,7 @@ interface SellerSectionProps {
   onViewDetails: (product: Product) => void;
   wishlistIds?: string[];
   onToggleFavorite?: (product: Product) => void;
+  isDedicatedPage?: boolean;
 }
 
 export const SellerSection: React.FC<SellerSectionProps> = ({
@@ -60,7 +62,8 @@ export const SellerSection: React.FC<SellerSectionProps> = ({
   onAddToCart,
   onViewDetails,
   wishlistIds = [],
-  onToggleFavorite
+  onToggleFavorite,
+  isDedicatedPage = false,
 }) => {
   // Only partner products (marketplace próprio)
   const partnerProducts = products.filter((p) => p.platform === 'parceiro');
@@ -428,26 +431,30 @@ export const SellerSection: React.FC<SellerSectionProps> = ({
                 Vitrine dos Comerciantes Parceiros
               </h3>
               <p className="text-xs text-neutral-500">
-                Produtos vendidos e enviados diretamente pelos lojistas com split de pagamento e garantia Comércio Popular.
+                Veja produtos publicados por comerciantes parceiros aprovados; preço, envio e condições são informados na página do produto.
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-teal-800 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200 w-fit">
               <Truck size={14} className="text-teal-700" />
-              <span>Frete por conta do vendedor até sua casa</span>
+              <span>Condições de envio definidas pela loja</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5">
-            {partnerProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                isFavorite={wishlistIds.includes(product.id)}
-                onToggleFavorite={onToggleFavorite}
-                onAddToCart={onAddToCart}
-                onViewDetails={onViewDetails}
-                onDirectAffiliateClick={() => {}}
-              />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+            {partnerProducts.map((product, index) => (
+              <React.Fragment key={product.id}>
+                <ProductCard
+                  product={product}
+                  isFavorite={wishlistIds.includes(product.id)}
+                  onToggleFavorite={onToggleFavorite}
+                  onAddToCart={onAddToCart}
+                  onViewDetails={onViewDetails}
+                  onDirectAffiliateClick={() => {}}
+                />
+                {isDedicatedPage && index === Math.min(3, partnerProducts.length - 1) && (
+                  <ProductVideoShowcase products={partnerProducts} onViewDetails={onViewDetails} />
+                )}
+              </React.Fragment>
             ))}
           </div>
         </div>
@@ -540,4 +547,5 @@ export const SellerSection: React.FC<SellerSectionProps> = ({
     </section>
   );
 };
+
 

@@ -123,3 +123,4 @@ export function getProductPriceComparison(product: Product): PriceComparison {
 function roundPrice(val: number): number {
   return Math.round(val * 10) / 10;
 }
+

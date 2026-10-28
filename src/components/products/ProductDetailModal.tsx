@@ -23,7 +23,8 @@ import {
   SlidersHorizontal,
   Heart,
   Barcode,
-  PackageX
+  PackageX,
+  Play
 } from 'lucide-react';
 import { Product, PriceAlert } from '../../types';
 import { PLATFORM_INFO } from '../../data/mockProducts';
@@ -68,6 +69,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onOpenStockNotify
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showProductVideo, setShowProductVideo] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [cep, setCep] = useState('');
   const [freightOptions, setFreightOptions] = useState<any[]>([]);
@@ -83,6 +85,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   useEffect(() => {
     if (product) {
       setSelectedImage(product.images[0]);
+      setShowProductVideo(false);
       if (activeAlert) {
         setTargetPriceInput(activeAlert.targetPrice.toFixed(2));
       } else {
@@ -304,13 +307,18 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {/* Gallery */}
           <div className="space-y-3">
             <div className="aspect-square w-full rounded-2xl bg-neutral-100 overflow-hidden border border-neutral-200">
-              <img
-                src={currentImage}
-                alt={product.title}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
+              {showProductVideo && product.videoUrl ? (
+                <video src={product.videoUrl} controls playsInline preload="none" poster={currentImage} className="w-full h-full object-contain bg-black" aria-label={'Vídeo de ' + product.title} />
+              ) : (
+                <img
+                  src={currentImage}
+                  alt={product.title}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
+            {product.videoUrl && <button type="button" onClick={() => setShowProductVideo((value) => !value)} className="inline-flex items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-xs font-bold text-neutral-700">{showProductVideo ? 'Ver imagem' : <><Play size={13} fill="currentColor" /> Assistir vídeo</>}</button>}
             {product.images.length > 1 && (
               <div className="flex gap-2">
                 {product.images.map((img, idx) => (
@@ -1014,3 +1022,4 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   </div>
   );
 };
+

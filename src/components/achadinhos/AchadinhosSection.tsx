@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Product } from '../../types';
 import { ProductCard } from '../products/ProductCard';
+import { ProductVideoShowcase } from '../products/ProductVideoShowcase';
 import { PlatformLogo, PlatformId } from '../common/PlatformLogo';
 
 interface AchadinhosSectionProps {
@@ -85,14 +86,14 @@ export const AchadinhosSection: React.FC<AchadinhosSectionProps> = ({
                 <span>Achadinhos do Dia • Curadoria de Redes Sociais</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-display">
-                Achadinhos da Shopee
+                Achadinhos em destaque
               </h2>
               <p className="text-sm text-coral-200 mt-1 max-w-xl">
-                Produtos selecionados com links de afiliado. Escolha uma oferta e finalize sua compra na Shopee.
+                Produtos selecionados com links de afiliado. Escolha uma oferta e finalize a compra na loja responsável.
               </p>
             </div>
 
-            <p className="max-w-xs text-sm text-coral-100">Preços, frete e disponibilidade sujeitos à confirmação na Shopee.</p>
+            <p className="max-w-xs text-sm text-coral-100">Preços, frete e disponibilidade devem ser confirmados na loja de destino.</p>
           </div>
         </div>
 
@@ -164,17 +165,21 @@ export const AchadinhosSection: React.FC<AchadinhosSectionProps> = ({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-            {visibleAchadinhos.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                isFavorite={wishlistIds.includes(product.id)}
-                onToggleFavorite={onToggleFavorite}
-                onAddToCart={onAddToCart}
-                onViewDetails={onViewDetails}
-                onDirectAffiliateClick={onAffiliateClick}
-              />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+            {visibleAchadinhos.map((product, index) => (
+              <React.Fragment key={product.id}>
+                <ProductCard
+                  product={product}
+                  isFavorite={wishlistIds.includes(product.id)}
+                  onToggleFavorite={onToggleFavorite}
+                  onAddToCart={onAddToCart}
+                  onViewDetails={onViewDetails}
+                  onDirectAffiliateClick={onAffiliateClick}
+                />
+                {isDedicatedPage && index === Math.min(3, visibleAchadinhos.length - 1) && (
+                  <ProductVideoShowcase products={visibleAchadinhos} onViewDetails={onViewDetails} />
+                )}
+              </React.Fragment>
             ))}
             {visibleAchadinhos.length < achadinhos.length && (
               <div className="col-span-full flex justify-center pt-2">
@@ -189,4 +194,5 @@ export const AchadinhosSection: React.FC<AchadinhosSectionProps> = ({
     </section>
   );
 };
+
 

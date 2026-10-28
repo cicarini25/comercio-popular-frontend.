@@ -7,7 +7,7 @@ interface BrandStoriesProps {
 }
 
 const stories: Array<{ platform: PlatformId; eyebrow: string; title: string; description: string; category: string }> = [
-  { platform: 'shopee', eyebrow: 'Guia Comércio Popular', title: 'Como avaliar um achadinho antes de comprar', description: 'Compare desconto, avaliações, frete e condição final da loja em poucos passos.', category: 'Utilidades' },
+  { platform: 'shopee', eyebrow: 'Guia Comércio Popular', title: 'Como avaliar um achadinho antes de comprar', description: 'Compare desconto, avaliações, frete e condição final da loja em poucos passos.', category: 'Casa & Cozinha' },
   { platform: 'mercadolivre', eyebrow: 'Seleção de ofertas', title: 'O que observar em compras para casa', description: 'Uma curadoria original para encontrar itens úteis, duráveis e com melhor custo-benefício.', category: 'Casa & Cozinha' },
   { platform: 'amazon', eyebrow: 'Radar de tecnologia', title: 'Tecnologia para o dia a dia', description: 'Veja categorias populares e compare alternativas antes de abrir a oferta parceira.', category: 'ELETRÔNICOS' },
 ];
@@ -39,3 +39,4 @@ export const BrandStories: React.FC<BrandStoriesProps> = ({ onSelectCategory }) 
     </div>
   </section>
 );
+

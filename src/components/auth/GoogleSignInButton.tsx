@@ -53,3 +53,4 @@ export function GoogleSignInButton({ onCredential, disabled }: {
     {error && <button type="button" disabled={disabled} onClick={() => setRetry(n => n + 1)} aria-label={`Tentar Google novamente: ${error}`} className="p-2 text-xs text-teal-800">Google: tentar novamente</button>}
   </div>;
 }
+

@@ -28,7 +28,7 @@ export interface PriceComparison {
 }
 
 export interface Product {
-  catalogSource?: "api";
+  catalogSource?: "api" | "seller";
   id: string;
   title: string;
   description: string;
@@ -42,6 +42,7 @@ export interface Product {
   rating: number;
   reviewCount: number;
   images: string[];
+  videoUrl?: string;
   category: string;
   isAchadinho: boolean;
   stockUnits: number | null;
@@ -160,4 +161,5 @@ export interface StockNotificationRequest {
   createdAt: string;
   status: 'pending' | 'notified';
 }
+
 
