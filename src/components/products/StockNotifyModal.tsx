@@ -308,3 +308,4 @@ export const StockNotifyModal: React.FC<StockNotifyModalProps> = ({
     </div>
   );
 };
+

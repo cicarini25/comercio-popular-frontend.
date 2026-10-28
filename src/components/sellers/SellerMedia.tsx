@@ -7,3 +7,4 @@ export function MediaUpload({files,setFiles}:{files:Attachment[];setFiles:(f:Att
 export function ScoreGauge(){
  return <div className="rounded-2xl bg-teal-50 p-5 space-y-4"><h4 className="font-bold">Pontuação do comerciante</h4><div className="mx-auto flex h-40 w-40 items-center justify-center rounded-full bg-neutral-200"><div className="flex h-32 w-32 flex-col items-center justify-center rounded-full bg-white"><b className="text-4xl">—</b><span>Sem dados</span></div></div><p className="text-sm">Aguardando integração com pedidos e atendimentos verificados. A pontuação não pode ser ajustada manualmente.</p><ul className="space-y-2 text-sm"><li>Pagamentos confirmados: não conectado</li><li>Entregas e cancelamentos: não conectado</li><li>Reclamações e avaliações verificadas: não conectado</li></ul></div>;
 }
+

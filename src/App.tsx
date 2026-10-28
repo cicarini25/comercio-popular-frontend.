@@ -1,9 +1,9 @@
-import { CATALOG_PAGE_SIZE, fetchAffiliateCatalog, resolveAffiliateRedirect } from './services/catalog';
+import { CATALOG_PAGE_SIZE, fetchAffiliateCatalog, fetchAffiliateProductById, fetchCatalogFacets, resolveAffiliateRedirect } from './services/catalog';
 import { CatalogProductDetail } from './components/products/CatalogProductDetail';
 import { mapApiUser } from './services/api';
 import { useAuth } from './context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { PWAInstallButton } from './components/common/PWAInstallButton';
@@ -17,6 +17,7 @@ import { SellerDashboard } from './components/sellers/SellerDashboard';
 import { MerchantRegistrationModal } from './components/sellers/MerchantRegistrationModal';
 import { MerchantApplicationsAdmin } from './components/admin/MerchantApplicationsAdmin';
 import { ProductCard } from './components/products/ProductCard';
+import { ProductVideoShowcase } from './components/products/ProductVideoShowcase';
 import { ProductDetailModal } from './components/products/ProductDetailModal';
 import { AffiliateModal } from './components/products/AffiliateModal';
 import { CartDrawer } from './components/cart/CartDrawer';
@@ -30,12 +31,12 @@ import { PriceRangeSlider } from './components/products/PriceRangeSlider';
 
 import { Product, CartItem, User, Order, SellerPlan, PriceAlert, ProductReview } from './types';
 import { CATEGORIES } from './data/mockProducts';
+import { CATEGORY_MENU, CategoryMenuGroup } from './data/categoryMenu';
 import { resolveProductCategory } from './utils/productCategories';
 import { getOrGenerateReviews } from './data/mockReviews';
 import { formatCurrency } from './utils/formatters';
 import { Flame, Store, Sparkles, Filter, CheckCircle2, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { notifyWishlistPriceDrop } from './services/notificationService';
 
 
 const normalizeProductSearch = (value: string) => value
@@ -68,55 +69,71 @@ const productSearchScore = (product: Product, query: string): number => {
 };
 
 const PENDING_AFFILIATE_KEY = 'cp_pending_affiliate_product';
-const PRODUCTS_PER_VIEW = 100;
 export default function App() {
-  // Products catalog
   const [products, setProducts] = useState<Product[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('Todas as Categorias');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState('');
   const [catalogRetry, setCatalogRetry] = useState(0);
-  const [categoryLoading, setCategoryLoading] = useState(false);
-  const [categoryError, setCategoryError] = useState('');
-  const [categoryRetry, setCategoryRetry] = useState(0);
+  const [catalogHasMore, setCatalogHasMore] = useState(false);
+  const [catalogOffset, setCatalogOffset] = useState(0);
+  const [catalogTotal, setCatalogTotal] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(CATEGORIES);
+  const [categoryGroups, setCategoryGroups] = useState<CategoryMenuGroup[]>(CATEGORY_MENU);
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  const [catalogMinPrice, setCatalogMinPrice] = useState(0);
+  const [catalogMaxPrice, setCatalogMaxPrice] = useState(300);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const loadMoreControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearchQuery(searchQuery.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const controller = new AbortController();
+    void fetchCatalogFacets(controller.signal).then((facets) => {
+      if (controller.signal.aborted) return;
+      setCategoryOptions(['Todas as Categorias', ...facets.categories]);
+      setCategoryGroups(facets.groups);
+      setCategoryCounts(facets.categoryCounts);
+      const min = Math.floor(facets.priceBounds.min);
+      const max = Math.ceil(facets.priceBounds.max);
+      if (Number.isFinite(min) && Number.isFinite(max) && max >= min) {
+        setCatalogMinPrice(min);
+        setCatalogMaxPrice(max > min ? max : min + 1);
+      }
+    }).catch(() => {
+      // A vitrine continua utilizável com a lista local se os filtros remotos falharem.
+    });
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    loadMoreControllerRef.current?.abort();
+    loadMoreControllerRef.current = null;
+    setLoadingMore(false);
+    const controller = new AbortController();
     setCatalogLoading(true);
     setCatalogError('');
-    const loadCatalog = async () => {
-      const completeCatalog = new Map<string, Product>();
-      let firstBatch = true;
+    setProducts([]);
+    setCatalogOffset(0);
+    setCatalogHasMore(false);
+    const loadFirstPage = async () => {
       try {
-        let offset = 0;
-        let hasMore = true;
-        while (hasMore && !controller.signal.aborted) {
-          // Duas páginas em paralelo reduzem o tempo de abertura sem limitar o catálogo.
-          const pages = await Promise.all([
-            fetchAffiliateCatalog(offset, controller.signal),
-            fetchAffiliateCatalog(offset + CATALOG_PAGE_SIZE, controller.signal),
-          ]);
-          if (controller.signal.aborted) return;
-          pages.forEach(page => page.products.forEach(product => {
-            // Normaliza a categoria no próprio item exibido. Assim o card,
-            // o filtro e o contador usam a mesma classificação corrigida,
-            // mesmo quando o banco trouxe uma categoria antiga.
-            const normalizedProduct = {
-              ...product,
-              category: resolveProductCategory(product.category, product.title, product.description),
-            };
-            completeCatalog.set(product.id, normalizedProduct);
-          }));
-          // Disponibiliza a primeira leva imediatamente. As páginas seguintes
-          // entram em segundo plano, sem deixar a vitrine vazia durante a carga.
-          setProducts([...completeCatalog.values()]);
-          if (firstBatch) {
-            firstBatch = false;
-            setCatalogLoading(false);
-          }
-          hasMore = pages.some(page => page.hasMore);
-          offset += CATALOG_PAGE_SIZE * 2;
-        }
-        if (!controller.signal.aborted) setProducts([...completeCatalog.values()]);
+        const page = await fetchAffiliateCatalog(0, controller.signal, {
+          category: selectedCategory,
+          query: debouncedSearchQuery,
+        });
+        if (controller.signal.aborted) return;
+        setProducts(page.products);
+        setCatalogTotal(page.total);
+        setCatalogOffset(CATALOG_PAGE_SIZE);
+        setCatalogHasMore(page.hasMore);
       } catch (error) {
         if (!controller.signal.aborted) {
           setCatalogError(error instanceof Error ? error.message : 'Não foi possível carregar a vitrine.');
@@ -125,9 +142,10 @@ export default function App() {
         if (!controller.signal.aborted) setCatalogLoading(false);
       }
     };
-    void loadCatalog();
+    void loadFirstPage();
     return () => controller.abort();
-  }, [catalogRetry]);
+  }, [catalogRetry, selectedCategory, debouncedSearchQuery]);
+
 
   const { user: sessionUser, loading, logout } = useAuth();
   const user: User | null = sessionUser ? mapApiUser(sessionUser) : null;
@@ -177,35 +195,13 @@ export default function App() {
   });
 
   // Navigation & Filters
-  const [selectedCategory, setSelectedCategory] = useState('Todas as Categorias');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [productDisplayLimit, setProductDisplayLimit] = useState(PRODUCTS_PER_VIEW);
-  // O catálogo completo já é carregado acima. A troca de aba/categoria filtra
-  // os mesmos produtos, evitando misturar uma página parcial com outra.
-  useEffect(() => {
-    setCategoryLoading(false);
-    setCategoryError('');
-  }, [selectedCategory, categoryRetry]);
-  // Dynamic price bounds of full catalog and Price Range Filter State
-  const catalogMinPrice = useMemo(() => {
-    if (products.length === 0) return 0;
-    return Math.floor(Math.min(...products.map((p) => p.price)));
-  }, [products]);
 
-  const catalogMaxPrice = useMemo(() => {
-    if (products.length === 0) return 300;
-    return Math.ceil(Math.max(...products.map((p) => p.price)));
-  }, [products]);
 
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 300]);
 
   useEffect(() => {
     setPriceRange([catalogMinPrice, catalogMaxPrice]);
   }, [catalogMinPrice, catalogMaxPrice]);
-
-  useEffect(() => {
-    setProductDisplayLimit(PRODUCTS_PER_VIEW);
-  }, [searchQuery, selectedCategory, priceRange]);
 
   // Modals
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -250,13 +246,22 @@ export default function App() {
       searchParams.get('p') ||
       window.location.hash.replace('#produto=', '').replace('#produto-', '').replace('#p=', '');
 
-    if (prodParam) {
-      const match = products.find((p) => p.id === prodParam);
-      if (match) {
-        setSelectedProduct(match);
-      }
+    if (!prodParam) return;
+    const match = products.find((product) => product.id === prodParam);
+    if (match) {
+      setSelectedProduct(match);
+      return;
     }
-  }, [products]);
+    if (catalogLoading) return;
+
+    const controller = new AbortController();
+    void fetchAffiliateProductById(prodParam, controller.signal)
+      .then((product) => {
+        if (!controller.signal.aborted && product) setSelectedProduct(product);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [products, catalogLoading]);
 
   // Keep URL search parameters updated when modal is opened or closed
   useEffect(() => {
@@ -359,42 +364,6 @@ export default function App() {
 
   const handleRemovePriceAlert = (productId: string) => {
     setPriceAlerts((prev) => prev.filter((a) => a.productId !== productId));
-  };
-
-  const handleSimulatePriceDrop = (productId: string) => {
-    if (products.find(p => p.id === productId)?.catalogSource === "api") return;
-    const alert = priceAlerts.find((a) => a.productId === productId);
-    const target = alert ? alert.targetPrice : 0;
-    const targetProd = products.find((p) => p.id === productId);
-
-    if (targetProd) {
-      const simulatedPrice = target > 0 ? Math.max(5, target - 5) : Math.round(targetProd.price * 0.8);
-      const orig = targetProd.price;
-      // Trigger Service Worker notification for price drop on wishlist items
-      notifyWishlistPriceDrop(targetProd, orig, simulatedPrice);
-    }
-
-    setProducts((prev) =>
-      prev.map((p) => {
-        if (p.id === productId) {
-          const simulatedPrice = target > 0 ? Math.max(5, target - 5) : Math.round(p.price * 0.8);
-          const orig = p.originalPrice || p.price;
-          return {
-            ...p,
-            price: simulatedPrice,
-            originalPrice: orig,
-            discountPercentage: Math.round(((orig - simulatedPrice) / orig) * 100)
-          };
-        }
-        return p;
-      })
-    );
-
-    confetti({
-      particleCount: 70,
-      spread: 70,
-      origin: { y: 0.15 }
-    });
   };
 
   // Customer Review & 1-5 Star Evaluation Action
@@ -572,32 +541,51 @@ export default function App() {
     );
   };
 
-  // A busca encontra os produtos em todo o catálogo e coloca os nomes mais relevantes primeiro.
-  const filteredProducts = useMemo(() => {
-    return products.map((product, index) => ({ product, index, score: productSearchScore(product, searchQuery) }))
-      .filter(({ product, score }) => {
-        // Recalcula a categoria pelo título também para itens vindos da API.
-        // O banco mantém o catálogo original; a vitrine usa a classificação
-        // corrigida para filtrar e exibir cada produto na aba certa.
-        const productCategory = resolveProductCategory(product.category, product.title, product.description);
-        const matchesCategory = hasSearch || selectedCategory === 'Todas as Categorias' || productCategory === selectedCategory;
-        return matchesCategory && (!hasSearch || score >= 0) && product.price >= priceRange[0] && product.price <= priceRange[1];
-      })
-      .sort((a, b) => hasSearch ? b.score - a.score || a.index - b.index : a.index - b.index)
-      .map(({ product }) => product);
-  }, [products, selectedCategory, searchQuery, hasSearch, priceRange]);
-  const visibleFilteredProducts = useMemo(
-    () => filteredProducts.slice(0, productDisplayLimit),
-    [filteredProducts, productDisplayLimit]
-  );
-  const showMoreProducts = () => setProductDisplayLimit((current) => current + PRODUCTS_PER_VIEW);
-  const categoryCounts = useMemo(() => {
-    return products.reduce<Record<string, number>>((counts, product) => {
-      const category = resolveProductCategory(product.category, product.title, product.description);
-      counts[category] = (counts[category] || 0) + 1;
-      return counts;
-    }, {});
-  }, [products]);
+  const filteredProducts = useMemo(() => products.filter((product) =>
+    product.price >= priceRange[0] &&
+    product.price <= priceRange[1]
+  ), [products, priceRange]);
+  const visibleFilteredProducts = filteredProducts;
+
+  const loadMoreProducts = useCallback(async () => {
+    if (!catalogHasMore || catalogLoading || loadMoreControllerRef.current) return;
+    const controller = new AbortController();
+    loadMoreControllerRef.current = controller;
+    setLoadingMore(true);
+    try {
+      const page = await fetchAffiliateCatalog(catalogOffset, controller.signal, {
+        category: selectedCategory,
+        query: debouncedSearchQuery,
+      });
+      if (controller.signal.aborted) return;
+      setProducts((current) => {
+        const existingIds = new Set(current.map((product) => product.id));
+        return [...current, ...page.products.filter((product) => !existingIds.has(product.id))];
+      });
+      setCatalogTotal(page.total);
+      setCatalogOffset((current) => current + CATALOG_PAGE_SIZE);
+      setCatalogHasMore(page.hasMore);
+      setCatalogError('');
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setCatalogError(error instanceof Error ? error.message : 'Não foi possível carregar mais produtos.');
+      }
+    } finally {
+      if (loadMoreControllerRef.current === controller) {
+        loadMoreControllerRef.current = null;
+        setLoadingMore(false);
+      }
+    }
+  }, [catalogHasMore, catalogLoading, catalogOffset, selectedCategory, debouncedSearchQuery]);
+
+  useEffect(() => {
+    if (!catalogHasMore || !loadMoreRef.current || !['home', 'achadinhos'].includes(activeTab)) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) void loadMoreProducts();
+    }, { rootMargin: '500px 0px' });
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [catalogHasMore, loadMoreProducts, activeTab]);
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50 selection:bg-teal-100 selection:text-teal-900">
       {/* Mobile PWA Install Announcement Banner */}
@@ -634,15 +622,16 @@ export default function App() {
           if (p) setSelectedProduct(p);
         }}
         onRemovePriceAlert={handleRemovePriceAlert}
-        onSimulatePriceDrop={handleSimulatePriceDrop}
         onOpenBarcodeScanner={() => setIsBarcodeScannerOpen(true)}
         favorites={products.filter((p) => wishlistIds.includes(p.id))}
         ordersCount={orders.length}
         categoryCounts={categoryCounts}
+        categoryOptions={categoryOptions}
+        categoryGroups={categoryGroups}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1">
+      <main className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         {/* TAB 1: HOME */}
         {activeTab === 'home' && (
           <div className="space-y-8">
@@ -654,7 +643,7 @@ export default function App() {
                       {hasSearch ? `Resultados para “${searchQuery.trim()}”` : selectedCategory}
                     </h1>
                     <p className="text-sm text-neutral-500">
-                      {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
+                      {filteredProducts.length} carregados de {catalogTotal.toLocaleString('pt-BR')} produtos
                     </p>
                   </div>
                   <button
@@ -665,25 +654,29 @@ export default function App() {
                     Ver todas as ofertas
                   </button>
                 </div>
-                {(catalogLoading || categoryLoading) && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
-                {(catalogError || categoryError) && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
-                  <p>{catalogError || categoryError}</p><button className="underline font-bold" onClick={() => selectedCategory === 'Todas as Categorias' ? setCatalogRetry(n => n + 1) : setCategoryRetry(n => n + 1)}>Tentar novamente</button>
+                {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
+                {catalogError && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
+                  <p>{catalogError}</p><button className="underline font-bold" onClick={() => selectedCategory === 'Todas as Categorias' ? setCatalogRetry(n => n + 1) : setCatalogRetry(n => n + 1)}>Tentar novamente</button>
                 </div>}
                 {filteredProducts.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                    {visibleFilteredProducts.map((p) => (
-                      <ProductCard
-                        key={p.id}
-                        product={p}
-                        isFavorite={wishlistIds.includes(p.id)}
-                        onToggleFavorite={handleToggleFavorite}
-                        onAddToCart={handleAddToCart}
-                        onViewDetails={setSelectedProduct}
-                        onDirectAffiliateClick={handleAffiliateClick}
-                      />
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+                    {visibleFilteredProducts.map((p, index) => (
+                      <React.Fragment key={p.id}>
+                        <ProductCard
+                          product={p}
+                          isFavorite={wishlistIds.includes(p.id)}
+                          onToggleFavorite={handleToggleFavorite}
+                          onAddToCart={handleAddToCart}
+                          onViewDetails={setSelectedProduct}
+                          onDirectAffiliateClick={handleAffiliateClick}
+                        />
+                        {index === Math.min(3, visibleFilteredProducts.length - 1) && (
+                          <ProductVideoShowcase products={visibleFilteredProducts} onViewDetails={setSelectedProduct} />
+                        )}
+                      </React.Fragment>
                     ))}
                   </div>
-                ) : !(catalogLoading || categoryLoading) && !(catalogError || categoryError) ? (
+                ) : !catalogLoading && !catalogError ? (
                   <div className="py-12 px-4 text-center bg-white rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                     <div className="w-14 h-14 mx-auto rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
                       <SlidersHorizontal size={28} />
@@ -701,13 +694,7 @@ export default function App() {
                     </button>
                   </div>
                 ) : null}
-                {visibleFilteredProducts.length < filteredProducts.length && (
-                  <div className="flex justify-center pt-2">
-                    <button type="button" onClick={showMoreProducts} className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800">
-                      Mostrar mais produtos ({visibleFilteredProducts.length} de {filteredProducts.length})
-                    </button>
-                  </div>
-                )}
+
               </section>
             ) : (
               <>
@@ -734,6 +721,8 @@ export default function App() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               categoryCounts={categoryCounts}
+              onExploreAchadinhos={() => { setActiveTab('achadinhos'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              onExploreSellers={() => { setActiveTab('vendedores'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             />
 
             <FlashDealsWidget
@@ -782,7 +771,7 @@ export default function App() {
                     Catálogo Completo • {selectedCategory}
                   </h3>
                   <p className="text-xs text-neutral-500">
-                    Mostrando {filteredProducts.length} {filteredProducts.length === 1 ? 'produto' : 'produtos'}
+                    Carregados {filteredProducts.length} de {catalogTotal.toLocaleString('pt-BR')} produtos
                     {(priceRange[0] > catalogMinPrice || priceRange[1] < catalogMaxPrice) && (
                       <span className="text-teal-700 font-semibold ml-1">
                         entre {formatCurrency(priceRange[0])} e {formatCurrency(priceRange[1])}
@@ -793,7 +782,7 @@ export default function App() {
 
                 {/* Category Pills Slider */}
                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
-                  {CATEGORIES.map((cat) => (
+                  {categoryOptions.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
@@ -820,26 +809,30 @@ export default function App() {
               />
 
               <div className="space-y-4">
-              {(catalogLoading || categoryLoading) && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
-              {(catalogError || categoryError) && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
-                <p>{catalogError || categoryError}</p><button className="underline font-bold" onClick={() => selectedCategory === 'Todas as Categorias' ? setCatalogRetry(n => n + 1) : setSelectedCategory(selectedCategory)}>Tentar novamente</button>
+              {catalogLoading && <p role="status" className="p-4 text-teal-800">Carregando produtos da vitrine…</p>}
+              {catalogError && <div role="alert" className="p-4 bg-amber-50 rounded-xl">
+                <p>{catalogError}</p><button className="underline font-bold" onClick={() => selectedCategory === 'Todas as Categorias' ? setCatalogRetry(n => n + 1) : setSelectedCategory(selectedCategory)}>Tentar novamente</button>
               </div>}
               {/* Grid or Empty State */}
               {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                  {visibleFilteredProducts.map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      product={p}
-                      isFavorite={wishlistIds.includes(p.id)}
-                      onToggleFavorite={handleToggleFavorite}
-                      onAddToCart={handleAddToCart}
-                      onViewDetails={setSelectedProduct}
-                      onDirectAffiliateClick={handleAffiliateClick}
-                    />
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+                  {visibleFilteredProducts.map((p, index) => (
+                    <React.Fragment key={p.id}>
+                      <ProductCard
+                        product={p}
+                        isFavorite={wishlistIds.includes(p.id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        onAddToCart={handleAddToCart}
+                        onViewDetails={setSelectedProduct}
+                        onDirectAffiliateClick={handleAffiliateClick}
+                      />
+                      {index === Math.min(3, visibleFilteredProducts.length - 1) && (
+                        <ProductVideoShowcase products={visibleFilteredProducts} onViewDetails={setSelectedProduct} />
+                      )}
+                    </React.Fragment>
                   ))}
                 </div>
-              ) : !(catalogLoading || categoryLoading) && !(catalogError || categoryError) ? (
+              ) : !catalogLoading && !catalogError ? (
                 <div className="py-12 px-4 text-center bg-white rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                   <div className="w-14 h-14 mx-auto rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
                     <SlidersHorizontal size={28} />
@@ -862,13 +855,6 @@ export default function App() {
                   </button>
                 </div>
               ) : null}
-              {visibleFilteredProducts.length < filteredProducts.length && (
-                <div className="flex justify-center pt-2">
-                  <button type="button" onClick={showMoreProducts} className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800">
-                    Mostrar mais produtos ({visibleFilteredProducts.length} de {filteredProducts.length})
-                  </button>
-                </div>
-              )}
               </div>
             </section>
               </>
@@ -895,6 +881,7 @@ export default function App() {
         {activeTab === 'vendedores' && (
           <div className="py-2">
             <SellerSection
+              isDedicatedPage={true}
               products={products}
               user={user}
               onSubscribePlan={handleSubscribePlan}
@@ -932,6 +919,18 @@ export default function App() {
           />
         )}
       </main>
+
+      {['home', 'achadinhos'].includes(activeTab) && (
+        <div ref={loadMoreRef} className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-center px-4 pb-6" aria-live="polite">
+          {loadingMore ? (
+            <p role="status" className="text-sm font-semibold text-teal-800">Carregando mais produtos…</p>
+          ) : catalogHasMore ? (
+            <button type="button" onClick={() => void loadMoreProducts()} className="rounded-xl border border-teal-200 bg-white px-5 py-2.5 text-sm font-bold text-teal-800 shadow-sm transition hover:bg-teal-50">
+              Role para carregar mais ou clique aqui
+            </button>
+          ) : null}
+        </div>
+      )}
 
       {/* Primary Footer */}
       <Footer
@@ -1082,4 +1081,5 @@ export default function App() {
     </div>
   );
 }
+
 

@@ -48,3 +48,4 @@ export function FacebookSignInButton({ disabled, onToken, onError }: { disabled:
     <span aria-hidden="true" style={{display:'block',width:35.2,height:35.2,backgroundImage:'url(/social-provider-logos.jpg)',backgroundSize:'112.64px 63.36px',backgroundPosition:'-73.425px -22.385px'}} />
   </button>;
 }
+

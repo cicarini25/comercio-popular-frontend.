@@ -143,3 +143,4 @@ export const AffiliateModal: React.FC<AffiliateModalProps> = ({ product, onClose
     </div>
   );
 };
+

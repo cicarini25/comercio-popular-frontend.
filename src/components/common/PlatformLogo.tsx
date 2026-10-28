@@ -12,6 +12,7 @@ export type PlatformId = 'shopee' | 'mercadolivre' | 'amazon' | 'aliexpress' | '
 interface PlatformLogoProps {
   platform: PlatformId;
   className?: string;
+  compact?: boolean;
 }
 
 const platforms: Record<PlatformId, { name: string; image: string }> = {
@@ -32,11 +33,12 @@ export const PLATFORM_LINKS: Record<PlatformId, string> = {
   magalu: 'https://www.magazineluiza.com.br/'
 };
 
-export const PlatformLogo: React.FC<PlatformLogoProps> = ({ platform, className = '' }) => {
+export const PlatformLogo: React.FC<PlatformLogoProps> = ({ platform, className = '', compact = false }) => {
   const item = platforms[platform];
   return (
-    <span className={`inline-flex h-12 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm ${className}`} title={item.name} aria-label={item.name}>
+    <span className={`inline-flex shrink-0 items-center justify-center overflow-hidden border border-neutral-200 bg-white shadow-sm ${compact ? 'h-9 w-10 rounded-lg' : 'h-12 w-14 rounded-xl'} ${className}`} title={item.name} aria-label={item.name}>
       <img src={item.image} alt={item.name} className="h-full w-full object-contain" />
     </span>
   );
 };
+

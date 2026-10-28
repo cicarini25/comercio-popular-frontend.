@@ -13,8 +13,8 @@ const mobilePhoneAccessoryPattern = /\b(peliculas?|capas?|capinhas?|cases?|pouch
 
 // Categorias definidas para os produtos selecionados dos lotes do feed Shopee.
 const curatedCategoryByTitle = new Map<string, string>([
-  [normalizeKey("Caneta esferográfica 1.0 Trilux Colors SM/032ESC10\\343210 com 10 unidades Faber-Castell"), 'Utilidades'],
-  [normalizeKey("Caderno Moleskine | C/Pauta | Floresça Onde Deus Te Plantou"), 'Utilidades'],
+  [normalizeKey("Caneta esferográfica 1.0 Trilux Colors SM/032ESC10\\343210 com 10 unidades Faber-Castell"), 'Casa & Cozinha'],
+  [normalizeKey("Caderno Moleskine | C/Pauta | Floresça Onde Deus Te Plantou"), 'Casa & Cozinha'],
   [normalizeKey("Kit 5 Peças Dry Fit 3 Camisetas e 2 Bermudas Alpha Co"), 'Esportes & Lazer'],
   [normalizeKey("Mini Bike Ergometrica Cicloergometro Pedalinho Monitor Lcd"), 'Esportes & Lazer'],
   [normalizeKey("Kit Jogo Frescobol Tênis De Praia 2 Raquetes Madeira + Bola"), 'Esportes & Lazer'],
@@ -25,16 +25,16 @@ const curatedCategoryByTitle = new Map<string, string>([
   [normalizeKey("Tabua de Corte Dupla Face Antiderrapante Carnes Legumes 35cm"), 'Casa & Cozinha'],
   [normalizeKey("Bolsa Pequena Feminina de Mão e Tiracolo Bolsinha Transversal Clutch Mini Bag"), 'Moda Feminina'],
   [normalizeKey("Regata Streetwear Camisa Masculina Estilo Verão Praia Summer Blusa Cavada Unissex Larga Algodão"), 'Moda Masculina'],
-  [normalizeKey("Edredom Cama Quarto Casal Queen Dupla Face Quentinho"), 'Utilidades'],
-  [normalizeKey("Kit Cobre Leito Colcha Casal 3 Peças Boutis Estampada Dupla Face Porta Travesseiro Aba Americana"), 'Utilidades'],
-  [normalizeKey("Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial"), 'Utilidades'],
-  [normalizeKey("Kit Jogo Pano De Prato Cozinha Copa Cheff Algodão Sortidos"), 'Utilidades'],
-  [normalizeKey("Tapete Sala 1,50x1,00 Peludo 4 Cm De Altura Shaggy Promoção"), 'Utilidades'],
+  [normalizeKey("Edredom Cama Quarto Casal Queen Dupla Face Quentinho"), 'CAMA/MESA/BANHO'],
+  [normalizeKey("Kit Cobre Leito Colcha Casal 3 Peças Boutis Estampada Dupla Face Porta Travesseiro Aba Americana"), 'CAMA/MESA/BANHO'],
+  [normalizeKey("Escrivaninha De Estudos Home Office 1 Gaveta Bonatto Oficial"), 'Móveis'],
+  [normalizeKey("Kit Jogo Pano De Prato Cozinha Copa Cheff Algodão Sortidos"), 'CAMA/MESA/BANHO'],
+  [normalizeKey("Tapete Sala 1,50x1,00 Peludo 4 Cm De Altura Shaggy Promoção"), 'CAMA/MESA/BANHO'],
   [normalizeKey("Cabo De Carregamento Rápido Baseus Pd Usb C Para Typec Qc 4.0 Para iPhone 15 / Xiaomi / Huawei / Macbook (100W)"), 'Acessórios para celulares'],
   [normalizeKey("Inova Carregador Portátil Power Bank Grande 20000mah/10000mAh Turbo 22.5W PD Rápido Com Display Portátil"), 'Acessórios para celulares'],
-  [normalizeKey("Teclado Mecanico Gamer TGT Sherman Compacto, Rainbow, ABNT2, Switch Azul, Preto, TGT-SHTKL-RBW01"), 'Computadores'],
-  [normalizeKey("Mouse Para Jogos Sem Fio Leve ATTACK SHARK X11 Com Base De Carregamento RGB Tri-Mode-2.4G/USB-C/BT"), 'Computadores'],
-  [normalizeKey("UGREEN USB Bluetooth 5.4 5.3 Adaptador Receptor De Transmissor Sem Fio Dongle Para PC Windows 11 10 8.1 7 Fone De Ouvido"), 'Computadores'],
+  [normalizeKey("Teclado Mecanico Gamer TGT Sherman Compacto, Rainbow, ABNT2, Switch Azul, Preto, TGT-SHTKL-RBW01"), 'Informática'],
+  [normalizeKey("Mouse Para Jogos Sem Fio Leve ATTACK SHARK X11 Com Base De Carregamento RGB Tri-Mode-2.4G/USB-C/BT"), 'Informática'],
+  [normalizeKey("UGREEN USB Bluetooth 5.4 5.3 Adaptador Receptor De Transmissor Sem Fio Dongle Para PC Windows 11 10 8.1 7 Fone De Ouvido"), 'Informática'],
 ]);
 
 const canonicalCategories = new Map(
@@ -43,7 +43,11 @@ const canonicalCategories = new Map(
 );
 
 const categoryAliases: Record<string, string> = {
-  'moda infantil': 'CALÇADOS INFANTIS M/F',
+  'utilidades': 'Casa & Cozinha',
+  'computadores': 'Informática',
+  'notebook': 'Informática',
+  'computers': 'Informática',
+
   'cama mesa e banho': 'CAMA/MESA/BANHO',
   'cama mesa banho': 'CAMA/MESA/BANHO',
   'moda praia': 'MODA VERÃO PRAIA',
@@ -53,8 +57,21 @@ const categoryAliases: Record<string, string> = {
   'armarinhos e trico': 'ARMARINHOS & TRICÔ',
   'tecnologia': 'ELETRÔNICOS',
   'casa construcao': 'Ferramentas',
-  'home living': 'Ferramentas',
-  'home decor': 'Ferramentas',
+  'home living': 'Casa & Cozinha',
+  'home decor': 'Casa & Cozinha',
+  'home and living': 'Casa & Cozinha',
+  'casa e cozinha': 'Casa & Cozinha',
+  'casa e cozinhas': 'Casa & Cozinha',
+  'casa cozinhas': 'Casa & Cozinha',
+  'electrical appliances': 'Eletrodomésticos',
+  'appliance parts': 'ELETRO & ACESSÓRIOS',
+  'electro accessories': 'ELETRO & ACESSÓRIOS',
+  'eletro e acessorios': 'ELETRO & ACESSÓRIOS',
+  'utilidades domesticas': 'Casa & Cozinha',
+  'kitchen': 'Casa & Cozinha',
+  'household goods': 'Casa & Cozinha',
+  'household supplies': 'Casa & Cozinha',
+  'home organization': 'Casa & Cozinha',
   'home improvement': 'Ferramentas',
   'construction tools': 'Ferramentas',
   'sports outdoors': 'Esportes & Lazer',
@@ -76,10 +93,10 @@ const categoryAliases: Record<string, string> = {
   'furniture': 'Móveis',
   'electronics': 'ELETRÔNICOS',
   'consumer electronics': 'ELETRÔNICOS',
-  'computers accessories': 'Computadores',
-  'computer accessories': 'Computadores',
-  'laptops': 'Notebook',
-  'laptop': 'Notebook',
+  'computers accessories': 'Informática',
+  'computer accessories': 'Informática',
+  'laptops': 'Informática',
+  'laptop': 'Informática',
   'mobile phones': 'Smartphones',
   'cell phones': 'Smartphones',
   'smartphones': 'Smartphones',
@@ -91,7 +108,7 @@ const categoryAliases: Record<string, string> = {
   'earphones': 'Fones & Headphones',
   'women clothes': 'Moda Feminina',
   'men clothes': 'Moda Masculina',
-  'baby kids fashion': 'CALÇADOS INFANTIS M/F',
+
   'pets animals': 'Pets',
   'pet supplies': 'Pets',
   'pet accessories': 'Pets',
@@ -99,19 +116,16 @@ const categoryAliases: Record<string, string> = {
   'musical instruments': 'Instrumentos Musicais',
   'music instruments': 'Instrumentos Musicais',
   'instruments': 'Instrumentos Musicais',
-  'automotivo': 'MOTOS & ACESSÓRIOS',
-  'automotive': 'MOTOS & ACESSÓRIOS',
-  'car accessories': 'MOTOS & ACESSÓRIOS',
+  'automotivo': 'AUTO & ACESSÓRIOS',
+  'automotive': 'AUTO & ACESSÓRIOS',
+  'car accessories': 'AUTO & ACESSÓRIOS',
   'mens clothing': 'Moda Masculina',
   'men clothing': 'Moda Masculina',
   'mens fashion': 'Moda Masculina',
   'womens clothing': 'Moda Feminina',
   'women clothing': 'Moda Feminina',
   'womens fashion': 'Moda Feminina',
-  'kids clothing': 'CALÇADOS INFANTIS M/F',
-  'children clothing': 'CALÇADOS INFANTIS M/F',
-  'baby clothing': 'CALÇADOS INFANTIS M/F',
-  'kids fashion': 'CALÇADOS INFANTIS M/F',
+
   'calcados': 'Calçados Masculino',
   'calcados masculinos': 'Calçados Masculino',
   'calcados femininos': 'Calçados Femininos',
@@ -128,14 +142,21 @@ const categoryAliases: Record<string, string> = {
   'food beverage': 'Alimentos & Bebidas',
   'food beverages': 'Alimentos & Bebidas',
   'groceries': 'Alimentos & Bebidas',
-  'household': 'Utilidades',
-  'household supplies': 'Utilidades',
-  'home organization': 'Utilidades',
+  'household': 'Casa & Cozinha',
 };
 
 const inferFromText = (title: string, description: string): string | undefined => {
 const text = normalizeKey(title + ' ' + description);
 const titleKey = normalizeKey(title);
+  const childAudience = /\b(infantil|infantis|bebe|bebes|crianca|criancas|kids|children|child|baby|menino|meninos|menina|meninas|boys?|girls?)\b/.test(titleKey);
+  const childGarment = /\b(roupas?|vestidos?|saias?|camisetas?|camisas?|blusas?|calcas?|bermudas?|shorts?|pijamas?|macacoes?|conjuntos?|body|lingerie|jaquetas?|moletons?)\b/.test(titleKey);
+  const childFootwear = /\b(tenis|sapatos?|sandalias?|chinelos?|botas?|sapatilhas?|calcados?|chuteiras?|tamancos?|sapatinhos?)\b/.test(titleKey);
+  if (childAudience && childFootwear) return 'CALÇADOS INFANTIS M/F';
+  if (childAudience && childGarment) {
+    if (/\b(menino|meninos|masculino|boys?|boy)\b/.test(titleKey)) return 'MODA INFANTIL MASCULINA';
+    if (/\b(menina|meninas|feminino|girls?|girl)\b/.test(titleKey)) return 'MODA INFANTIL FEMININA';
+    return 'Outros';
+  }
 
   const tvLedAccessory = /\b(barras? de led|led bars?|led strips?|fitas? led)\b/.test(titleKey) &&
     /\b(tvs?|televisao|televisor|televisions?)\b/.test(titleKey);
@@ -144,13 +165,13 @@ const titleKey = normalizeKey(title);
   const utilityOverride = /\b(porta chaves?|porta chaveiro|key holders?|key racks?)\b/.test(titleKey) ||
     /\bcortadores? de biscoitos?\b/.test(titleKey) ||
     (/\b(arejador(?:es)?|aerador(?:es)?|ejador(?:es)?)\b/.test(titleKey) && /\b(torneiras?|tornerias?|faucets?|taps?)\b/.test(titleKey));
-  if (utilityOverride) return 'Utilidades';
+  if (utilityOverride) return 'Casa & Cozinha';
 
-  if (/(papel de parede|wallpaper)/.test(titleKey) && /(ps4|playstation|playgaming|gaming|gamer)/.test(titleKey)) return 'Utilidades';
+  if (/(papel de parede|wallpaper)/.test(titleKey) && /(ps4|playstation|playgaming|gaming|gamer)/.test(titleKey)) return 'Casa & Cozinha';
 
   // As novas abas têm prioridade sobre categorias genéricas antigas do feed.
   // Sensores de torneira e módulos de deteção/controlos elétricos vão para a
-  // categoria elétrica/hidráulica, não para Utilidades ou Luminárias.
+  // categoria elétrica/hidráulica, não para Casa & Cozinha ou Luminárias.
   const plumbingFixture = /\b(torneiras?|tornerias?|faucets?|taps?|bacias?|cubas?|lavatorios?|lavabos?|sifoes?|ralos?)\b/.test(titleKey);
   const electricalSensor = /\b(sensor|modulo)\b/.test(titleKey) &&
     /\b(infravermelho|corpo humano|radar|movimento|controle de luz|luz sonora)\b/.test(titleKey);
@@ -171,14 +192,14 @@ const titleKey = normalizeKey(title);
   // Alimentos e utensílios/acessórios de Air Fryer não são eletrodomésticos.
   if (/\badocantes?\b/.test(text)) return 'Alimentos & Bebidas';
   if (/(botao|peca|reparo|reposicao).{0,60}air fryer|air fryer.{0,60}(botao|peca|reparo|reposicao)/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
-  if (/(silicone.{0,50}(panela|forma|forro|cesto).{0,70}air fryer|air fryer.{0,70}(silicone.{0,50}(panela|forma|forro|cesto)|forro|papel descartavel|pegador|pinca|limpa|limpeza|desengordurante)|forro.{0,50}air fryer|pegador culinario.{0,60}air fryer|pinca.{0,60}air fryer|tapete.{0,40}silicone.{0,40}air fryer|limpa air fryer|kit.{0,40}limpa air fryer)/.test(titleKey)) return 'Utilidades';
+  if (/(silicone.{0,50}(panela|forma|forro|cesto).{0,70}air fryer|air fryer.{0,70}(silicone.{0,50}(panela|forma|forro|cesto)|forro|papel descartavel|pegador|pinca|limpa|limpeza|desengordurante)|forro.{0,50}air fryer|pegador culinario.{0,60}air fryer|pinca.{0,60}air fryer|tapete.{0,40}silicone.{0,40}air fryer|limpa air fryer|kit.{0,40}limpa air fryer)/.test(titleKey)) return 'Casa & Cozinha';
   if (/(fogareiro|fogao).{0,50}eletric|eletric.{0,50}(fogareiro|fogao)/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
 
   // O produto principal prevalece sobre acessórios incluídos no kit ou citados
   // como compatibilidade no título.
   if (/\bmoto serras?\b|\bmotosserras?\b/.test(titleKey)) return 'Ferramentas';
   if (/(mini moto de dedo|moto de dedo|moto.{0,35}brinquedo|brinquedo.{0,35}moto)/.test(titleKey)) return 'Brinquedos';
-  if (/^(kit )?(pc gamer|computador.{0,25}(gamer|desktop)|desktop.{0,25}gamer)/.test(titleKey)) return 'Computadores';
+  if (/^(kit )?(pc gamer|computador.{0,25}(gamer|desktop)|desktop.{0,25}gamer)/.test(titleKey)) return 'Informática';
   if (/(som automotivo|radio automotivo|radio de carro|som de carro|aparelho de som.{0,45}(carro|automotivo)|radio veicular)/.test(titleKey)) return 'AUTO & ACESSÓRIOS';
   if (/(radio portatil|radio fm|radio am|radio digital|radio de emergencia|radio transistor|receptor de radio)/.test(titleKey)) return 'Aparelhos de Som';
   if (/(bicicleta ergometrica|bicicleta de academia|bike de academia)/.test(titleKey)) return 'Esportes & Lazer';
@@ -207,7 +228,7 @@ const titleKey = normalizeKey(title);
   if (/(pelicula|capa|capinha|case|pouch|estojo|suporte|carregador|cabo|power bank|protetor de tela).{0,120}(celular|smartphone|iphone|galaxy|android|samsung|xiaomi|motorola|redmi|phone)|(celular|smartphone|iphone|galaxy|android|samsung|xiaomi|motorola|redmi|phone).{0,120}(pelicula|capa|capinha|case|pouch|estojo|suporte|carregador|cabo|power bank|protetor de tela)/.test(text)) return 'Acessórios para celulares';
   if (/(som automotivo|radio automotivo|radio de carro|som de carro|aparelho de som.{0,45}(carro|automotivo)|carro.{0,45}(radio|som automotivo)|amplificador.{0,60}(carro|automotivo|veicular)|audio.{0,60}(carro|automotivo|veicular)|moldura.{0,35}(radio|som))/.test(text)) return 'AUTO & ACESSÓRIOS';
   if (/\bmoto\b|motocicleta|capacete|bauleto|cb ?\d|biz 125|crosser|twister/.test(text) && !/(bicicleta.{0,40}eletrica|bike.{0,40}eletrica|e bike|ebike|motorola.{0,20}\bmoto\b)/.test(text)) return 'MOTOS & ACESSÓRIOS';
-  if (/(headset|fone de ouvido|headphone).{0,60}(mouse gamer|teclado gamer)|(mouse gamer|teclado gamer).{0,60}(headset|fone de ouvido|headphone)/.test(text)) return 'Computadores';
+  if (/(headset|fone de ouvido|headphone).{0,60}(mouse gamer|teclado gamer)|(mouse gamer|teclado gamer).{0,60}(headset|fone de ouvido|headphone)/.test(text)) return 'Informática';
   if (/(fone[s]? (bluetooth|sem fio|tws|gamer|de ouvido)|headset|headphone|fone de ouvido|fone gamer|earphone|earbud)/.test(text) && !/(amplificador|amplifier|\bdac\b)/.test(text)) return 'Fones & Headphones';
   if (/\b(microfone|microfones)\b/.test(text)) return 'Aparelhos de Som';
   if (/(videogame|video game|mini game|console gamer|console de jogos|game console|console de videogame|joystick|controle gamer)/.test(text)) return 'Games';
@@ -235,7 +256,7 @@ const titleKey = normalizeKey(title);
   if (/(toyota|yaris|corolla|honda|volkswagen|fiat|ford|chevrolet|hyundai|kia).{0,90}(valvula|virabrequim|cabecote|motor|pistao|biela|embreagem|comando|peca)|\b(virabrequim|cabecote|pistao|biela|tampa( de)? valvulas?)\b/.test(text)) return 'AUTO & ACESSÓRIOS';
   if (/(microondas|micro ondas|forno).{0,80}(prato|carrossel|carrocel|bandeja|suporte)|\b(prato|carrossel|carrocel|bandeja).{0,80}(microondas|micro ondas|forno)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(capacitor|fusivel|magnetron|membrana.{0,35}(microondas|micro ondas)|motor prato|prato.{0,35}(microondas|micro ondas)|kit mica|eletrobomba|batedor.{0,35}(batedeira|tanquinho)|bucha.{0,35}(agitador|lavadora)|gabinete.{0,35}(maquina de lavar|lavadora)|bomba de agua.{0,35}(maquina de lavar|lavadora)|conjunto eletrodo.{0,25}(fogao|cooktop)|kit.{0,35}(espalhador|queimador).{0,25}fogao|acessorios?.{0,45}(fogao|microondas|micro ondas|lavadora|tanquinho|aspirador|geladeira|batedeira)|pecas?.{0,45}(fogao|microondas|micro ondas|lavadora|tanquinho|aspirador|geladeira|batedeira)|fusivel.{0,45}(microondas|micro ondas)|termostato.{0,45}(microondas|micro ondas))/.test(text)) return 'ELETRO & ACESSÓRIOS';
-  if (/(pc gamer|computador gamer|computador desktop|desktop gamer|placa mae|placa de video|memoria ram|processador para pc|processador intel|processador amd)/.test(text)) return 'Computadores';
+  if (/(pc gamer|computador gamer|computador desktop|desktop gamer|placa mae|placa de video|memoria ram|processador para pc|processador intel|processador amd)/.test(text)) return 'Informática';
   if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
   if (/(smartphone|celular|iphone|galaxy|poco [a-z0-9]+|android phone)/.test(text)) return 'Smartphones';
@@ -250,7 +271,8 @@ const titleKey = normalizeKey(title);
   // ou "pelúcia" usadas no título do anúncio.
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno|tamanco).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno)/.test(text)) return 'Calçados Femininos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno).{0,55}(masculino|homem|men)|\b(masculino|homem|men).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado|chuteira|mocassim|coturno)/.test(text)) return 'Calçados Masculino';
-  if (/(escova de limpeza|escova para limpeza|limpeza|limpador|limpa janela|limpa vidro|faxina|lavagem|higienizacao|higienizador|lixeira|lixo|cesto de lixo|organizador|caixa organizadora|cesto|cesta|armazenamento|multiuso|armario organizador|luminaria|abajur|luz noturna|luz de mesa)/.test(text)) return 'Utilidades';
+  if (/(panela|frigideira|espremedor manual|espremedor de frutas|utensilio[s]? de cozinha|prato|talher|pote[s]? hermetico|pote[s]? de vidro|porta tempero|organizador.{0,30}(tempero|cozinha)|tempero[s]?.{0,30}organizador|tabua de corte|espatula|taca[s]?|copo[s]?|faqueiro[s]?|forma de bolo|garrafa termica|cafeteira|chaleira|jarra para cafeteira|escorredor de louca|secador de louca)/.test(text)) return 'Casa & Cozinha';
+  if (/(escova de limpeza|escova para limpeza|limpeza|limpador|limpa janela|limpa vidro|faxina|lavagem|higienizacao|higienizador|lixeira|lixo|cesto de lixo|organizador|caixa organizadora|cesto|cesta|armazenamento|multiuso|armario organizador|luminaria|abajur|luz noturna|luz de mesa)/.test(text)) return 'Casa & Cozinha';
   if (/(cozinha infantil de brinquedo|cozinha de brinquedo|mini cozinha.{0,25}brinquedo|fogao.{0,25}de brinquedo|kit cozinha infantil.{0,25}brinquedo)/.test(text)) return 'Brinquedos';
   // Utensílios de cozinha vencem termos comerciais como "multifuncional";
   // frigideiras e panelas não são máquinas nem impressoras.
@@ -259,23 +281,23 @@ const titleKey = normalizeKey(title);
   // o anúncio usa "processador" ou "multifuncional".
   if (/(mixer|batedeira|liquidificador|triturador de alimentos|processador de alimentos|processador.{0,30}(ovo|alimento|cozinha)|triturador.{0,30}(ovo|alimento|cozinha))/.test(text)) return 'Eletrodomésticos';
   // Cortadoras de papel e máquinas de corte pertencem a Máquinas & Impressoras,
-  // ainda que o feed tenha enviado a categoria Notebook.
+  // ainda que o feed tenha enviado uma categoria antiga de notebook.
   if (/(maquina de corte|cortadora de papel|cortador de papel|corte de papel|papel redondo)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
   if (/(capacitor|capacitores).{0,70}(microondas|micro ondas|forno)|\b(microondas|micro ondas|forno).{0,70}(capacitor|capacitores)/.test(text)) return 'ELETRO & ACESSÓRIOS';
-  if (/(monitor|display).{0,55}(computador|pc|desktop|hdmi|vga)|\b(computador|pc|desktop).{0,55}(monitor|display)/.test(text)) return 'Computadores';
+  if (/(monitor|display).{0,55}(computador|pc|desktop|hdmi|vga)|\b(computador|pc|desktop).{0,55}(monitor|display)/.test(text)) return 'Informática';
   if (/(tanquinho|maquina de lavar|lavadora|lavar roupa).{0,90}(\d+\s?kg|programas?|timer|capacidade|centrifug|automatica|automatico|digital)|\b(tanquinho|maquina de lavar|lavadora)\b/.test(text)) return 'Eletrodomésticos';
   if (/(brinqued|boneca|boneco|lego|pelucia|quebra cabeca|massinha|playset|carrinho infantil|jogo infantil|tabuleiro infantil|fantasia infantil)/.test(text)) return 'Brinquedos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(feminino|mulher|women)|\b(feminino|mulher|women).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Femininos';
   if (/(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado).{0,55}(masculino|homem|men)|\b(masculino|homem|men).{0,55}(tamanco|sandalia|sapato|chinelo|bota|sapatilha|scarpin|calcado)/.test(text)) return 'Calçados Masculino';
-  if (/(teclado gamer|teclado mecanico gamer|mouse gamer|mouse para jogos|monitor para pc|webcam|hub usb|adaptador bluetooth para pc|placa de video|memoria ram|processador)/.test(text)) return 'Computadores';
+  if (/(teclado gamer|teclado mecanico gamer|mouse gamer|mouse para jogos|monitor para pc|webcam|hub usb|adaptador bluetooth para pc|placa de video|memoria ram|processador)/.test(text)) return 'Informática';
   if (/(martelo de carne|amaciador de carne|batedor de carne|amassador de carne|ralador|descascador|abridor de lata|utensilio culinario)/.test(text)) return 'Casa & Cozinha';
-  if (/(escova de limpeza|escova para limpeza|limpeza|limpador|limpa janela|limpa vidro|faxina|lavagem|higienizacao|higienizador)/.test(text)) return 'Utilidades';
+  if (/(escova de limpeza|escova para limpeza|limpeza|limpador|limpa janela|limpa vidro|faxina|lavagem|higienizacao|higienizador)/.test(text)) return 'Casa & Cozinha';
   if (/(organizador|caixa organizadora).{0,80}(parafuso|bucha|cavilha|fixador|terminal|ferramenta)|\b(kit|caixa) de ferramentas\b/.test(text)) return 'Ferramentas';
-  if (/(organizador|caixa organizadora|cesto|cesta|armazenamento|multiuso|armario organizador|luminaria|luminaria de mesa|abajur|luz de mesa|mosquiteiro|mosquiteira)/.test(text)) return /mosquiteir/.test(text) ? 'CAMA/MESA/BANHO' : 'Utilidades';
+  if (/(organizador|caixa organizadora|cesto|cesta|armazenamento|multiuso|armario organizador|luminaria|luminaria de mesa|abajur|luz de mesa|mosquiteiro|mosquiteira)/.test(text)) return /mosquiteir/.test(text) ? 'CAMA/MESA/BANHO' : 'Casa & Cozinha';
   if (/(escorredor de louca|escorredor de pratos|secador de louca|secador de pratos|porta pratos|prateleira de cozinha)/.test(text)) return 'Casa & Cozinha';
   if (/(extratora|lavadora de estofados|limpa estofado|aspirador de estofado)/.test(text)) return 'Eletrodomésticos';
   if (/(pneu|camara de ar).{0,35}(bicicleta|bike)|\b(bicicleta|bike).{0,45}(pneu|camara de ar|e bike|eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
-  if (/(torneira|registro de agua|arejador|adaptador de torneira|conector de torneira|mangueira de torneira)/.test(text)) return 'Utilidades';
+  if (/(torneira|registro de agua|arejador|adaptador de torneira|conector de torneira|mangueira de torneira)/.test(text)) return 'Casa & Cozinha';
   if (/(tomada|interruptor|plugue|adaptador eletrico|conector eletrico|soquete)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(mini impressora|impressora termica|impressora portatil|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
   // TV continua em TVs mesmo quando o anúncio também inclui soundbar.
@@ -285,9 +307,9 @@ const titleKey = normalizeKey(title);
   if (/(amplificador|alto falante de som|saude auditiva|radio portatil|radio fm|speaker|caixa de som|aparelho de som|som bluetooth)/.test(text)) return 'Aparelhos de Som';
   if (/(bicicleta ergometrica|bicicleta de academia|bike de academia)/.test(text)) return 'Esportes & Lazer';
   if (/(bicicleta|bike|e bike|ebike|bike eletrica|bicicleta eletrica)/.test(text)) return 'Bike Elétrica e Acessórios';
-  if (/(mochila|mala|bolsa|case|capa).{0,45}(notebook|laptop)|\b(conector|adaptador|fonte|carregador|alto falante).{0,45}(notebook|laptop)/.test(text)) return /\b(conector|adaptador|fonte|carregador|alto falante)\b/.test(text) ? 'Computadores' : 'Utilidades';
+  if (/(mochila|mala|bolsa|case|capa).{0,45}(notebook|laptop)|\b(conector|adaptador|fonte|carregador|alto falante).{0,45}(notebook|laptop)/.test(text)) return /\b(conector|adaptador|fonte|carregador|alto falante)\b/.test(text) ? 'Informática' : 'Casa & Cozinha';
   if (/(headset|headphone|fone de ouvido|fone gamer|earphone|earbud)/.test(text)) return 'Fones & Headphones';
-  if (/(lixeira|lixo|cesto de lixo|cesto para lixo|varal|cabideiro|secador de roupas|organizador de roupas|cabide|prendedor de roupa)/.test(text)) return 'Utilidades';
+  if (/(lixeira|lixo|cesto de lixo|cesto para lixo|varal|cabideiro|secador de roupas|organizador de roupas|cabide|prendedor de roupa)/.test(text)) return 'Casa & Cozinha';
   if (/(lavadora de alta pressao|maquina de lavar.{0,30}alta press|hidrolavadora|lavadora pressao)/.test(text)) return 'Ferramentas';
   // Motores e peças de tanquinho pertencem a peças de eletrodomésticos;
   // o tanquinho completo pertence a Eletrodomésticos.
@@ -300,7 +322,8 @@ const titleKey = normalizeKey(title);
   if (mobilePhoneAccessoryPattern.test(text)) return 'Acessórios para celulares';
   if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
   if (/(smartwatch|smart watch|relogio inteligente|galaxy watch|apple watch)/.test(text)) return 'RELÓGIOS';
-  if (/(honda|motociclet|\bmoto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis)/.test(text)) return 'MOTOS & ACESSÓRIOS';
+  if (/(motociclet|motorcycle|motorbike|motocross|gear shift|pedal de moto|capacete de moto|bauleto|carenagem|moto pecas|pecas de moto)/.test(text) ||
+      (/\bmoto\b/.test(text) && !/(motorola|smartphone|celular|iphone|android)/.test(text))) return 'MOTOS & ACESSÓRIOS';
   if (/(carro|automotivo|veiculo|autopeca|acessorio automotivo|tapete automotivo|suporte veicular|camera veicular)/.test(text)) return 'AUTO & ACESSÓRIOS';
   if (/(ferramenta|furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
   if (/(impressora|jato de tinta|multifuncional|plotter|scanner|rotulador|etiquetadora)/.test(text)) return 'MÁQUINAS & IMPRESSORAS';
@@ -308,12 +331,12 @@ const titleKey = normalizeKey(title);
   // Peças, módulos e reposição de lavadoras e micro-ondas são acessórios de eletro.
   if (/(peca|modulo|sensor|agitador|micro chave|protetor de polia|banda|cinta|atuador|tirante|reparo|reposicao).{0,80}(lavadora|lavar|maquina de lavar|micro ondas|microondas|brastemp|consul)|\b(lavadora|maquina de lavar|micro ondas|microondas).{0,80}(peca|modulo|sensor|agitador|micro chave|protetor|banda|cinta|atuador|tirante|reparo|reposicao)/.test(text)) return 'ELETRO & ACESSÓRIOS';
   if (/(frigideira|panela|espremedor manual|espremedor de frutas|utensilio de cozinha|prato|talher|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
-  if (/(bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Utilidades';
+  if (/(bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Casa & Cozinha';
   // Vestidos, saias e peças explicitamente femininas não podem cair em Moda Masculina
   // só porque o feed forneceu essa categoria genérica.
   if (/(vestido|saia|cropped|lingerie|blusa feminina|calca feminina|calca de mulher|moda feminina|feminina|mulher|women)/.test(text)) return 'Moda Feminina';
   if (/(camisa|camiseta|regata|shorts?|bermuda|calca|blusa|roupa|jaqueta)/.test(text)) {
-    if (/(infantil|bebe|crianca|kids)/.test(text)) return 'CALÇADOS INFANTIS M/F';
+    if (/(infantil|bebe|crianca|kids)/.test(text)) return 'Outros';
     if (/(feminin|mulher|women)/.test(text)) return 'Moda Feminina';
     return 'Moda Masculina';
   }
@@ -330,9 +353,10 @@ const titleKey = normalizeKey(title);
   // Painéis, racks e suportes para TV são móveis; a TV eletrônica fica em TVs.
   if (/(painel|rack|estante|moveis?).{0,45}(tv|televisao)|\b(tv|televisao).{0,45}(painel|rack|estante|moveis?)/.test(text)) return 'Móveis';
 
-  // Peças e proteção de moto não são calçados, mesmo quando o título cita
-  // pedal, tênis ou sapato para descrever o produto.
-  if (/(\bhonda\b|motociclet|\bmoto\b|gear shift|pedal de moto|protetor de calcado|protetor de tenis).{0,90}(calcado|tenis|sapato|pedal|protetor)?/.test(text)) return 'MOTOS & ACESSÓRIOS';
+    // A categoria de moto depende de sinais de motocicleta; a marca Honda sozinha
+  // também aparece em anúncios de carros.
+  if (/(motociclet|gear shift|pedal de moto)/.test(text) ||
+      (/\bmoto\b/.test(text) && !/(motorola|smartphone|celular|iphone|android)/.test(text))) return 'MOTOS & ACESSÓRIOS';
 
   // Ferramentas manuais e elétricas não devem ficar junto de impressoras.
   if (/(ferramenta|furadeira|parafusadeira|serra|serrote|martelo|martelete|broca|motosserra|esmerilhadeira|lixadeira|alicate|chave[s]? de|kit de ferramentas|caixa de ferramentas|organizador de ferramentas|escada|grampeador|pregador|torno|chave inglesa)/.test(text)) return 'Ferramentas';
@@ -346,22 +370,22 @@ const titleKey = normalizeKey(title);
 
   // Frigideiras, panelas, espremedores e utensílios pertencem a Casa & Cozinha.
   if (/(frigideira|panela|espremedor manual|espremedor de frutas|utensilio de cozinha|prato|talher|cozinha|garrafa termica|cafeteira|chaleira|jarra para cafeteira)/.test(text)) return 'Casa & Cozinha';
-  // Torneiras com sensor e itens domésticos semelhantes permanecem em Utilidades.
-  if (/(bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Utilidades';
+  // Torneiras com sensor e itens domésticos semelhantes permanecem em Casa & Cozinha.
+  if (/(bico infravermelho|sensor.{0,35}torneira|torneira.{0,35}sensor)/.test(text)) return 'Casa & Cozinha';
 
-  if (/(coala home|odorizante|aromatizante|difusor de aromas|home spray|antimofo|evita mofo|desumidificador|limpeza|limpador)/.test(text)) return 'Utilidades';
-  if (/(relogio despertador|despertador|relogio de mesa)/.test(text)) return 'Utilidades';
+  if (/(coala home|odorizante|aromatizante|difusor de aromas|home spray|antimofo|evita mofo|desumidificador|limpeza|limpador)/.test(text)) return 'Casa & Cozinha';
+  if (/(relogio despertador|despertador|relogio de mesa)/.test(text)) return 'Casa & Cozinha';
   if (/(vela.{0,25}(filtro de barro|filtro de agua)|filtro de barro.{0,25}vela)/.test(text)) return 'Casa & Cozinha';
   if (/(caminhao.{0,35}(engolir|dinossauro)|dinossauro.{0,35}(caminhao|carros))/.test(text)) return 'Brinquedos';
   if (/(brinqued|toys?|bonec|lego|pelucia|quebra cabeca|massinha de modelar|playset|carrinho infantil)/.test(text)) return 'Brinquedos';
   if (/\b(creme facial|hidratante facial|protetor solar|creme para pentear|escova secadora|oleo nutritivo)\b/.test(text)) return 'Cuidado & Beleza';
   if (/\b(petiscos?|racao|racoes|coleiras?|peitoral|cachorros?|cao|caes|gatos?|animal de estimacao|produto pet|pets?)\b/.test(text)) return 'Pets';
   if (/(instrumento musical|violino|violao|guitarra|ukulele|espaleira|cavaquinho|bateria musical|teclado musical)/.test(text)) return 'Instrumentos Musicais';
-  if (/(moda infantil|roupa infantil|roupas infantis|vestido infantil|conjunto infantil|roupa de bebe|roupas de bebe)/.test(text)) return 'CALÇADOS INFANTIS M/F';
+  if (/(moda infantil|roupa infantil|roupas infantis|vestido infantil|conjunto infantil|roupa de bebe|roupas de bebe)/.test(text)) return 'Outros';
   if (/(smart ?tv|televis|\btv\b)/.test(text)) return 'TVs';
-  if (/(notebook|laptop|chromebook)/.test(text)) return 'Notebook';
+  if (/(notebook|laptop|chromebook)/.test(text)) return 'Informática';
   if (/(camera de seguranca|camera wi fi|camera wifi)/.test(text)) return 'ELETRÔNICOS';
-  if (/(computador|desktop|pc gamer|placa mae|placa de video|memoria ram)/.test(text)) return 'Computadores';
+  if (/(computador|desktop|pc gamer|placa mae|placa de video|memoria ram)/.test(text)) return 'Informática';
   if (/(smartwatch|smart watch|relogio inteligente)/.test(text)) return 'ELETRÔNICOS';
   if (/(smartphone|celular|iphone|android phone)/.test(text)) return 'Smartphones';
   if (/(fone de ouvido|headphone|headset|earbud|caixa de som|soundbar|alto falante)/.test(text)) return 'Fones & Headphones';
@@ -382,11 +406,13 @@ const titleKey = normalizeKey(title);
   if (/(academia|halter|esteira|bicicleta|camping|esporte|fitness|bola de futebol)/.test(text)) return 'Esportes & Lazer';
   if (/(maquiagem|cosmetico|skincare|perfume|cuidado com a pele|beleza|monitor de pressao|aparelho de pressao|manicure|unhas?|esmalte|gel uv|pinceis)/.test(text)) return 'Cuidado & Beleza';
   if (/(cafe|\bcha\b|alimento|bebida|suplemento|chocolate|mantimento)/.test(text)) return 'Alimentos & Bebidas';
-  if (/\b(carros?|automotivo|moto|veiculo|scooter|patinete eletrico|acessorio automotivo)\b/.test(text)) return 'MOTOS & ACESSÓRIOS';
-  if (/(utilidade|organizador|selador|limpeza|armazenamento|pote hermetico)/.test(text)) return 'Utilidades';
+  if (/\b(moto|motocicleta|motorcycle|motorbike|motocross|capacete.{0,25}motocicl|bauleto|carenagem|retrovisor.{0,20}moto|corrente.{0,20}moto|pneu.{0,20}moto|pastilha.{0,20}moto|escapamento.{0,20}moto|moto pecas|pecas de moto)\b/.test(text) &&
+      !/\b(motorola|celular|smartphone|iphone|android)\b/.test(text)) return 'MOTOS & ACESSÓRIOS';
+  if (/\b(carros?|automotivo|automotiva|veicular|veiculo|autopeca|acessorio automotivo|tapete automotivo|suporte veicular|camera veicular|car accessories|auto parts)\b/.test(text)) return 'AUTO & ACESSÓRIOS';
+  if (/(utilidade|organizador|selador|limpeza|armazenamento|pote hermetico)/.test(text)) return 'Casa & Cozinha';
   if (/(camisa|camiseta|regata|shorts?|bermuda|calca|blusa|saia|vestido|roupa|jaqueta|cropped|lingerie)/.test(text)) {
+    if (/(infantil|bebe|crianca|kids)/.test(text)) return 'Outros';
     if (/(masculin|homem|men\b)/.test(text)) return 'Moda Masculina';
-    if (/(infantil|bebe|crianca|kids)/.test(text)) return 'CALÇADOS INFANTIS M/F';
     return /(feminin|mulher|women|unissex|unisex)/.test(text) ? 'Moda Feminina' : 'Moda Masculina';
   }
   return undefined;
@@ -416,9 +442,11 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     return 'Eletrodomésticos';
   }
   const isElectroCategory = exact === 'Eletrodomésticos' || exact === 'ELETRO & ACESSÓRIOS';
-  const isElectroAccessoryTitle = /\b(eletrobomba|capacitor|diodo|detector|display|fusivel|magnetron|membrana|motor prato|prato de microondas|kit mica|batedor|bucha|agitador|usina|acendedor|eletrodo|interruptor|lampada|mangueiras?|mangureiras?|espalhadores?|tampinhas?|queimadores?|bocas? de fogao|gaxeta|vedacao|peca|modulo|reparo|reposicao|acessorio|sensor|tirantes?|pressostatos?|atuadores?|polias?|micro chave|cinta do freio|saca agitador|molas? de suspensao)\b/.test(titleKey) ||
-    (/\bpe almofada\b/.test(titleKey) && /\b(microondas|micro ondas)\b/.test(titleKey));
-  if (isElectroCategory && isElectroAccessoryTitle) return 'ELETRO & ACESSÓRIOS';
+  const applianceTitleSignal = /\b(geladeira|refrigerador|fogao|microondas|micro ondas|lava roupa|lavadora|tanquinho|air fryer|fritadeira eletrica|ar condicionado|cafeteira eletrica|sanduicheira|liquidificador|batedeira|aspirador|maquina de lavar|secadora|forno eletrico|freezer|ventilador|purificador de agua|lava loucas?)\b/.test(titleKey);
+  const accessoryTitleHead = /^(?:(?:kit|conjunto|jogo|dois|tres|quatro|seis|\d+)\s+){0,3}(?:(?:c|com)\s+\d+\s+)?(?:eletrobomba|capacitor|diodo|detector|display|fusivel|magnetron|membrana|motor|bomba|valvula|placa|resistencia|batedor|bucha|agitador|usina|acendedor|eletrodo|interruptor|lampadas?|mangueiras?|mangureiras?|espalhadores?|tampinhas?|queimadores?|bocas? de fogao|gaxeta|vedacao|pecas?|acessorios?|reparo|reposicao|sensor|tirantes?|pressostatos?|atuadores?|polias?|micro chave|cinta|saca agitador|molas?|filtro|capa|forro|protetor|bandeja|cesto|grade|grelha)\b/.test(titleKey) ||
+    (/^(?:pe almofada|almofada)\b/.test(titleKey) && /\b(microondas|micro ondas)\b/.test(titleKey));
+  if (isElectroCategory && applianceTitleSignal && accessoryTitleHead) return 'ELETRO & ACESSÓRIOS';
+  if (isElectroCategory && applianceTitleSignal) return 'Eletrodomésticos';
   if (isElectroCategory) return exact;
   const acessoriosEletrodomesticosConfirmados = new Set([
     normalizeKey('Eletrobomba Bomba De Agua Maquina De Lavar Electrolux 15kg 127v'),
@@ -515,7 +543,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/\b(toalha[s]?|toalhas?)\b/.test(titleKey) && /\bmesa[s]?\b/.test(titleKey)) return 'CAMA/MESA/BANHO';
   if (/\b(sensor|sensores)\b/.test(titleKey) && /\b(pressao|contato|alarme|cama escolar|resistencia)\b/.test(titleKey)) return 'ELETRÔNICOS';
   if (/\b(rgb|luz de perseguicao|monitor de mesa)\b/.test(titleKey) && /\b(luz|decoracao|computador|monitor|jogos?)\b/.test(titleKey)) return 'ELETRÔNICOS';
-  if (/\bpratos?\b/.test(titleKey) && /\b(jogo de pratos?|prato de jantar|ceramica|mesa posta)\b/.test(titleKey)) return 'Utilidades';
+  if (/\bpratos?\b/.test(titleKey) && /\b(jogo de pratos?|prato de jantar|ceramica|mesa posta)\b/.test(titleKey)) return 'Casa & Cozinha';
   if (/\b(escova|escovas)\b/.test(titleKey) && /\b(lavar louca|lava louca|fogao de cozinha)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (/\b(maquina de lavar louca|lavadora de louca|lava loucas?|lavar louca)\b/.test(titleKey)) return 'Eletrodomésticos';
   if (/\b(mangueiras?|mangureiras?)\b/.test(titleKey) && /\b(tanquinho|lavadora|maquina de lavar)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
@@ -524,7 +552,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/\b(manipulo|man[ií]pulo)\b/.test(titleKey) && /\bfogao\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (/\btigela\b/.test(titleKey) && /\b(batedeira|planetaria)\b/.test(titleKey)) return 'Casa & Cozinha';
   if (/\b(vedacao|gaxeta)\b/.test(titleKey) && /\b(porta forno|forno|fogao)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
-  if (/\b(enfeite televisor retro|monitor boneca|tela expositor)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(enfeite televisor retro|monitor boneca|tela expositor)\b/.test(titleKey)) return 'Casa & Cozinha';
 
   if (/\b(mangueiras?|removedor(?:es)? de cabelo|acessorios?)\b/.test(titleKey) && /\b(tanquinho|lavadora|maquina de lavar|robo aspirador|aspirador de po)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   if (/\b(espalhadores?|queimadores?|bocas?)\b/.test(titleKey) && /\b(fogao|fogoes)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
@@ -535,8 +563,8 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   // categorias antigas e palavras secundárias (bicicleta, lâmpada, mochila).
   if (/\bcabo de forca\b/.test(titleKey) && /\b(bipolar|energia|10a)\b/.test(titleKey) &&
       /\b(tv|samsung|lg|ps4|ps5|xbox|impressoras?)\b/.test(titleKey)) return 'ELETRÔNICOS';
-  if (/\b(playstation|ps[1-5])\b/.test(titleKey) && /\b(kit festa|festa em casa|aniversario|mesversario)\b/.test(titleKey)) return 'Utilidades';
-  if (/\b(bonecos?|figuras?)\b/.test(titleKey) && /\b(playstation|simbolos? playstation)\b/.test(titleKey) && /\b(impressao 3d|articulados?)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(playstation|ps[1-5])\b/.test(titleKey) && /\b(kit festa|festa em casa|aniversario|mesversario)\b/.test(titleKey)) return 'Casa & Cozinha';
+  if (/\b(bonecos?|figuras?)\b/.test(titleKey) && /\b(playstation|simbolos? playstation)\b/.test(titleKey) && /\b(impressao 3d|articulados?)\b/.test(titleKey)) return 'Casa & Cozinha';
   if (/\b(fogao|cooktop)\b/.test(titleKey) && /\b(4 bocas|quatro bocas)\b/.test(titleKey) &&
       /\b(inox|embutir|acendimento|bivolt|star new|essencial|mesa cozinha|cozinha moderna|vidro)\b/.test(titleKey)) return 'Eletrodomésticos';
   if (/\b(caixas? de som|soundbar|alto falante)\b/.test(titleKey) && /\b(bluetooth|sem fio|wireless)\b/.test(titleKey)) return 'Aparelhos de Som';
@@ -544,7 +572,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
       !/\b(mesa de som|mesa digitalizadora|mesa de trabalho de costura)\b/.test(titleKey)) return 'Móveis';
   if (/\b(mini cozinha|cozinha de brincar|freezer cooker|brincar de cozinhar)\b/.test(titleKey) &&
       /\b(brinquedo|brincar|infantil|rosa|educativo|comidinhas|fogao|forno|freezer)\b/.test(titleKey)) return 'Brinquedos';
-  if (/\b(carimbo|marcador|molde)\b/.test(titleKey) && /\b(brigadeiros?|confeitaria|confeiteiros?|aniversario|festa)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(carimbo|marcador|molde)\b/.test(titleKey) && /\b(brigadeiros?|confeitaria|confeiteiros?|aniversario|festa)\b/.test(titleKey)) return 'Casa & Cozinha';
   if (/(smartwatch|smart watch)/.test(titleKey) && /\b(fone de ouvido|fone|headphone|earphone)\b/.test(titleKey) && /\b(conjunto|kit|em 1|presente)\b/.test(titleKey)) return 'RELÓGIOS';
   if (/\b(bolsas?|bolsinhas?|clutches?|mini bags?)\b/.test(titleKey) &&
       /\b(mao|tiracolo|transversal|clutch|mini bag|handbag)\b/.test(titleKey)) return 'BOLSAS & MOCHILAS';
@@ -552,7 +580,7 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/\b(camisas?|camisetas?)\b/.test(titleKey) &&
       /\b(masculino|masculina)\b/.test(titleKey) && /\b(feminino|feminina)\b/.test(titleKey) &&
       /\b(musculacao|academia)\b/.test(titleKey)) return 'Moda Masculina';
-  if (/\b(relogios? despertador|despertadores?|alarm clocks?)\b/.test(titleKey)) return 'Utilidades';
+  if (/\b(relogios? despertador|despertadores?|alarm clocks?)\b/.test(titleKey)) return 'Casa & Cozinha';
   if (/\b(vestidos?|macaquinhos?)\b/.test(titleKey) &&
       /\b(infantil|juvenil|crianca|criancas|menina|meninas|kids)\b/.test(titleKey) &&
       /\b(princesa|ballet|bale|jazz|ginastica ritmica|tule|festa infantil|decote halter)\b/.test(titleKey)) return 'MODA INFANTIL FEMININA';
@@ -566,10 +594,10 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/\b(lampadas?|bulbs?)\b/.test(titleKey) && /\b(g9|fogao|fogoes|forno|fornos|cooktop|fisher|electrolux)\b/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   // Componentes de computador podem conter traduções erradas como “liquidificador”.
   if (/^(processador de chip cpu de computador|liquidificador computador cpu chip su processador)/.test(titleKey) &&
-      /(cpu|processador)/.test(titleKey) && /(chip|c4d|snapdragon|qualcomm|maya|rhino|3dmax|fbx)/.test(titleKey)) return 'Computadores';
+      /(cpu|processador)/.test(titleKey) && /(chip|c4d|snapdragon|qualcomm|maya|rhino|3dmax|fbx)/.test(titleKey)) return 'Informática';
   // Organizadores e forros de geladeira são utilidades, não eletrodomésticos.
-  if (/geladeira/.test(titleKey) && /(caixa|cesta|cesto|organiz|armazenamento)/.test(titleKey)) return 'Utilidades';
-  if (/geladeira/.test(titleKey) && /toalhas?/.test(titleKey)) return 'Utilidades';
+  if (/geladeira/.test(titleKey) && /(caixa|cesta|cesto|organiz|armazenamento)/.test(titleKey)) return 'Casa & Cozinha';
+  if (/geladeira/.test(titleKey) && /toalhas?/.test(titleKey)) return 'Casa & Cozinha';
   // Grades/grelhas vendidas como acessórios para micro-ondas são peças de eletro.
   if (/(microondas|micro ondas)/.test(titleKey) && /(grade|grelha|malha)/.test(titleKey) && /acessorios?/.test(titleKey)) return 'ELETRO & ACESSÓRIOS';
   // Componentes de lavadora não são aparelhos completos.
@@ -585,12 +613,21 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (/^capa de chuva moto motoqueiro impermeavel reforcada\b/.test(titleKey)) return 'MOTOS & ACESSÓRIOS';
   if (/^kit mechas salao de beleza brinquedo menina crianca camarim faz de conta pinta cabelo\b/.test(titleKey)) return 'MODA INFANTIL FEMININA';
   if (titleKey === normalizeKey('Camiseta Feminina Masculina São Bento Camisa Religiosa Cristã 100% Algodão 30.1')) return 'Moda Masculina';
-  if (/^lixeira c pedal jardim encantado rosa menina\b/.test(titleKey)) return 'Utilidades';
+  if (/^lixeira c pedal jardim encantado rosa menina\b/.test(titleKey)) return 'Casa & Cozinha';
   // O título identifica uma ferramenta de manutenção, não a peça mencionada.
   if (/^(chave|ferramenta|extrator|saca)\b/.test(titleKey) && /(agitador|lavadora|tanquinho)/.test(titleKey)) return 'Ferramentas';
   const clothingItem = /\b(camisas?|camisetas?|regatas?|polos?|vestidos?|saias?|camisolas?|pijamas?|macacoes?|jaquetas?|casacos?|moletons?|blusas?|lingeries?|shorts?|bermudas?|calcas?|roupas?)\b/.test(titleKey);
-  const titleHasFemaleAudience = /\b(feminin[oa]s?|mulheres?|women|womens|meninas?)\b/.test(titleKey);
-  const titleHasMaleAudience = /\b(masculin[oa]s?|homens?|men|mens|meninos?)\b/.test(titleKey);
+  const titleHasFemaleAudience = /\b(feminin[oa]s?|mulheres?|women|womens|meninas?|girls?|girl)\b/.test(titleKey);
+  const titleHasMaleAudience = /\b(masculin[oa]s?|homens?|men|mens|meninos?|boys?|boy)\b/.test(titleKey);
+  const childAudience = /\b(infantil|infantis|bebe|bebes|crianca|criancas|kids|children|child|baby|menino|meninos|menina|meninas|boys?|girls?)\b/.test(titleKey);
+  const childGarment = /\b(roupas?|vestidos?|saias?|camisetas?|camisas?|blusas?|calcas?|bermudas?|shorts?|pijamas?|macacoes?|rompers?|conjuntos?|body|lingerie|jaquetas?|moletons?|cropped|regatas?)\b/.test(titleKey);
+  const childFootwear = /\b(tenis|sapatos?|sandalias?|chinelos?|botas?|sapatilhas?|calcados?|chuteiras?|tamancos?|sapatinhos?)\b/.test(titleKey);
+  if (childAudience && childFootwear) return 'CALÇADOS INFANTIS M/F';
+  if (childAudience && childGarment) {
+    if (titleHasMaleAudience) return 'MODA INFANTIL MASCULINA';
+    if (titleHasFemaleAudience) return 'MODA INFANTIL FEMININA';
+    return 'Outros';
+  }
   // O produto principal vence palavras incidentais do título (por exemplo,
   // “computador” num controle compatível ou “fone” num anúncio de smartphone).
   if (/^(controle|controlador|gamepad|joystick)\b/.test(titleKey) &&
@@ -628,9 +665,9 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   if (exact === 'MODA VERÃO PRAIA' && clothingItem && titleHasMaleAudience && !titleHasFemaleAudience && !/(sunga|maio|biquini|shorts?.{0,30}(praia|piscina|surf)|bermuda.{0,30}(praia|piscina|surf))/.test(titleKey)) return 'Moda Masculina';
   if (clothingItem && exact === 'Moda Masculina' && !(titleHasFemaleAudience && !titleHasMaleAudience)) return exact;
   if (clothingItem && exact === 'Moda Feminina' && !(titleHasMaleAudience && !titleHasFemaleAudience)) return exact;
-  if (exact === 'CALÇADOS INFANTIS M/F') return exact;
+
   if (exact === 'MODA VERÃO PRAIA' && curatedCategoryByTitle.get(titleKey) === 'Moda Masculina') return 'Moda Masculina';
-  if (exact === 'CAMA/MESA/BANHO' || exact === 'MODA VERÃO PRAIA' || exact === 'MODA INFANTIL FEMININA' || exact === 'MODA INFANTIL MASCULINA') return exact;
+  if (exact === 'MODA VERÃO PRAIA') return exact;
   const curatedCategory = curatedCategoryByTitle.get(titleKey);
   if (curatedCategory) return curatedCategory;
   if (/(^| )(sofa|mesa de jantar|cadeira|armario|estante|cama|colchao)( |$)/.test(titleKey) &&
@@ -640,6 +677,12 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   // a categoria de calçados quando o título realmente indicar um calçado.
   const hasGarment = /(vestido|saia|camisola|pijama|macacao|jaqueta|blusa|top|lingerie|sutia|shorts?|bermuda|calca|camisa|camiseta|roupa|moletom)/.test(titleKey);
   const hasFootwear = /\b(tenis|sapatos?|sandalias?|chinelos?|botas?|sapatilhas?|scarpins?|calcados?|chuteiras?|mocassins?|coturnos?|tamancos?)\b/.test(titleKey);
+  if (exact === 'CALÇADOS INFANTIS M/F' && hasFootwear) return exact;
+  if (exact === 'CALÇADOS INFANTIS M/F' && hasGarment && !hasFootwear) {
+    if (titleHasMaleAudience) return 'MODA INFANTIL MASCULINA';
+    if (titleHasFemaleAudience) return 'MODA INFANTIL FEMININA';
+    return 'Outros';
+  }
   if (hasFootwear && exact === 'Calçados Femininos' && !(titleHasMaleAudience && !titleHasFemaleAudience)) return exact;
   if (hasFootwear && exact === 'Calçados Masculino' && !(titleHasFemaleAudience && !titleHasMaleAudience)) return exact;
   if (hasGarment && !hasFootwear && (exact === 'Calçados Femininos' || exact === 'Calçados Masculino')) {
@@ -650,13 +693,14 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
   const titleCategory = inferFromText(title, '');
   const titleDrivenCategories = new Set([
     'Brinquedos', 'Pets', 'Instrumentos Musicais', 'ARMARINHOS & TRICÔ', 'Moda Feminina', 'Moda Masculina', 'CALÇADOS INFANTIS M/F',
-    'TVs', 'Notebook', 'ELETRÔNICOS', 'RELÓGIOS', 'Computadores', 'Smartphones', 'Acessórios para celulares',
+    'TVs', 'ELETRÔNICOS', 'RELÓGIOS', 'Informática', 'Smartphones', 'Acessórios para celulares',
     'CAMA/MESA/BANHO',
     'Fones & Headphones', 'Aparelhos de Som', 'Games', 'ARMARINHOS & TRICÔ', 'CALÇADOS INFANTIS M/F', 'Eletrodomésticos', 'Móveis', 'Casa & Cozinha', 'Ferramentas',
     'Calçados Masculino', 'Calçados Femininos', 'Bike Elétrica e Acessórios', 'Esportes & Lazer', 'Cuidado & Beleza', 'Alimentos & Bebidas',
-    'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'AUTO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS', 'Utilidades',
+    'MÁQUINAS & IMPRESSORAS', 'ELETRO & ACESSÓRIOS', 'AUTO & ACESSÓRIOS', 'MOTOS & ACESSÓRIOS',
     'ELÉTRICA & HIDRÁULICA', 'LUMINÁRIAS', 'BOLSAS & MOCHILAS',
   ]);
+  if (titleCategory === 'Outros') return 'Outros';
   if (titleCategory && titleDrivenCategories.has(titleCategory) &&
       !(exact === 'ELETRO & ACESSÓRIOS' && titleCategory === 'Eletrodomésticos')) {
     return titleCategory;
@@ -674,7 +718,10 @@ export function resolveProductCategory(category: unknown, title = '', descriptio
     if (mapped) return mapped;
   }
 
-  return inferred || raw || 'Outros';
+  return inferred || 'Outros';
 }
+
+
+
 
 

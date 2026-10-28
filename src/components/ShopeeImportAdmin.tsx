@@ -207,11 +207,11 @@ export default function ShopeeImportAdmin() {
 
   async function applyMisplacedComputerProducts() {
     if (!computerMisplacementReview) return;
-    setError(''); setSuccess(''); setBusy('Transferindo produtos para Computadores…');
+    setError(''); setSuccess(''); setBusy('Transferindo produtos para Informática…');
     try {
       const result = await analyzeMisplacedComputerProducts(token, computerMisplacementReview.sourceCategories, false);
       setComputerMisplacementReview(result);
-      setSuccess(result.updatedCount + ' produto(s) transferido(s) para Computadores. Os demais permaneceram nas categorias de origem.');
+      setSuccess(result.updatedCount + ' produto(s) transferido(s) para Informática. Os demais permaneceram nas categorias de origem.');
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível transferir os produtos de computador.'); }
     finally { setBusy(''); }
   }
@@ -237,7 +237,7 @@ export default function ShopeeImportAdmin() {
 
   async function reviewMisplacedPetProducts() {
     setError(''); setSuccess(''); setPetMisplacementReview(null);
-    setBusy('Analisando produtos para pets que estão em Computadores…');
+    setBusy('Analisando produtos para pets que estão em Informática…');
     try { setPetMisplacementReview(await analyzeMisplacedPetProducts(token, true)); }
     catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível analisar os produtos de pets.'); }
     finally { setBusy(''); }
@@ -476,7 +476,7 @@ export default function ShopeeImportAdmin() {
           <details className="mt-4"><summary className="cursor-pointer font-semibold text-sm">Conferir produtos sugeridos ({computerMisplacementReview.plannedChanges})</summary>
             <div className="mt-3 max-h-96 overflow-auto space-y-2">{computerMisplacementReview.products.filter((product) => product.willChange).map((product) => <div key={product.productId} className="rounded-lg border bg-white px-3 py-2 text-sm"><div className="font-medium">{product.title}</div><div className="mt-1 text-slate-600">Atual: {product.currentCategory} → <strong>{product.suggestedCategory}</strong></div></div>)}</div>
           </details>
-          {computerMisplacementReview.dryRun && <button className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold disabled:opacity-50" type="button" disabled={!!busy || !token.trim() || computerMisplacementReview.plannedChanges === 0} onClick={() => void applyMisplacedComputerProducts()}>Transferir para Computadores</button>}
+          {computerMisplacementReview.dryRun && <button className="mt-4 rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold disabled:opacity-50" type="button" disabled={!!busy || !token.trim() || computerMisplacementReview.plannedChanges === 0} onClick={() => void applyMisplacedComputerProducts()}>Transferir para Informática</button>}
         </div>}
       </section>
 
@@ -495,9 +495,9 @@ export default function ShopeeImportAdmin() {
       </section>
 
       <section className="mt-6 bg-white rounded-2xl border border-slate-200 p-5">
-        <h2 className="text-xl font-bold">Corrigir produtos de Pets em Computadores</h2>
+        <h2 className="text-xl font-bold">Corrigir produtos de Pets em Informática</h2>
         <p className="mt-2 text-sm text-slate-600">Analisa títulos com gato, cachorro, brinquedo de gato e outros sinais claros de produtos para pets.</p>
-        <button className="mt-4 rounded-xl bg-teal-700 text-white px-5 py-3 font-semibold disabled:opacity-50" type="button" disabled={!!busy || !token.trim()} onClick={() => void reviewMisplacedPetProducts()}>Analisar produtos em Computadores</button>
+        <button className="mt-4 rounded-xl bg-teal-700 text-white px-5 py-3 font-semibold disabled:opacity-50" type="button" disabled={!!busy || !token.trim()} onClick={() => void reviewMisplacedPetProducts()}>Analisar produtos em Informática</button>
         {petMisplacementReview && <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h3 className="font-bold">Resultado: {petMisplacementReview.totalProducts} produto(s)</h3>
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">{Object.entries(petMisplacementReview.categoryCounts).map(([category, count]) => <div key={category} className="rounded-lg border bg-white px-3 py-2 text-sm flex justify-between"><span>{category}</span><strong>{count}</strong></div>)}</div>
@@ -643,3 +643,5 @@ export default function ShopeeImportAdmin() {
     </div>
   </main>;
 }
+
+

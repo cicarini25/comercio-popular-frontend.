@@ -27,3 +27,4 @@ export const api = {
   verifySmsCode: code => request('/auth/sms/verify', { method: 'POST', body: JSON.stringify({ code }) }),
   me: () => request('/auth/me')
 };
+

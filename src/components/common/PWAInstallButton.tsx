@@ -119,12 +119,13 @@ export const PWAInstallButton: React.FC<{ variant?: 'nav' | 'banner' | 'footer' 
     return (
       <button
         id="btn-pwa-install"
+        aria-label="Instalar aplicativo Comércio Popular"
         onClick={install}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-800 hover:bg-teal-700 text-teal-100 text-xs font-bold transition-colors cursor-pointer shadow-xs"
         title="Instalar aplicativo no seu dispositivo"
       >
         <Download size={14} className="text-teal-300" />
-        <span>Instalar App</span>
+        <span className="hidden 2xl:inline">Instalar App</span>
       </button>
     );
   }
@@ -134,12 +135,13 @@ export const PWAInstallButton: React.FC<{ variant?: 'nav' | 'banner' | 'footer' 
       <>
         <button
           id="btn-pwa-install-ios"
+          aria-label="Ver instruções para instalar no iPhone"
           onClick={() => setShowIOSGuide(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-800 hover:bg-teal-700 text-teal-100 text-xs font-bold transition-colors cursor-pointer shadow-xs"
           title="Instalar no iPhone"
         >
           <Download size={14} className="text-teal-300" />
-          <span>Instalar App</span>
+          <span className="hidden 2xl:inline">Instalar App</span>
         </button>
 
         {showIOSGuide && (
@@ -200,3 +202,4 @@ export const PWAInstallButton: React.FC<{ variant?: 'nav' | 'banner' | 'footer' 
 
   return null;
 };
+

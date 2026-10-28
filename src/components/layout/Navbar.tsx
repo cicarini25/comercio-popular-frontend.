@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CategoryPicker, CategoryIcon } from '../common/CategoryPicker';
+import { CategoryIcon } from '../common/CategoryPicker';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Search,
@@ -19,13 +19,16 @@ import {
   Bell,
   BellRing,
   Trash2,
-  ScanBarcode
+  ScanBarcode,
+  Home,
+  Grid2X2
 } from 'lucide-react';
 import { Logo } from '../common/Logo';
 import { PlatformLogo, PLATFORM_LINKS, PlatformId } from '../common/PlatformLogo';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 import { User, CartItem, PriceAlert } from '../../types';
 import { CATEGORIES } from '../../data/mockProducts';
+import { CATEGORY_MENU, CategoryMenuGroup } from '../../data/categoryMenu';
 import { formatCurrency } from '../../utils/formatters';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { VoiceSearchModal } from './VoiceSearchModal';
@@ -52,11 +55,12 @@ interface NavbarProps {
   priceAlerts?: PriceAlert[];
   onOpenProductDetail?: (productId: string) => void;
   onRemovePriceAlert?: (productId: string) => void;
-  onSimulatePriceDrop?: (productId: string) => void;
   onOpenBarcodeScanner?: () => void;
   favorites?: Product[];
   ordersCount?: number;
   categoryCounts?: Record<string, number>;
+  categoryOptions?: string[];
+  categoryGroups?: CategoryMenuGroup[];
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -77,13 +81,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   priceAlerts = [],
   onOpenProductDetail,
   onRemovePriceAlert,
-  onSimulatePriceDrop,
   onOpenBarcodeScanner,
   favorites = [],
   ordersCount = 0,
-  categoryCounts
+  categoryCounts,
+  categoryOptions = CATEGORIES,
+  categoryGroups = CATEGORY_MENU,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -139,9 +145,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   const cartSubtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-amber-400/80 bg-amber-300 shadow-sm">
-      {/* Top micro-announcement banner */}
-      <div className="bg-teal-950 text-teal-100 text-xs py-1.5 px-4">
+    <>
+    <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white shadow-sm">
+      {/* Brand announcement strip using the logo palette */}
+      <div className="bg-[#0F6E56] text-white text-xs py-1.5 px-4">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 font-medium">
             <span className="inline-flex items-center gap-1 bg-coral-600 text-white text-[10px] uppercase font-bold px-1.5 py-0.5 rounded">
@@ -149,9 +156,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
             <span>Ofertas de afiliados: confira as condições e o preço final na loja.</span>
           </div>
-          <div className="hidden md:flex items-center gap-4 text-neutral-300 text-[11px]">
+          <div className="hidden md:flex items-center gap-4 text-white/90 text-[11px]">
             <span className="flex items-center gap-1">
-              <ShieldCheck size={13} className="text-teal-400" />
+              <ShieldCheck size={13} className="text-white" />
               Crie sua conta no Comércio Popular
             </span>
             <button
@@ -159,7 +166,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => {
                 onOpenSellerDashboard();
               }}
-              className="text-teal-300 hover:text-white font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+              className="text-white hover:text-orange-100 font-semibold transition-colors flex items-center gap-1 cursor-pointer"
             >
               <Store size={13} />
               {user?.isSeller ? 'Meu Painel de Vendedor' : 'Venda Conosco'}
@@ -169,28 +176,28 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Main Bar */}
-      <div className="bg-amber-300 px-4 py-3 sm:py-4">
+      <div className="border-b border-neutral-100 bg-white px-4 py-3 shadow-sm sm:py-4">
         <div className="mx-auto max-w-7xl">
-        <div className="flex min-w-0 items-center justify-between gap-2 lg:gap-3 2xl:gap-6">
+        <div className="flex min-w-0 items-center justify-between gap-2 lg:gap-3 2xl:gap-4">
           {/* Logo */}
           <Logo
+            className="shrink-0"
             onClick={() => {
               onSelectTab('home');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
 
-          {/* Desktop Search Bar with Category Dropdown & Voice Search */}
-          <div className="hidden min-w-0 flex-1 items-center lg:flex lg:max-w-3xl">
+          {/* Desktop Search Bar with Voice Search */}
+          <div className="hidden min-w-0 flex-1 items-center 2xl:flex 2xl:min-w-[18rem] 2xl:max-w-xl">
             <div className="relative w-full">
               <div
                   className={`relative w-full min-w-0 flex items-center rounded-xl border-2 bg-white shadow-sm transition-all ${
                   isListening
                     ? 'border-coral-500 ring-2 ring-coral-200 bg-coral-50/20'
-                    : 'border-white focus-within:border-teal-700 focus-within:ring-2 focus-within:ring-teal-100'
+                    : 'border-neutral-200 focus-within:border-teal-700 focus-within:ring-2 focus-within:ring-teal-100'
                 }`}
               >
-                <CategoryPicker value={selectedCategory} onChange={onSelectCategory}/>
 
                 <input
                   id="search-input-header"
@@ -274,7 +281,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     if (input) input.blur();
                   }}
                   aria-label="Pesquisar produtos"
-                  className="shrink-0 rounded-lg bg-teal-800 px-4 py-2.5 mr-1 text-sm font-black text-white transition-colors hover:bg-teal-950 flex items-center justify-center cursor-pointer"
+                  className="shrink-0 rounded-lg bg-teal-800 px-3 py-2 mr-1 text-sm font-black text-white transition-colors hover:bg-teal-950 flex items-center justify-center cursor-pointer"
                 >
                   <Search size={16} />
                 </button>
@@ -333,21 +340,24 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* User & Actions */}
-          <div className="min-w-0 max-w-[58vw] flex items-center justify-end gap-1 overflow-x-auto scrollbar-none sm:max-w-none sm:gap-2 2xl:gap-3">
+          <div className="shrink-0 flex items-center justify-end gap-1 sm:gap-2 2xl:gap-3">
             {/* Seller Quick Action Button */}
             <button
               id="btn-nav-seller"
+              type="button"
+              title={user?.isSeller ? 'Painel do lojista' : 'Área do vendedor'}
+              aria-label={user?.isSeller ? 'Abrir painel do lojista' : 'Abrir área do vendedor'}
               onClick={() => {
                 onOpenSellerDashboard();
               }}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 cursor-pointer"
+              className="hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-800 transition-all hover:bg-teal-100 2xl:px-3 2xl:py-2 cursor-pointer"
             >
               <Store size={15} className="text-teal-600" />
-              <span>{user?.isSeller ? 'Painel Lojista' : 'Área do Vendedor'}</span>
+              <span className="hidden 2xl:inline">{user?.isSeller ? 'Painel Lojista' : 'Área do Vendedor'}</span>
             </button>
 
             {/* PWA Install Button */}
-            <span className="hidden sm:inline-flex"><PWAInstallButton variant="nav" /></span>
+            <span className="hidden shrink-0 sm:inline-flex"><PWAInstallButton variant="nav" /></span>
 
             {/* User Account Button */}
             {user ? (
@@ -461,11 +471,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 id="btn-login-header"
+                type="button"
+                aria-label="Entrar ou cadastrar"
                 onClick={onOpenAuth}
-                className="flex items-center gap-1.5 px-2 py-2 sm:px-3.5 rounded-xl text-xs sm:text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors border border-neutral-200 cursor-pointer"
+                className="flex shrink-0 items-center gap-1.5 rounded-xl border border-neutral-200 px-2 py-2 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-100 sm:px-2.5 2xl:px-3.5 2xl:text-sm cursor-pointer"
               >
                 <UserIcon size={16} className="text-teal-700" />
-                <span className="hidden sm:inline">Entrar / Cadastrar</span>
+                <span className="hidden 2xl:inline">Entrar / Cadastrar</span>
               </button>
             )}
 
@@ -497,7 +509,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className={priceAlerts.length > 0 ? 'text-amber-600 fill-amber-100' : 'text-neutral-500'}
                   />
                 )}
-                <span className="hidden md:inline">
+                <span className="hidden 2xl:inline">
                   {triggeredAlertsCount > 0 ? 'Alerta!' : 'Radar'}
                 </span>
                 {priceAlerts.length > 0 && (
@@ -628,16 +640,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                             ) : (
                               <div className="mt-1 flex items-center justify-between text-[10px] text-neutral-500">
                                 <span>Aguardando queda...</span>
-                                {onSimulatePriceDrop && (
-                                  <button
-                                    type="button"
-                                    onClick={() => onSimulatePriceDrop(alert.productId)}
-                                    title="Simular queda para testar alerta agora"
-                                    className="text-[10px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-1.5 py-0.5 rounded border border-teal-200 cursor-pointer"
-                                  >
-                                    ⚡ Simular Queda
-                                  </button>
-                                )}
+
                               </div>
                             )}
                           </div>
@@ -691,7 +694,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'text-neutral-500'
                 }
               />
-              <span className="hidden md:inline">Favoritos</span>
+              <span className="hidden 2xl:inline">Favoritos</span>
               {favoritesCount > 0 && (
                 <span
                   id="badge-nav-favorites-count"
@@ -713,7 +716,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="relative hidden sm:flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl border border-neutral-200 bg-white hover:bg-teal-50 hover:border-teal-300 text-neutral-700 hover:text-teal-800 text-xs font-bold transition-all cursor-pointer shadow-2xs"
               >
                 <ScanBarcode size={16} className="text-teal-700" />
-                <span className="hidden xl:inline">Ler Código</span>
+                <span className="hidden 2xl:inline">Ler Código</span>
               </button>
             )}
 
@@ -725,14 +728,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="relative flex shrink-0 items-center gap-2 p-2 sm:px-3.5 sm:py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs sm:text-sm transition-colors cursor-pointer shadow-xs"
             >
               <ShoppingCart size={18} />
-              <span className="hidden md:inline">Sacola</span>
+              <span className="hidden 2xl:inline">Sacola</span>
               {cartCount > 0 && (
                 <span className="bg-coral-600 text-white text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center">
                   {cartCount}
                 </span>
               )}
               {cartSubtotal > 0 && (
-                <span className="hidden lg:inline text-teal-100 text-xs border-l border-teal-600 pl-2">
+                <span className="hidden 2xl:inline text-teal-100 text-xs border-l border-teal-600 pl-2">
                   {formatCurrency(cartSubtotal)}
                 </span>
               )}
@@ -750,7 +753,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile Search Bar with Voice Search */}
-        <div className="mt-2.5 2xl:hidden relative">
+        <div className="relative mx-auto mt-2.5 w-full max-w-3xl 2xl:hidden">
           <div
             className={`relative flex items-center rounded-xl border-2 bg-white shadow-sm transition-all ${
               isListening
@@ -758,7 +761,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'border-white'
             }`}
           >
-            <CategoryPicker value={selectedCategory} onChange={onSelectCategory} compact />
+
             <button type="button" onClick={onSearchSubmit} aria-label="Pesquisar produtos" className="ml-2 p-2 text-teal-700 shrink-0 rounded-lg hover:bg-teal-50"><Search size={16} /></button>
             <input
               id="mobile-search-input"
@@ -868,21 +871,24 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Secondary Navigation Ribbon */}
-      <nav className="border-t border-amber-400 bg-amber-300 px-4 overflow-x-auto scrollbar-none">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-1 sm:gap-2 py-2.5 text-xs sm:text-sm whitespace-nowrap font-semibold text-teal-950">
-          <div className="flex items-center gap-1 sm:gap-2">
+      <nav className="border-b border-neutral-200 bg-neutral-50 px-4 overflow-x-auto scrollbar-none">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-1 sm:gap-2 py-1.5 text-xs sm:text-sm whitespace-nowrap font-semibold text-neutral-700">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <MegaMenu
               selectedCategory={selectedCategory}
               onSelectCategory={onSelectCategory}
               categoryCounts={categoryCounts}
+              groups={categoryGroups}
+              open={categoryMenuOpen}
+              onOpenChange={setCategoryMenuOpen}
             />
 
             <button
               onClick={() => onSelectTab('home')}
               className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 activeTab === 'home'
-                  ? 'bg-white text-teal-950 font-black shadow-sm border border-white'
-                  : 'hover:text-teal-950 hover:bg-white/50'
+                  ? 'bg-teal-700 text-white font-black shadow-sm border border-teal-700'
+                  : 'text-neutral-700 hover:text-teal-800 hover:bg-neutral-100'
               }`}
             >
               Início
@@ -894,7 +900,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'achadinhos'
                   ? 'bg-teal-800 text-white font-black shadow-sm'
-                  : 'text-teal-950 hover:bg-white/50'
+                  : 'text-neutral-700 hover:bg-neutral-100 hover:text-teal-800'
               }`}
             >
               <Flame size={14} className={activeTab === 'achadinhos' ? 'text-white' : 'text-coral-600'} />
@@ -910,7 +916,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'vendedores'
                   ? 'bg-teal-800 text-white font-black shadow-sm'
-                  : 'hover:text-teal-950 hover:bg-white/50'
+                  : 'text-neutral-700 hover:text-teal-800 hover:bg-neutral-100'
               }`}
             >
               <Store size={14} />
@@ -923,7 +929,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'favoritos'
                   ? 'bg-teal-800 text-white font-black shadow-sm'
-                  : 'text-teal-950 hover:bg-white/50'
+                  : 'text-neutral-700 hover:bg-neutral-100 hover:text-teal-800'
               }`}
             >
               <Heart
@@ -952,7 +958,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onSelectTab('pedidos')}
               className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 activeTab === 'pedidos'
-                  ? 'bg-white text-teal-800 font-bold shadow-xs border border-neutral-200'
+                  ? 'bg-teal-700 text-white font-bold shadow-xs border border-teal-700'
                   : 'hover:text-teal-700 hover:bg-neutral-100'
               }`}
             >
@@ -960,8 +966,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          <div className="hidden md:flex items-center gap-2 text-xs text-neutral-500">
-            <span className="flex items-center gap-1.5 rounded-xl bg-white/70 px-2 py-1" aria-label="Acessar plataformas parceiras">
+          <div className="ml-auto hidden shrink-0 items-center gap-1 text-xs text-neutral-500 xl:flex">
+            <span className="flex items-center gap-1 rounded-lg bg-white/70 px-1.5 py-1" aria-label="Acessar plataformas parceiras">
               {(['shopee', 'mercadolivre', 'amazon', 'aliexpress', 'shein', 'magalu'] as PlatformId[]).map((platform) => (
                 <a
                   key={platform}
@@ -971,7 +977,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="rounded-xl transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
                   aria-label={platform === 'shein' ? 'Abrir ofertas SHEIN em nova aba (link de afiliado)' : `Abrir ${platform} em nova aba`}
                 >
-                  <PlatformLogo platform={platform} className="hover:border-teal-400 hover:shadow-md" />
+                  <PlatformLogo platform={platform} compact className="hover:border-teal-400 hover:shadow-md" />
                 </a>
               ))}
             </span>
@@ -1113,7 +1119,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               Categorias
             </p>
             <div className="grid grid-cols-2 gap-1.5">
-              {CATEGORIES.map((cat) => (
+              {categoryOptions.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => {
@@ -1162,5 +1168,24 @@ export const Navbar: React.FC<NavbarProps> = ({
         />
       )}
     </header>
+    <nav className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-neutral-200 bg-white/95 px-1 pt-1.5 shadow-[0_-6px_24px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} aria-label="Navegação principal móvel">
+      <button type="button" onClick={() => onSelectTab('home')} aria-current={activeTab === 'home' ? 'page' : undefined} className={activeTab === 'home' && !categoryMenuOpen ? 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-teal-800' : 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-neutral-500 hover:text-teal-800'}>
+        <Home size={19} /> Início
+      </button>
+      <button type="button" onClick={() => { setMobileMenuOpen(false); setCategoryMenuOpen(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-expanded={categoryMenuOpen} aria-controls="category-menu-mobile" className={categoryMenuOpen || selectedCategory !== 'Todas as Categorias' ? 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-teal-800' : 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-neutral-500 hover:text-teal-800'}>
+        <Grid2X2 size={19} /> Categorias
+      </button>
+      <button type="button" onClick={() => onSelectTab('achadinhos')} aria-current={activeTab === 'achadinhos' ? 'page' : undefined} className={activeTab === 'achadinhos' ? 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-coral-700' : 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-neutral-500 hover:text-coral-700'}>
+        <Flame size={19} /> Achadinhos
+      </button>
+      <button type="button" onClick={() => onSelectTab('vendedores')} aria-current={activeTab === 'vendedores' ? 'page' : undefined} className={activeTab === 'vendedores' ? 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-teal-800' : 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-neutral-500 hover:text-teal-800'}>
+        <Store size={19} /> Lojas
+      </button>
+      <button type="button" onClick={() => user ? setProfileModalOpen(true) : onOpenAuth()} aria-label={user ? 'Abrir meu perfil' : 'Entrar ou criar conta'} className={profileModalOpen ? 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-teal-800' : 'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold text-neutral-500 hover:text-teal-800'}>
+        <UserIcon size={19} /> Conta
+      </button>
+    </nav>
+    </>
   );
 };
+

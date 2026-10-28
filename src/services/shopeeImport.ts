@@ -94,12 +94,11 @@ const importCategoryRules: Record<string, RegExp> = {
   'MODA VERÃO PRAIA': /\b(biquinis?|biquini|maios?|sungas?|saida de praia|saidas de praia|canga|cangas|roupa de praia|moda praia|vestido de praia|shorts? de praia|bermudas? de praia|chapeu de praia|chapeus de praia|bolsa de praia|bolsas de praia)\b/,
   'ARMARINHOS & TRICÔ': /\b(armarinhos?|la|las|novelos?|barbantes?|fios? de malha|fios? de algodao|linhas? (?:de |para )?(?:costura|bordado|croche|trico)|agulhas? (?:de |para )?(?:costura|bordado|croche|trico)|bastidores? de bordado|fitas? de cetim|rendas? (?:de |para )?costura|ziperes?|ziper|(?:botao|botoes) (?:de |para )?costura|elasticos? (?:de |para )?costura)\b/,
   'RELÓGIOS': /\b(relogios?|smartwatches?|smartwatch|watch|despertadores?|cronometros?)\b/,
-  'Casa & Cozinha': /\b(panela|frigideira|prato|talher|copo|taca|pote|garrafa|chaleira|jarra|faqueiro|utensilio|confeitaria|cozinha|biscoito|paliteiro)\b/,
+  'Casa & Cozinha': /\b(panela|frigideira|prato|talher|copo|taca|pote|garrafa|chaleira|jarra|faqueiro|utensilio|confeitaria|cozinha|biscoito|paliteiro|organizador|varal|lixeira|cesto|limpeza|cabide)\b/,
   'Ferramentas': /\b(ferramenta|furadeira|parafusadeira|serra|motosserra|solda|nivel|trena|parafuso|broca|torneira|tinta|pedreiro|construcao|desempenadeira|espatula|alicate|martelo|chave|jardinagem)\b/,
   'MÁQUINAS & IMPRESSORAS': /\b(impressora|impressoras|multifuncional|multifuncionais|impressao|impressão|impressora termica|impressora portatil|impressora portátil|impressora de fita de cetim|impressora fita de cetim|mini gravadora a laser|gravadora a laser|maquina de cortar cartoes|máquina de cortar cartões|maquina de corte de cartoes|máquina de corte de cartões|etiquetadora|rotuladora|plotter|sublimacao|sublimação|prensa termica|prensa térmica|maquina de corte|máquina de corte|cortadora|encadernadora|laminadora|plastificadora|bordadeira|maquina de bordado|máquina de bordado|costura industrial)\b/,
   'Eletrodomésticos': /\b(geladeira|refrigerador|fogao|microondas|micro ondas|lavadora|lava roupa|air fryer|airfryer|cafeteira|liquidificador|batedeira|aspirador|sanduicheira|ar condicionado|ventilador|espremedor eletrico)\b/,
-  'Computadores': /\b(computador|desktop|pc|placa mae|placa de video|memoria ram|processador|monitor|mouse|teclado|ssd|hd externo|webcam)\b/,
-  'Notebook': /\b(notebook|laptop|chromebook)\b/,
+  'Informática': /\b(computador|desktop|pc|placa mae|placa de video|memoria ram|processador|monitor|mouse|teclado|ssd|hd externo|webcam|notebook|laptop|chromebook)\b/,
   'Smartphones': /\b(smartphone|celular|iphone|samsung galaxy|xiaomi|motorola|poco|redmi)\b/,
   'Acessórios para celulares': /\b(capa|capinha|pelicula|carregador|cabo|power bank|suporte|adaptador|bateria|lente|fone)\b/,
   'Aparelhos de Som': /\b(caixa de som|alto falante|soundbar|amplificador|receiver|home theater|aparelho de som|radio|microfone)\b/,
@@ -289,7 +288,7 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
     "celular android",
     "celular 64gb"
   ],
-  "Notebook": [
+  "Informática": [
     "notebook",
     "laptop",
     "chromebook",
@@ -301,9 +300,7 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
     "notebook ryzen",
     "notebook 8gb",
     "notebook 16gb",
-    "notebook ssd"
-  ],
-  "Computadores": [
+    "notebook ssd",
     "computador desktop",
     "monitor computador",
     "teclado computador",
@@ -343,21 +340,27 @@ export const SHOPEE_SEARCH_SUGGESTIONS: Record<string, string[]> = {
     "taça",
     "chaleira",
     "jarra",
-    "cafeteira italiana"
-  ],
-  "Utilidades": [
+    "cafeteira italiana",
     "organizador multiuso",
     "carrinho organizador",
-    "luminária",
     "varal de roupas",
     "caixa organizadora",
-    "abajur",
     "lixeira",
     "cesto organizador",
     "porta objetos",
     "organizador de gaveta",
     "cabide",
     "escova de limpeza"
+  ],
+  "LUMINÁRIAS": [
+    "luminária",
+    "abajur",
+    "lâmpada",
+    "lustre",
+    "arandela",
+    "plafon",
+    "spot de luz",
+    "luz noturna"
   ],
   "Eletrodomésticos": [
     "air fryer",
@@ -907,12 +910,12 @@ export function matchesShopeeImportCategory(title: string, category: string): bo
   if (category === 'Games') return !clothingTerms.test(text) && !pet &&
     !/\b(headset|headphone|fone|carrinho|miniatura|festa|papel de parede|caneca)\b/.test(text) &&
     /\b(playstation|xbox|nintendo|videogame|video game|console|joystick|controle gamer|jogo|gamer)\b/.test(text);
-  if (category === 'Utilidades') {
+  if (category === 'Casa & Cozinha') {
     const clothesline = /\b(varais?|varal\s+de\s+roupas?)\b/.test(text);
     return !pet && (!clothingTerms.test(text) || clothesline) && !footwearTerms.test(text) &&
       (!furnitureTerms.test(text) || furnitureAccessories.test(text) || /\b(organizador|carrinho organizador)\b/.test(text));
   }
-  const completeDeviceCategories = ['Notebook', 'Smartphones', 'TVs', 'Aparelhos de Som', 'Fones & Headphones', 'Instrumentos Musicais'];
+  const completeDeviceCategories = ['Informática', 'Smartphones', 'TVs', 'Aparelhos de Som', 'Fones & Headphones', 'Instrumentos Musicais'];
   if (completeDeviceCategories.includes(category)) {
     // Peças mencionam o aparelho compatível, mas não são o produto principal.
     if (/\b(pecas?|reposicao|substituicao|reparo|conserto|somente caixa|caixa vazia|miniatura|brinquedo)\b/.test(text)) return false;
@@ -1419,7 +1422,7 @@ export type ShopeeCategoryReclassificationResult = {
   matchedCount?: number;
   updatedCount?: number;
   preview?: Array<{ id: string; title: string; category: string | null }>;
-  utilidades?: number;
+  luminarias?: number;
   brinquedos?: number;
   changed?: Array<{ id: string; title: string; category: string }>;
 };
@@ -1530,7 +1533,7 @@ export type ShopeeMisplacedComputerReview = {
   ok: boolean;
   dryRun: boolean;
   sourceCategories: string[];
-  targetCategory: 'Computadores';
+  targetCategory: 'Informática';
   totalProducts: number;
   categoryCounts: Record<string, number>;
   plannedChanges: number;
@@ -1596,7 +1599,7 @@ export async function analyzeMisplacedElectroAccessories(
 export type ShopeeMisplacedPetReview = {
   ok: boolean;
   dryRun: boolean;
-  sourceCategory: 'Computadores';
+  sourceCategory: 'Informática';
   targetCategory: 'Pets';
   totalProducts: number;
   categoryCounts: Record<string, number>;
@@ -1675,3 +1678,4 @@ export async function transferShopeeImportJobsToMotos(
   }
   return result as ShopeeBatchCategoryTransferResult;
 }
+

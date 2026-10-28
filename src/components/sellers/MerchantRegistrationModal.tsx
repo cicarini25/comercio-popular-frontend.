@@ -215,3 +215,4 @@ export const MerchantRegistrationModal: React.FC<MerchantRegistrationModalProps>
   );
 };
 
+
