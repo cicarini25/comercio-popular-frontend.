@@ -38,7 +38,6 @@ export const CATEGORY_MENU: CategoryMenuGroup[] = [
     icon: Home,
     items: [
       { label: 'Casa & Cozinha', category: 'Casa & Cozinha' },
-      { label: 'Casa & Cozinha', category: 'Casa & Cozinha' },
       { label: 'CAMA/MESA/BANHO', category: 'CAMA/MESA/BANHO' },
       { label: 'Móveis', category: 'Móveis' },
       { label: 'LUMINÁRIAS', category: 'LUMINÁRIAS' },
@@ -69,7 +68,6 @@ export const CATEGORY_MENU: CategoryMenuGroup[] = [
       { label: 'ELETRÔNICOS', category: 'ELETRÔNICOS' },
       { label: 'RELÓGIOS', category: 'RELÓGIOS' },
       { label: 'Games', category: 'Games' },
-      { label: 'Informática', category: 'Informática' },
       { label: 'Informática', category: 'Informática' },
       { label: 'Smartphones', category: 'Smartphones' },
       { label: 'Acessórios para celulares', category: 'Acessórios para celulares' },
@@ -160,3 +158,4 @@ export const CATEGORY_MENU_ICON_HINTS = {
   infantil: Baby,
   games: Gamepad2,
 };
+

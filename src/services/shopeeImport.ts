@@ -1422,7 +1422,7 @@ export type ShopeeCategoryReclassificationResult = {
   matchedCount?: number;
   updatedCount?: number;
   preview?: Array<{ id: string; title: string; category: string | null }>;
-  utilidades?: number;
+  luminarias?: number;
   brinquedos?: number;
   changed?: Array<{ id: string; title: string; category: string }>;
 };
@@ -1678,3 +1678,4 @@ export async function transferShopeeImportJobsToMotos(
   }
   return result as ShopeeBatchCategoryTransferResult;
 }
+
