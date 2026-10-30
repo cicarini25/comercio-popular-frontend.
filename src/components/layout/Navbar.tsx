@@ -178,7 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Main Bar */}
       <div className="border-b border-neutral-100 bg-white px-4 py-3 shadow-sm sm:py-4">
         <div className="mx-auto max-w-7xl">
-        <div className="flex min-w-0 items-center justify-between gap-2 lg:gap-3 2xl:gap-4">
+        <div className="flex min-w-0 items-center justify-between gap-2 pr-1 sm:pr-2 lg:gap-3 2xl:gap-4 2xl:pr-4">
           {/* Logo */}
           <Logo
             className="shrink-0"
@@ -189,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           />
 
           {/* Desktop Search Bar with Voice Search */}
-          <div className="hidden min-w-0 flex-1 items-center 2xl:flex 2xl:min-w-[18rem] 2xl:max-w-xl">
+          <div className="hidden min-w-0 flex-none w-full items-center 2xl:flex 2xl:max-w-lg">
             <div className="relative w-full">
               <div
                   className={`relative w-full min-w-0 flex items-center rounded-xl border-2 bg-white shadow-sm transition-all ${
@@ -340,7 +340,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* User & Actions */}
-          <div className="shrink-0 flex items-center justify-end gap-1 sm:gap-2 2xl:gap-3">
+          <div className="ml-auto mr-1 flex shrink-0 items-center justify-end gap-1 sm:mr-2 sm:gap-2 2xl:mr-4 2xl:gap-3">
             {/* Seller Quick Action Button */}
             <button
               id="btn-nav-seller"
@@ -753,7 +753,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile Search Bar with Voice Search */}
-        <div className="relative mx-auto mt-2.5 w-full max-w-3xl 2xl:hidden">
+        <div className="relative mr-auto mt-2.5 w-[calc(100%-0.75rem)] max-w-[calc(100%-0.75rem)] sm:w-[calc(100%-1rem)] sm:max-w-[calc(100%-1rem)] 2xl:hidden">
           <div
             className={`relative flex items-center rounded-xl border-2 bg-white shadow-sm transition-all ${
               isListening
