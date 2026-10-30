@@ -146,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-    <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white shadow-sm">
+    <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white shadow-sm">
       {/* Brand announcement strip using the logo palette */}
       <div className="bg-[#0F6E56] text-white text-xs py-1.5 px-4">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
@@ -871,7 +871,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Secondary Navigation Ribbon */}
-      <nav className="border-b border-neutral-200 bg-neutral-50 px-4 overflow-x-auto scrollbar-none">
+      <nav className="relative z-50 border-b border-neutral-200 bg-neutral-50 px-4 overflow-visible">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-1 sm:gap-2 py-1.5 text-xs sm:text-sm whitespace-nowrap font-semibold text-neutral-700">
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <MegaMenu
