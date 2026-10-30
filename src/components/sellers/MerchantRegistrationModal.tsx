@@ -4,6 +4,7 @@ import { SellerPlan, User } from '../../types';
 import { api, MerchantApplicationPayload } from '../../services/api';
 import merchantLogo from '../../assets/logo-comercio-popular-verde.png';
 import { Logo } from '../common/Logo';
+import { FacePresenceCheck } from './FacePresenceCheck';
 
 interface MerchantRegistrationModalProps {
   isOpen: boolean;
@@ -204,6 +205,8 @@ export const MerchantRegistrationModal: React.FC<MerchantRegistrationModalProps>
                 </label>
               </div>
             </div>
+
+            <FacePresenceCheck context="seller-registration" />
 
             {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
             <p className="text-xs leading-5 text-neutral-500">Ao enviar, você autoriza a análise dos dados cadastrais para aprovação da loja. O cadastro não publica produtos automaticamente.</p>

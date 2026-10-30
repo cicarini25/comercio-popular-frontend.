@@ -736,7 +736,7 @@ export default function App() {
                 setActiveTab('achadinhos');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              onExploreSellers={() => {
+              onExploreVendedores={() => {
                 setActiveTab('vendedores');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}

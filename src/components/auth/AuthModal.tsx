@@ -9,6 +9,7 @@ import { GoogleSignInButton } from './GoogleSignInButton';
 import { mapApiUser } from '../../services/api';
 import { api } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { FacePresenceCheck } from '../sellers/FacePresenceCheck';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -330,6 +331,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         <h2 id="auth-title" className="text-center text-xl font-bold">{mode === 'signup' ? 'Cadastre-se no Comércio Popular' : 'Acesse sua conta'}</h2>
         {message && <p role="status" className="rounded-xl bg-teal-50 p-3 text-center text-sm text-teal-900">{message}</p>}
         <div className="flex items-center justify-between text-sm text-neutral-600" aria-live="polite"><span>Etapa {stage} de 2</span><span>{stage === 1 ? 'Identificação' : mode === 'signup' ? 'Dados e senha' : 'Senha'}</span></div>
+        {mode === 'login' && <FacePresenceCheck context="user-login" />}
         {stage === 1 && <>
           <div className="grid grid-cols-4 gap-2">
             <GoogleSignInButton onCredential={googleCredential} disabled={busy} />
