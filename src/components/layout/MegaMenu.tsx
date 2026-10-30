@@ -116,7 +116,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
           onMouseLeave={scheduleClose}
           className="absolute left-0 top-[calc(100%+0.55rem)] z-[70] hidden w-[min(92vw,960px)] overflow-hidden rounded-3xl border border-[#d7e6df] bg-[#F3F7F5] font-sans shadow-[0_22px_70px_rgba(4,33,25,0.18)] lg:flex"
         >
-          <div className="w-64 shrink-0 border-r border-[#d7e6df] bg-[#EAF3EE] p-3">
+          <div className="w-64 shrink-0 border-r border-[#c4dbcf] bg-[#DCEBE4] p-3">
             <div className="flex items-center justify-between px-3 pb-3 pt-2">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-teal-800">Navegue por</p>
@@ -203,7 +203,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
       )}
 
       {open && (
-        <div id="category-menu-mobile" role="dialog" aria-label="Categorias" className="absolute left-0 top-[calc(100%+0.55rem)] z-[70] block max-h-[calc(100vh-10rem)] w-[min(94vw,420px)] overflow-y-auto rounded-2xl border border-[#d7e6df] bg-[#F3F7F5] p-3 font-sans shadow-[0_22px_70px_rgba(4,33,25,0.18)] lg:hidden">
+        <div id="category-menu-mobile" role="dialog" aria-label="Categorias" className="absolute left-0 top-[calc(100%+0.55rem)] z-[70] block max-h-[calc(100vh-10rem)] w-[min(94vw,420px)] overflow-y-auto rounded-2xl border border-[#c4dbcf] bg-[#E5EFEA] p-3 font-sans shadow-[0_22px_70px_rgba(4,33,25,0.18)] lg:hidden">
           <div className="flex items-center justify-between border-b border-[#d7e6df] px-2 pb-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-teal-700">Navegue por</p>
@@ -248,7 +248,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
               })}
             </div>
           ) : (
-            <div className="mt-3 rounded-xl border border-[#d7e6df] bg-[#EAF3EE] p-2">
+            <div className="mt-3 rounded-xl border border-[#c4dbcf] bg-[#DCEBE4] p-2">
               <p className="px-2 pb-1 text-[10px] font-black uppercase tracking-wide text-neutral-600">Subcategorias de {activeGroup.label}</p>
               <div className="grid grid-cols-2 gap-1">
                 {activeGroup.items.map((item) => (

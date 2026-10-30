@@ -26,18 +26,18 @@ export const FeaturedCategories: React.FC<FeaturedCategoriesProps> = ({
   onExploreSellers,
   categoryCounts,
 }) => (
-  <section className="w-full bg-slate-100 py-6 sm:py-8" aria-labelledby="featured-categories-title">
+  <section className="w-full bg-[#E5EFEA] py-6 font-sans sm:py-8" aria-labelledby="featured-categories-title">
     <div className="mx-auto w-full max-w-7xl space-y-5 px-4 sm:px-6">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-teal-700">Encontre mais rápido</p>
-          <h2 id="featured-categories-title" className="mt-1 font-display text-xl font-black text-neutral-950 sm:text-2xl">Explore por categoria</h2>
-          <p className="mt-1 text-xs text-neutral-500 sm:text-sm">Cada atalho abre a categoria correspondente no catálogo.</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-teal-900">Encontre mais rápido</p>
+          <h2 id="featured-categories-title" className="mt-1 font-display text-xl font-black text-[#12392d] sm:text-2xl">Explore por categoria</h2>
+          <p className="mt-1 text-xs text-neutral-700 sm:text-sm">Cada atalho abre a categoria correspondente no catálogo.</p>
         </div>
         <button
           type="button"
           onClick={() => onSelectCategory('Todas as Categorias')}
-          className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-xl px-2 text-xs font-black text-teal-800 transition hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-teal-700 sm:px-3"
+          className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-xl px-2 text-xs font-black text-teal-900 transition hover:bg-[#D9EEE4] focus-visible:outline-2 focus-visible:outline-teal-700 sm:px-3"
         >
           Ver todas <ArrowUpRight size={14} />
         </button>
@@ -52,13 +52,13 @@ export const FeaturedCategories: React.FC<FeaturedCategoriesProps> = ({
               type="button"
               onClick={() => onSelectCategory(item.category)}
               aria-label={'Ver produtos em ' + item.label}
-              className="group flex min-h-[102px] flex-col items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-1.5 py-3 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:min-h-[118px] sm:gap-2.5"
+              className="group flex min-h-[102px] flex-col items-center justify-center gap-2 rounded-2xl border border-[#c4dbcf] bg-[#F3F7F5] px-1.5 py-3 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-teal-400 hover:bg-[#DCEBE4] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:min-h-[118px] sm:gap-2.5"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 transition group-hover:bg-teal-50">
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#D9EEE4] text-teal-900 transition group-hover:bg-[#CBE4D7]">
                 <CategoryIcon category={item.category} />
               </span>
-              <span className="line-clamp-2 min-h-7 text-[10px] font-extrabold leading-tight text-neutral-800 sm:text-xs">{item.label}</span>
-              {typeof count === 'number' && <span className="text-[9px] font-semibold text-neutral-400">{count.toLocaleString('pt-BR')} ofertas</span>}
+              <span className="line-clamp-2 min-h-7 text-[10px] font-extrabold leading-tight text-[#12392d] sm:text-xs">{item.label}</span>
+              {typeof count === 'number' && <span className="text-[9px] font-semibold text-neutral-600">{count.toLocaleString('pt-BR')} ofertas</span>}
             </button>
           );
         })}
