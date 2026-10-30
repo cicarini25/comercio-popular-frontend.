@@ -216,7 +216,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, onOpenSellerSection
       <div className="border-t border-neutral-800 py-6 bg-neutral-950">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-neutral-500 text-[11px]">
           <p>
-            © {new Date().getFullYear()} Comércio Popular Ltda. CNPJ: 49.821.042/0001-90. Todos os direitos reservados.
+            © {new Date().getFullYear()} Comércio Popular Ltda. CNPJ: 11.644.927/0001-80. Todos os direitos reservados.
           </p>
           <p className="flex items-center gap-1">
             Feito com dedicação para o comércio brasileiro.
