@@ -185,6 +185,10 @@ export const api = {
     return request<{ seller: any; stats: any; products: any[]; orders: any[] }>('/api/seller/dashboard', { method: 'GET' });
   },
 
+  async createMercadoPagoConnection(): Promise<{ url: string }> {
+    return request<{ url: string }>('/api/mercadopago/marketplace/connect', { method: 'POST' });
+  },
+
   async createSellerProduct(payload: SellerProductPayload): Promise<{ product: any }> {
     return request<{ product: any }>('/api/seller/products', {
       method: 'POST',
