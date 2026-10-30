@@ -189,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           />
 
           {/* Desktop Search Bar with Voice Search */}
-          <div className="hidden min-w-0 flex-none w-full items-center 2xl:flex 2xl:max-w-lg">
+          <div className="hidden min-w-0 flex-none items-center 2xl:flex 2xl:w-[31rem]">
             <div className="relative w-full">
               <div
                   className={`relative w-full min-w-0 flex items-center rounded-xl border-2 bg-white shadow-sm transition-all ${
@@ -753,7 +753,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile Search Bar with Voice Search */}
-        <div className="relative mr-auto mt-2.5 w-[calc(100%-0.75rem)] max-w-[calc(100%-0.75rem)] sm:w-[calc(100%-1rem)] sm:max-w-[calc(100%-1rem)] 2xl:hidden">
+        <div className="relative mr-auto mt-2.5 w-full max-w-[31rem] 2xl:hidden">
           <div
             className={`relative flex items-center rounded-xl border-2 bg-white shadow-sm transition-all ${
               isListening
